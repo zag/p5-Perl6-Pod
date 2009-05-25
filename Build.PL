@@ -1,7 +1,7 @@
 use Module::Build;
 use 5.8.0;
 Module::Build->new
-    ( module_name => 'Pod6::Pod',
+    ( module_name => 'Perl6::Pod',
     license => 'perl',
    prereq => {
 	'XML::Parser'=>'0',
