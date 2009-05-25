@@ -1,0 +1,16 @@
+use Module::Build;
+use 5.8.0;
+Module::Build->new
+    ( module_name => 'Pod6::Pod',
+    license => 'perl',
+   prereq => {
+	'XML::Parser'=>'0',
+	'XML::Writer'=>'0',
+	'XML::ExtOn'=>'0',
+	'XML::SAX::Writer' => 0,
+	'Encode'=>0,
+	     },
+   dist_version_from=>'lib/Pod6/Parser.pm',
+   dist_author=>'Zahatski Aliaksandr zag@cpan.org',
+    create_makefile_pl=>$ENV{DO_OUTCPAN} ? 'traditional':'passthrough'
+    )->create_build_script;
