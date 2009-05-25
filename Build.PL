@@ -10,7 +10,7 @@ Module::Build->new
 	'XML::SAX::Writer' => 0,
 	'Encode'=>0,
 	     },
-   dist_version_from=>'lib/Pod6/Parser.pm',
+   dist_version_from=>'lib/Pod6/Pod.pm',
    dist_author=>'Zahatski Aliaksandr zag@cpan.org',
     create_makefile_pl=>$ENV{DO_OUTCPAN} ? 'traditional':'passthrough'
     )->create_build_script;
