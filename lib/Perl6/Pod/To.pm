@@ -34,38 +34,83 @@ sub on_start_block {
 
 sub export_block {
     my ( $self, $elem, $text ) = @_;
-    warn "Not overriden method"
+    my $lname = $elem->local_name;
+    warn ref($self)."->export_block_$lname() not found. And not overriden export_block method ";
+}
+
+sub export_code {
+    my ( $self, $elem, $text ) = @_;
+    my $lname = $elem->local_name;
+    warn ref($self)."->export_code_$lname() not found. And not overriden export_code method ";
 }
 
 sub on_para {
     my $self = shift;
     my ( $element, $text ) = @_;
     return $text unless $element->isa('Perl6::Pod::Block');
-
-    #now process FormatCodes on para
-    #
-    #
     $element->{_CONTENT_} .= $text;
     return;
+}
+
+#internal methods
+# $self->__handle_export( $element, @params)
+# return export data of $element
+
+sub __handle_export {
+    my $self   = shift;
+    my $el     = shift || return;
+    my $e_name = $el->local_name;
+    my $e_type = $el->isa('Perl6::Pod::FormattingCode') ? 'code' : 'block';
+    my $export_method = "export_${e_type}_${e_name}";
+    return
+        $self->can($export_method) ? $self->$export_method( $el, @_ )
+      : $e_type eq "code" ? $self->export_code( $el, @_ )
+      :                     $self->export_block( $el, @_ );
+}
+
+=head2 print_export
+
+Method for handle print out exported data
+
+=cut
+
+sub print_export {
+    my $self = shift;
+    my @data = @_;
+
+    #get out unless not out_put defined
+    return unless exists $self->{out_put};
+    my $out_put = $self->{out_put};
+    return unless ref($out_put);    #skip bad out
+    if ( ref($out_put) eq 'SCALAR' ) {
+        $$out_put .= join "" => @data;
+    }
+    elsif (
+        (
+            UNIVERSAL::isa( $out_put, 'IO::Handle' )
+            or ( ref $out_put ) eq 'GLOB'
+        )
+        or UNIVERSAL::isa( $out_put, 'Tie::Handle' )
+      )
+    {
+        print $out_put join "" => @data;
+    }
 }
 
 sub on_end_block {
     my $self = shift;
     my $el   = shift;
     return $el unless $el->isa('Perl6::Pod::Block');
+
     my $text = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
-    my $data = $self->export_block( $el, $text );
+    my $data = $self->__handle_export( $el, $text );
     my $cel = $self->current_element;
     if ($cel) {
         $cel->{_CONTENT_} .= $data;
         return;
     }
     else {
-
-        # now prepare FormatCodes
-        # now get format codes
-        # use
-        return $self->mk_from_xml($data);
+        $self->print_export($data);
     }
     return $el;
 }

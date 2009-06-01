@@ -1,4 +1,10 @@
 Revision history for Perl extension Perl6::Pod.
 
+0.01_02
+    + implement =comment, =use, =config
+    + paragraph text of block_data can be modifyed before parse FormattingCodes
+       ( Perl6::Pod::Block::on_para)
+    + fix package deps and tests
+
 0.01_01
     + developer release of Perl6::Pod suite

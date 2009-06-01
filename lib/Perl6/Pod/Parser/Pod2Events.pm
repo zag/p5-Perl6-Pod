@@ -7,7 +7,6 @@ use warnings;
 use Test::More;
 use Data::Dumper;
 use XML::ExtOn;
-use WebDAO;
 use Carp;
 use base qw/ XML::ExtOn /;
 
@@ -26,7 +25,7 @@ sub parse_config_str {
     my $self = shift;
     my $el   = shift;
     my $str  = shift;
-    $el->{CONFIG} .= " " . $str;
+    $el->{CONFIG} .= " " . $str if defined $str;
     return $el;
 }
 

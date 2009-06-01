@@ -46,9 +46,8 @@ is_deeply my $attr = $b->get_attr, {
            'w2' =>1
          } , 'config opt and init pod';
 ok  $b->context->set_use('Block::DUMMY',':Mytestblock' ), 'set use';
-is_deeply $b->context->use, {
-           'Mytestblock' => 'Block::DUMMY'
-         }, 'test set_use';
+is $b->context->use->{Mytestblock} , 'Block::DUMMY',
+         , 'test set_use';
 
 isa_ok my $b2 = $b->mk_block('Mytestblock', ':w3(33)'), 'Block::DUMMY';
 ok $b2->get_attr->{w3} , 'check opt';

@@ -29,18 +29,21 @@ use Perl6::Pod::Parser::Pod2Events;
 use XML::ExtOn;
 use Pod::Parser;
 use Perl6::Pod::Parser::Context;
+use Perl6::Pod::FormattingCode;
+use Perl6::Pod::Block;
 use base qw/XML::ExtOn/;
-
 
 sub new {
     my $self = XML::ExtOn::new(@_);
 
-    #create default context
-    my $context = new Perl6::Pod::Parser::Context::;
+    unless ( exists $self->{__DEFAULT_CONTEXT} ) {
 
-    #setup defaults
-    $self->{__DEFAULT_CONTEXT} = $context;
-    $context->use->{test} = 'Perl6::Pod::Block::Test';
+        #create default context
+        my $context = new Perl6::Pod::Parser::Context::;
+
+        #setup defaults
+        $self->{__DEFAULT_CONTEXT} = $context;
+    }
     return $self;
 }
 
@@ -51,7 +54,6 @@ sub current_context {
     }
     return $self->{__DEFAULT_CONTEXT};
 }
-
 
 sub mk_block {
     my $self = shift;
@@ -77,39 +79,67 @@ sub mk_block {
 
 }
 
+sub mk_fcode {
+    my $self = shift;
 
+    #try get current element
+    if ( my $current_block = $self->current_element ) {
+        return $current_block->mk_fcode(@_);
+    }
+
+    #make first element
+    my ( $name, $pod_opt ) = @_;
+    my $mod_name = $self->current_context->usef->{$name}
+      || 'Perl6::Pod::FormattingCode';
+
+    #      or die "Unknown block_type $name. Try =use ...";
+
+    #get prop
+    my $block = $mod_name->new(
+        name    => $name,
+        context => $self->current_context,
+        options => $pod_opt
+    );
+
+}
 
 sub _parse_chunk {
     my ( $self, $src ) = @_;
+    my $need_close = 0;
+    if ( ref $src eq 'SCALAR' ) {
+        open( my $fh, '< ', $src );
+        $need_close = 1;
+        $src        = $fh;
+    }
     my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $self;
     $ev->parse($src);
-
+    $ev->new_line;
+    $src->close if $need_close;
 }
+
 sub parse {
-    my $self = shift;
-    my $src = shift ;
+    my $self       = shift;
+    my $src        = shift;
     my $need_close = 0;
     unless ( ref $src ) {
-        $src = new IO::File::  $src ,'r'  or die "Eror open file: $!";
+        $src = new IO::File:: $src , 'r' or die "Eror open file: $!";
         $need_close = 1;
     }
-    if ( ref $src eq 'SCALAR') {
-         open( my $fh , '< ', $src );
+    if ( ref $src eq 'SCALAR' ) {
+        open( my $fh, '< ', $src );
         $need_close = 1;
-        $src = $fh
+        $src        = $fh;
     }
-    unless (
-            ( UNIVERSAL::isa( $src, 'IO::Handle' ) or ( ref $src ) eq 'GLOB' )
-            or UNIVERSAL::isa( $src, 'Tie::Handle' )
-           )
-        {
-            croak "parse: Need  <ref to string|GLOB> or <file_nadler>"
-        }
+    unless ( ( UNIVERSAL::isa( $src, 'IO::Handle' ) or ( ref $src ) eq 'GLOB' )
+        or UNIVERSAL::isa( $src, 'Tie::Handle' ) )
+    {
+        croak "parse: Need  <ref to string|GLOB> or <file_nadler>";
+    }
     $self->begin_input;
     $self->_parse_chunk($src);
     $self->end_input;
     close $src if $need_close;
-    
+
 }
 
 sub on_start_element {
@@ -121,7 +151,7 @@ sub on_start_element {
 sub on_start_block {
     my $self = shift;
     my $blk  = shift;
-    $blk->start( $blk->get_attr() );
+    $blk->start( $self, $blk->get_attr() );
     return $blk;
 }
 
@@ -133,7 +163,7 @@ sub on_end_element {
 sub on_end_block {
     my $self = shift;
     my $blk  = shift;
-    $blk->end( $blk->get_attr(), );
+    $blk->end( $self, $blk->get_attr() );
     return $blk;
 
 }
@@ -171,13 +201,15 @@ sub start_block {
 }
 
 sub para {
-    my $self  = shift;
-    my $txt   = shift;
+    my $self = shift;
+    my $txt  = shift;
+
+    #hadnle block on_para
+    if ( my $elem = $self->current_element ) {
+        $txt = $elem->on_para($self, $txt);
+    }
     my $elems = $self->get_elements_from_ref( $self->parse_str($txt) );
     $self->_process_comm($_) for @$elems;
-
-    #    $p1
-    #    $self->characters( { Data => $txt } );
 }
 
 sub end_block {
@@ -226,7 +258,7 @@ sub get_elements_from_ref {
         }
         else {
             my $current_element = $self->current_element || $self;
-            $elem = $current_element->mk_block( $_->{name} );
+            $elem = $current_element->mk_fcode( $_->{name} );
             if ( my $childs = $_->{childs} ) {
                 my $child_elements = $self->get_elements_from_ref($childs);
                 $elem->add_content(@$child_elements);

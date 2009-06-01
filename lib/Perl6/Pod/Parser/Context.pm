@@ -1,7 +1,11 @@
 package Perl6::Pod::Parser::Context;
 use warnings;
 use strict;
+use Perl6::Pod::Directive::use;
+use Perl6::Pod::Directive::config;
+use Perl6::Pod::Block::comment;
 use Tie::UnionHash;
+use Data::Dumper;
 our $IDENT = qr{ [^\W\d]\w* }xms;
 our $BALANCED_BRACKETS;
 $BALANCED_BRACKETS = qr{  <   (?: (??{$BALANCED_BRACKETS}) | . )*?  >
@@ -13,6 +17,14 @@ $BALANCED_BRACKETS = qr{  <   (?: (??{$BALANCED_BRACKETS}) | . )*?  >
 
 my $OPTION_EXTRACT = qr{ :()($IDENT)($BALANCED_BRACKETS?) | :(!)($IDENT)() }xms;
 
+use constant {
+    DEFAULT_USE => {
+        use    => 'Perl6::Pod::Directive::use',
+        config => 'Perl6::Pod::Directive::config',
+        comment => 'Perl6::Pod::Block::comment'
+    }
+};
+
 =head2 new [ <parent context ref>]
 
 =cut
@@ -20,10 +32,15 @@ my $OPTION_EXTRACT = qr{ :()($IDENT)($BALANCED_BRACKETS?) | :(!)($IDENT)() }xms;
 sub new {
     my $class = shift;
     $class = ref $class if ref $class;
+
     #set default contexts
-    my %args = ( _use=>{}, _config=>{}, _encoding=>'UTF-8', @_ );
-    
-    
+    my %args = (
+        _usef     => {},
+        _use      => DEFAULT_USE,
+        _config   => {},
+        _encoding => 'UTF-8',
+        @_
+    );
 
     #create union hashes
     while ( my ( $key, $val ) = each %args ) {
@@ -58,6 +75,16 @@ sub config {
     return $_[0]->{_config};
 }
 
+=head2 usef
+
+return ref to hash of pod options per blockname
+
+=cut
+
+sub usef {
+    return $_[0]->{_usef};
+}
+
 =head2 use
 
 return ref to hash of pod options per blockname
@@ -72,18 +99,18 @@ sub use {
 
 =cut
 
-sub  set_use {
+sub set_use {
     my $self = shift;
-    my ($name, $opt) = @_;
+    my ( $name, $opt ) = @_;
+
     #now cut block_name
-    my ( $b1, @bn ) = @{   $self->_opt2array( $opt) };
+    my ( $b1, @bn ) = @{ $self->_opt2array($opt) };
     my $key = $b1->{name};
-    my $block_opt = join " "=> map {$_->{pod}} @bn;
+    my $block_opt = join " " => map { $_->{pod} } @bn;
     $self->use->{$key} = $name;
     $self->{_use_init}->{$name} = $block_opt;
-    return { $key => $block_opt} ;
+    return { $key => $block_opt };
 }
-
 
 =head2 encoding
 
@@ -94,7 +121,6 @@ return ref to hash of pod options per blockname
 sub encoding {
     return $_[0]->{_encoding};
 }
-
 
 sub _opt2array {
     my $self = shift;
@@ -134,11 +160,17 @@ sub _opt2array {
 
         }
         warn "$!" if $!;
-        push @options, { name=> $key, value => $eval, pod=>":${neg}${key}${val}", src => $val, type => $type };
+        push @options,
+          {
+            name  => $key,
+            value => $eval,
+            pod   => ":${neg}${key}${val}",
+            src   => $val,
+            type  => $type
+          };
     }
     return \@options;
 }
-
 
 =head2 _opt2hash <pod opt string>
 
@@ -158,6 +190,7 @@ sub _opt2hash {
         my $type = undef;
         my $eval = '';
         local $!;
+
         #determine type of attr
         if ($neg) {
             $type = 'Boolean';
@@ -300,7 +333,6 @@ sub set_attr {
     $self->config->{$btype} = $opt;
     return $opt;
 }
-
 
 1;
 

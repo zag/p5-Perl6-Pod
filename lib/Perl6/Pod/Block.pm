@@ -23,14 +23,16 @@ use Data::Dumper;
 use XML::ExtOn::Element;
 use XML::ExtOn::Context;
 use base 'XML::ExtOn::Element';
+use Perl6::Pod::FormattingCode;
 
 sub new {
     my ( $class, %args ) = @_;
     my $doc_context = new XML::ExtOn::Context::;
     my $self =
       $class->SUPER::new( context => $doc_context, name => $args{name} );
+
     #save orig context
-    $self->{__context}     = $args{context} || die 'need context !';
+    $self->{__context}    = $args{context} || die 'need context !';
     $self->{_pod_options} = $args{options} || '';
     $self;
 }
@@ -48,12 +50,36 @@ Create block element.
 sub mk_block {
     my $self = shift;
     my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->context->use->{$name} || 'Perl6::Pod::Block';# or die "Unknown block_type $name. Try =use ...";
-    #get prop
+    my $mod_name = $self->context->use->{$name}
+      || 'Perl6::Pod::Block'; # or die "Unknown block_type $name. Try =use ...";
+                              #get prop
     my $block = $mod_name->new(
-      name    => $name,
-      context => $self->context,
-      options => $pod_opt);
+        name    => $name,
+        context => $self->context,
+        options => $pod_opt
+    );
+    return $block;
+
+}
+
+=head2 mk_fcode <BLOCK_NAME>, <POD_OPTIONS>
+
+Create block element.
+
+=cut
+
+sub mk_fcode {
+    my $self = shift;
+    my ( $name, $pod_opt ) = @_;
+    my $mod_name = $self->context->usef->{$name}
+      || 'Perl6::Pod::FormattingCode'
+      ;    # or die "Unknown block_type $name. Try =use ...";
+           #get prop
+    my $block = $mod_name->new(
+        name    => $name,
+        context => $self->context,
+        options => $pod_opt
+    );
     return $block;
 
 }
@@ -66,9 +92,15 @@ sub end {
     my ( $self, $attr ) = @_;
 }
 
+sub on_para {
+    my ( $self, $parser, $txt ) = @_;
+    return $txt;
+}
+
 sub get_attr {
-    my $self           = shift;
-    my $context        = $self->context;
+    my $self    = shift;
+    my $context = $self->context;
+
     #warn $context->config;
     my $pre_config_opt = $context->config->{ $self->local_name } || '';
     my $opt            = $self->{_pod_options};
@@ -83,17 +115,16 @@ sub get_attr {
 #default export methods
 
 sub to_xml {
-    my $self  = shift;
-    my $parser = shift;
-    my $ln = $self->local_name;
-    my $attr = $self->get_attr;
+    my $self     = shift;
+    my $parser   = shift;
+    my $ln       = $self->local_name;
+    my $attr     = $self->get_attr;
     my $attr_str = '';
     while ( my ( $key, $val ) = each %$attr ) {
-        $attr_str .= qq/$key = "$val"/
+        $attr_str .= qq/$key = "$val"/;
     }
-    return qq"<$ln $attr_str >@_</$ln>"
+    return qq"<$ln $attr_str >@_</$ln>";
 }
-
 
 1;
 __END__
