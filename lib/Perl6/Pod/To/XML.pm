@@ -21,32 +21,123 @@ DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
 use strict;
 use warnings;
 use Perl6::Pod::To;
+use XML::SAX::Writer;
+use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To/;
+use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
+use Data::Dumper;
 
-
-sub export_block {
-    my ( $self, $elem, $text ) = @_;
-    return $elem->to_xml( $self, $text );
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+    my $out   = $self->{out_put} || return $self;    #if empty out
+    if ( UNIVERSAL::isa( $out, 'XML::Filter::BufferText' ) ) {
+        $self->{out_put} = create_pipe( 'XML::ExtOn', $out );
+    }
+    elsif ( !UNIVERSAL::isa( $out, 'XML::ExtOn' ) ) {
+        my $xml_writer = new XML::SAX::Writer:: Output => $out;
+        $self->{out_put} = create_pipe( 'XML::ExtOn', $xml_writer );
+    }
+    return $self;
 }
 
+sub out_parser { $_[0]->{out_put} }
+
+sub start_document {
+    if ( my $out = $_[0]->out_parser ) {
+        $out->start_document;
+        $out->on_start_prefix_mapping( pod => POD_URI );
+    }
+}
+
+sub end_document {
+    if ( my $out = $_[0]->out_parser ) {
+        $out->end_document;
+    }
+}
+
+sub _make_xml_element {
+    my $self     = shift;
+    my $elem     = shift;
+    my $e_type   = $elem->isa('Perl6::Pod::FormattingCode') ? 'code' : 'block';
+    my $out_elem = $self->out_parser->mk_element( $elem->local_name );
+    my ($out_attr, $attr) = ($out_elem->attrs_by_name, $elem->get_attr );
+    while ( my ($key, $val) = each %$attr ) {
+        my $xml_str = $val;
+        if (ref($val) eq 'ARRAY') {
+            $xml_str = join "," => @$val;
+        }
+        $out_attr->{$key}= $xml_str;
+    }
+    #%{ $out_elem->attrs_by_name } = %{ $elem->get_attr };
+    $out_elem->attrs_by_ns_uri(POD_URI)->{type} = $e_type;
+    # add use="SOME::Test::Element"
+#    if ( exists $elem->current_context->use->{ $e_type } )
+    return $out_elem;
+}
+
+sub process_element {
+    my $self = shift;
+    my $elem = shift;
+    my $res;
+    if ( $elem->can('to_xml') ) {
+        $res = $elem->to_xml($self, @_);
+        unless ( ref( $res ) ) {
+            $res = $self->out_parser->mk_from_xml( $res )
+        }
+    }
+    else {
+
+        #make characters from unhandled texts
+        my @out_content = ();
+        for (@_) {
+            push @out_content,
+              ref($_) ? $_ : $self->out_parser->mk_characters($_);
+        }
+        $res = $self->_make_xml_element($elem)->add_content(@out_content);
+    }
+    return $res;
+}
+
+sub export_block {
+    my $self = shift;
+    return $self->process_element(@_);
+}
+
+sub export_code {
+    my $self = shift;
+    return $self->process_element(@_);
+}
+
+sub print_export {
+    my $self = shift;
+    for (@_) {
+        my @data = ref($_) eq 'ARRAY' ? @{$_} : $_;
+        $self->out_parser->_process_comm($_) for @data;
+    }
+}
+
+sub on_para {
+    my $self = shift;
+    my ( $element, $text ) = @_;
+    push @{ $element->{_CONTENT_} }, $text;
+    return;
+}
 
 sub on_end_block {
     my $self = shift;
     my $el   = shift;
     return $el unless $el->isa('Perl6::Pod::Block');
-    my $text = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
-    my $data = $self->export_block( $el, $text );
+    my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
+    my $data = $self->__handle_export( $el, @$content );
     my $cel = $self->current_element;
     if ($cel) {
-        $cel->{_CONTENT_} .= $data;
+        push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
         return;
     }
     else {
 
-        # now prepare FormatCodes
-        # now get format codes
-        # use
-        return $self->mk_from_xml($data);
+        $self->print_export($data);
     }
     return $el;
 }
