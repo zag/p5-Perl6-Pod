@@ -71,7 +71,7 @@ Create block element.
 sub mk_fcode {
     my $self = shift;
     my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->context->usef->{$name}
+    my $mod_name = $self->context->use->{$name."<>"}
       || 'Perl6::Pod::FormattingCode'
       ;    # or die "Unknown block_type $name. Try =use ...";
            #get prop
@@ -97,12 +97,19 @@ sub on_para {
     return $txt;
 }
 
+=head2 get_attr [block name]
+
+Return blocks attributes splited with pre-configured via =config.
+Unless provided <block_name> return attributes for current block.
+
+=cut
+
 sub get_attr {
     my $self    = shift;
     my $context = $self->context;
-
+    my $name =  shift || $self->local_name ;
     #warn $context->config;
-    my $pre_config_opt = $context->config->{ $self->local_name } || '';
+    my $pre_config_opt = $context->config->{ $name } || '';
     my $opt            = $self->{_pod_options};
     my $hash           = $context->_opt2hash( $pre_config_opt . " " . $opt );
     my %res            = ();
@@ -114,16 +121,22 @@ sub get_attr {
 
 #default export methods
 
-sub to_xml {
+sub to_xml1 {
     my $self     = shift;
     my $parser   = shift;
     my $ln       = $self->local_name;
     my $attr     = $self->get_attr;
-    my $attr_str = '';
-    while ( my ( $key, $val ) = each %$attr ) {
-        $attr_str .= qq/$key = "$val"/;
+    my $elem = $parser->mk_element( $ln);
+    my $eattr = $elem->attrs_by_name;
+    %{$elem->attrs_by_name}= %$attr;
+    my @content = ();
+    foreach my $in_param ( @_) {
+        push @content, $in_param
     }
-    return qq"<$ln $attr_str >@_</$ln>";
+    return $elem
+}
+sub to_sax2 {
+    return $_[0];
 }
 
 1;

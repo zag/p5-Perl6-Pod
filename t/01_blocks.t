@@ -1,3 +1,9 @@
+#===============================================================================
+#
+#  DESCRIPTION:  
+#
+#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
+#===============================================================================
 package Perl6::Pod::Parser::DUMMY;
 use warnings;
 use strict;

@@ -1,3 +1,9 @@
+#===============================================================================
+#
+#  DESCRIPTION:  
+#
+#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
+#===============================================================================
 package main;
 use strict;
 use warnings;

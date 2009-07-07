@@ -1,3 +1,9 @@
+#===============================================================================
+#
+#  DESCRIPTION:  
+#
+#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
+#===============================================================================
 package Perl6::Pod::Block::Test;
 use strict;
 use warnings;
@@ -26,6 +32,34 @@ sub to_xml1 {
 
 1;
 
+package Perl6::Pod::FormattingCode::Test;
+use strict;
+use warnings;
+use Perl6::Pod::FormattingCode;
+use Test::More;
+use Data::Dumper;
+use base 'Perl6::Pod::FormattingCode';
+
+sub on_para {
+    my ( $self, $parser, $txt ) = @_;
+    if ( exists $self->get_attr->{w2} ) {
+       $txt = uc $txt;
+    }
+    $txt;
+}
+
+sub to_xml1 {
+    my ( $self, $parser, $text ) = @_;
+    my $attr = $self->get_attr();
+    chomp($text);
+    $parser->{HEAD1} = $self->get_attr;
+    my $ln = $self->local_name;
+    # warn Dumper $attr;
+    return "<$ln>$text</$ln>";
+}
+
+1;
+
 package Perl6::Pod::To::XML1;
 use warnings;
 use strict;
@@ -50,6 +84,17 @@ sub export_code_C {
     return "C[" . $_[2] . "]";
 }
 
+sub export_code_M {
+    my ( $self, $elem, $data) = @_;
+    $self->{M} = 
+    return "M[".$data."]";
+}
+
+sub export_block_head1 {
+    my ( $self, $el, @data ) = @_;
+
+    return "<head1>@data</head1>"
+}
 sub export_block {
     my ( $self, $el, @data ) = @_;
     my $lname = $el->local_name;
@@ -63,6 +108,25 @@ sub export_block {
 
 1;
 
+package Perl6::Pod::To::Mem;
+use warnings;
+use strict;
+use Perl6::Pod::To;
+use base 'Perl6::Pod::To';
+
+use Test::More;
+use Data::Dumper;
+
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+    $self->{out_put} = [] unless exists $self->{out_put};
+    return $self;
+}
+
+
+
+1;
 package main;
 use strict;
 use warnings;
@@ -176,22 +240,17 @@ is_deeply $_f3->{TEST},
   'config and block opt';
 
 is $buf3, '<x>MSG</x>', 'on_para';
-#check call on_para
-exit;
 
-my $s1 = (<<TXT02);
-=begin pod :w1
-test message
-=begin test :attr1
+my $buf5;
+my ( $_p5, $_f5 ) = to_xml1( \$buf5 );
+$_p5->parse( \<<TXT_5);
+=use Perl6::Pod::FormattingCode::Test FT<> :w1
+=config head1 :w1
+=config FT<> :rerer :like<head1>
+=head1 This is a head1
+format code M<FT: test message>
+TXT_5
 
- =code
-
-C<inside>
-
-=end test
-
-
-=end pod
-
-TXT02
-
+#diag Dumper $_p5->current_context;
+#diag $buf5;
+#diag Dumper \@INC;

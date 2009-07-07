@@ -21,6 +21,20 @@ use warnings;
 use strict;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+=head2 get_attr [code_name]
+
+Return formatting code  attributes splited with pre-configured via =config.
+Unless provided <code_name> return attributes for current .
+
+=cut
+
+sub get_attr {
+    my $self = shift;
+    my $name =  shift || $self->local_name;
+    $self->SUPER::get_attr($name.'<>')
+ 
+}
+
 1;
 __END__
 

@@ -10,10 +10,32 @@ Perl6::Pod::Directive::use - handle =use directive
 
 =head1 SYNOPSIS
 
+Load the corresponding Perldoc module:
+
+    =use Test::Tag test2
+    =for test2
+    SOME data
+
+Define own formatting code:
+    
+    =use Perldoc::TT <TT>
+    =config TT<>  :allow<E>
+    head1 Overview of the M<TT: $CLASSNAME > class
+
 
 =head1 DESCRIPTION
 
 Perl6::Pod::Directive::use - handle =use directive
+
+Perldoc provides a mechanism by which you can extend the syntax, semantics, or content of your documentation: the =use directive.
+
+
+A =use directive may be specified with either a module name or a URI:
+
+    =use MODULE_NAME  OPTIONAL CONFIG DATA
+    =                 OPTIONAL EXTRA CONFIG DATA
+    
+    =use URI
 
 =cut
 

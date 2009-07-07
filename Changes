@@ -1,5 +1,15 @@
 Revision history for Perl extension Perl6::Pod.
+TODO:
+    - Formatting codes
+    - Items
+    - xhtml formatter
 
+0.01_03
+    + add levels of headers
+    + pod6xml  - utility fot convert Perl pod to XML
+    + To::XML - add namespace for extra attrs
+    + add To::Mem formatter for use in tests
+    + implement M<> ( custom formatting codes)
 0.01_02
     + implement =comment, =use, =config
     + paragraph text of block_data can be modifyed before parse FormattingCodes

@@ -22,7 +22,23 @@ use warnings;
 use Perl6::Pod::Parser;
 use Test::More;
 use Data::Dumper;
+use XML::ExtOn ('create_pipe');
 use base qw/Perl6::Pod::Parser/;
+
+################# FUNCTION
+sub to_abstract {
+    my $class = shift;
+    my $out   = shift;
+    my %arg   = ();
+    $arg{out_put} = $out if defined($out);
+    my $out_formatter = $class->new(%arg);
+    my $p = create_pipe( 'Perl6::Pod::Parser', $out_formatter );
+    return wantarray ? ( $p, $out_formatter ) : $p;
+}
+
+=head1 METHODS
+
+=cut
 
 sub on_start_block {
     my $self = shift;

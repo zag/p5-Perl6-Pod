@@ -1,18 +1,7 @@
-#
 #===============================================================================
 #
-#         FILE:  04_Block.t
-#
 #  DESCRIPTION:  Test Block.pm
-#
-#        FILES:  ---
-#         BUGS:  ---
-#        NOTES:  ---
 #       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
-#      COMPANY:  artpragmatica.ru
-#      VERSION:  1.0
-#      CREATED:  15.05.2009 08:55:35 MSD
-#     REVISION:  ---
 #===============================================================================
 package Block::DUMMY;
 use strict;

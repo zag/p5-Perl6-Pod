@@ -4,6 +4,9 @@ use strict;
 use Perl6::Pod::Directive::use;
 use Perl6::Pod::Directive::config;
 use Perl6::Pod::Block::comment;
+
+use Perl6::Pod::FormattingCode::M;
+
 use Tie::UnionHash;
 use Data::Dumper;
 our $IDENT = qr{ [^\W\d]\w* }xms;
@@ -21,7 +24,8 @@ use constant {
     DEFAULT_USE => {
         use    => 'Perl6::Pod::Directive::use',
         config => 'Perl6::Pod::Directive::config',
-        comment => 'Perl6::Pod::Block::comment'
+        comment => 'Perl6::Pod::Block::comment',
+        'M<>' =>'Perl6::Pod::FormattingCode::M'
     }
 };
 

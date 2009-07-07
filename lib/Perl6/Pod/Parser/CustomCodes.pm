@@ -1,0 +1,53 @@
+package Perl6::Pod::Parser::CustomCodes;
+
+#$Id$
+
+=pod
+
+=head1 NAME
+
+Perl6::Pod::Parser::CustomCodes - Filter for handle custom codes
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+
+DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
+
+=cut
+
+use strict;
+use warnings;
+use Data::Dumper;
+use base 'Perl6::Pod::Parser';
+
+sub on_start_element {
+    my ( $self, $el ) = @_;
+    my $lname = $el->local_name;
+    return $el unless $lname eq 'M' and $el->isa('Perl6::Pod::FormattingCode::M');
+    $el->{__CUSTOM_CODE_M} = '';
+    $el->delete_element;
+    return $el;
+}
+
+sub on_para {
+    my ( $self, $el, $text ) = @_;
+    return $text unless exists $el->{__CUSTOM_CODE_M};
+    $el->{__CUSTOM_CODE_M} .= $text;
+    return undef;
+}
+
+sub on_end_element {
+    my ( $self, $el ) = @_;
+    return $el unless exists $el->{__CUSTOM_CODE_M};
+    my $str = $el->{__CUSTOM_CODE_M};
+    my ( $custom_code_name, $para ) = $str =~ /\s*(\w+)\s*:\s*(.*)/s;
+    my $custom_el = $self->mk_fcode($custom_code_name);
+    $custom_el->add_content( $self->mk_characters($para) );
+    return [ $el, $custom_el ];
+}
+
+1;
+

@@ -89,7 +89,7 @@ sub mk_fcode {
 
     #make first element
     my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->current_context->usef->{$name}
+    my $mod_name = $self->current_context->use->{$name."<>"}
       || 'Perl6::Pod::FormattingCode';
 
     #      or die "Unknown block_type $name. Try =use ...";
@@ -133,7 +133,7 @@ sub parse {
     unless ( ( UNIVERSAL::isa( $src, 'IO::Handle' ) or ( ref $src ) eq 'GLOB' )
         or UNIVERSAL::isa( $src, 'Tie::Handle' ) )
     {
-        croak "parse: Need  <ref to string|GLOB> or <file_nadler>";
+        croak "parse: Need  <ref to string|GLOB> or <file_handler>";
     }
     $self->begin_input;
     $self->_parse_chunk($src);
