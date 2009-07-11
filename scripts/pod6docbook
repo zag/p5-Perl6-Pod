@@ -1,28 +1,27 @@
 #!/usr/bin/perl
 #===============================================================================
 #
-#         FILE: pod6xml
+#         FILE: pod6docbook
 #
-#  DESCRIPTION:  save Perl pod to xml
+#  DESCRIPTION:  save Perl pod as docbook
 #       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
 #===============================================================================
 #$Id$
 use strict;
 use warnings;
-use Data::Dumper;
-use Test::More;
 use Getopt::Long;
 use Pod::Usage;
-use Encode qw(encode decode is_utf8);
 use Perl6::Pod::To;
-use Perl6::Pod::To::XML;
-my ( $help, $man, $partner_id );
+use Perl6::Pod::To::DocBook;
+my ( $help, $man, $doctype, $add_head);
 my %opt =
-  ( help => \$help, man => \$man, pid => \$partner_id );    #meta=>\$meta,);
-GetOptions( \%opt, 'help|?', 'man', 'c=s', 'pid|s=s' )
+  ( help => \$help, man => \$man, );
+GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head )
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
+
+my %args = (header=>$add_head, doctype=>$doctype);
 
 my $infile = shift;
 my $in_fd;
@@ -33,23 +32,24 @@ else {
     $in_fd = \*STDIN;
 }
 
-my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XML', \*STDOUT );
+my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
 $p->parse($in_fd);
 
 exit;
 
 =head1 NAME
 
-  pod6xml  - convert Perl pod to XML
+    pod6docbook  - convert Perl pod to DocBook
 
 =head1 SYNOPSIS
 
-  pod6xml < somefile.pod > somefile.xml
-  pod6xml somefile.pod  > somefile.xml
+  pod6docbook < somefile.pod > somefile.xml
+  pod6docbook somefile.pod  > somefile.xml
 
 
    options:
-
+    -doctype|t - set docbook type ( ie chapter, article, book ...). Default chapter;
+    -add_head|ah - If this option is set , pod6docbook will emit a DOCTYPE as the first line of output.
     -help  - print help message
     -man   - print man page
 
@@ -69,11 +69,11 @@ Prints manual page and exits
 
 =head1 DESCRIPTION
 
-  B<pod6xml>  - convert Perl pod to XML
+  B<pod6docbook>  - convert Perl pod to DocBook
 
 =head1 EXAMPLE
 
-  pod6xml < somefile.pod > somefile.xml
+  pod6docbook < somefile.pod > somefile.xml
 
 
 =head1 AUTHOR
