@@ -4,6 +4,13 @@ TODO:
     - Items
     - xhtml formatter
 
+0.02_1
+    + add docbook formater
+    + scripts/pod6docbook - convert pod to docbook
+    + add test
+    + support lists
+    + generate id attribute
+
 0.01_03
     + add levels of headers
     + pod6xml  - utility fot convert Perl pod to XML

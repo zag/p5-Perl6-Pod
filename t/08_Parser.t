@@ -108,29 +108,38 @@ sub export_block {
 
 1;
 
-package Perl6::Pod::To::Mem;
-use warnings;
+package T::Parser;
 use strict;
-use Perl6::Pod::To;
-use base 'Perl6::Pod::To';
-
+use warnings;
 use Test::More;
 use Data::Dumper;
+use lib 't/lib';
+use base "TBase";;
 
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new(@_);
-    $self->{out_put} = [] unless exists $self->{out_put};
-    return $self;
+sub p1_create_id : Test(no_plan){
+    my $t = shift;
+    
+    my $x = $t->parse_to_xml( <<T1,);
+=begin pod
+=begin head1
+test
+test2
+
+asdasdasdasd B< sd>
+asdasd
+
+=end head1
+=end pod
+T1
+#    diag $x;
+#    exit;
 }
-
-
 
 1;
 package main;
 use strict;
 use warnings;
-use Test::More('no_plan');
+use Test::More(tests=>22);
 use Data::Dumper;
 my $FORMATTING_CODE = q{[BCDEIKLMNPRSTUVXZ]};
 use_ok 'Perl6::Pod::Parser';
@@ -144,6 +153,10 @@ use_ok 'Perl6::Pod::To';
 use_ok 'Perl6::Pod::To::XML';
 ####################test context ##########
 
+use strict;
+use warnings;
+use lib 't/lib';
+Test::Class->runtests;
 use utf8;
 
 =head2 to_xml (<$in_buf_ref|IN_FILE> , <$out_buf_ref|OUT_FILE> )

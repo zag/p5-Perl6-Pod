@@ -202,33 +202,33 @@ sub h1_repeated_12323123 : Test(no_plan) {
 T1
 #print $o;
 $t->is_deeply_xml( $o,<<T2, 'xml for heads 12323123');
-<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>
-   <headlevel level='1' pod:type='block'>
-   <head1 pod:type='block' />
-      <headlevel level='2' pod:type='block'>
-      <head2 pod:type='block' />
-           <headlevel level='3' pod:type='block'>
-           <head3 pod:type='block' />
-           </headlevel>
+<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <headlevel level="1" pod:type="block" pod:hlevel="1">
+    <head1 pod:type="block"/>
+    <headlevel level="2" pod:type="block" pod:hlevel="2">
+      <head2 pod:type="block"/>
+      <headlevel level="3" pod:type="block" pod:hlevel="3">
+        <head3 pod:type="block"/>
       </headlevel>
-      <headlevel level='2' pod:type='block'>
-      <head2 pod:type='block' />
-          <headlevel level='3' pod:type='block'>
-          <head3 pod:type='block' />
-          </headlevel>
-      </headlevel>
-   </headlevel>
-   <headlevel level='1' pod:type='block'>
-   <head1 pod:type='block' />
-       <headlevel level='2' pod:type='block'>
-       <head2 pod:type='block' />
-              <headlevel level='3' pod:type='block'>
-              <head3 pod:type='block' />
-              </headlevel>
-        </headlevel>
     </headlevel>
+    <headlevel level="2" pod:type="block" pod:hlevel="2">
+      <head2 pod:type="block"/>
+      <headlevel level="3" pod:type="block" pod:hlevel="3">
+        <head3 pod:type="block"/>
+      </headlevel>
+    </headlevel>
+  </headlevel>
+  <headlevel level="1" pod:type="block" pod:hlevel="1">
+    <head1 pod:type="block"/>
+    <headlevel level="2" pod:type="block" pod:hlevel="2">
+      <head2 pod:type="block"/>
+      <headlevel level="3" pod:type="block" pod:hlevel="3">
+        <head3 pod:type="block"/>
+      </headlevel>
+    </headlevel>
+  </headlevel>
 </pod>
-
 T2
 
 }

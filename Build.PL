@@ -13,6 +13,9 @@ Module::Build->new
 	'Pod::Usage'=>0,
 	'Getopt::Long'=>0,
 	     },
+    script_files=>[qw!
+	scripts/pod6xml
+    !],
    dist_version_from=>'lib/Perl6/Pod.pm',
    dist_author=>'Zahatski Aliaksandr zag@cpan.org',
     create_makefile_pl=>$ENV{DO_OUTCPAN} ? 'traditional':'passthrough'

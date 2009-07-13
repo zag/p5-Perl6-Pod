@@ -29,7 +29,7 @@ use base qw/Perl6::Pod::Parser/;
 sub to_abstract {
     my $class = shift;
     my $out   = shift;
-    my %arg   = ();
+    my %arg   = @_;
     $arg{out_put} = $out if defined($out);
     my $out_formatter = $class->new(%arg);
     my $p = create_pipe( 'Perl6::Pod::Parser', $out_formatter );

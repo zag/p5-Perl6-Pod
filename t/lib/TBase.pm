@@ -106,10 +106,43 @@ sub _xml_to_ref {
     $res;
 }
 
+sub xml_ref {
+    my $self = shift;
+    my $xml = shift;
+    my %tags;
+    #collect tags names;
+    map { $tags{$_}++ } $xml =~ m/<(\w+)/gis;
+
+    #make handlers
+    our $res;
+    for ( keys %tags ) {
+        my $name = $_;
+        $tags{$_} = sub {
+            my $attr = shift || {};
+            return $res = {
+                name    => $name,
+                attr    => $attr,
+                content => [ grep { ref $_ } @_ ]
+            };
+          }
+    }
+    my $rd = new XML::Flow:: \$xml;
+    $rd->read( \%tags );
+    $res;
+
+}
+
 sub is_deeply_xml {
     my $test = shift;
     my ( $got, $exp, @params ) = @_;
-    is_deeply _xml_to_ref($got), _xml_to_ref($exp), @params;
+#    is_deeply _xml_to_ref($got), _xml_to_ref($exp), @params;
+    unless (  is_deeply $test->xml_ref($got), $test->xml_ref($exp), @params ) {
+        diag "got:", "<" x40;
+        diag $got;
+        diag "expected:", ">" x40;
+        diag $exp;
+
+    };
 }
 
 sub startup : Test(startup) {

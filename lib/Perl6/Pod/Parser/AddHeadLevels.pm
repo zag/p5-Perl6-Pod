@@ -6,7 +6,7 @@ package Perl6::Pod::Parser::AddHeadLevels;
 
 =head1 NAME
 
-Perl6::Pod::Parser - base class for perl6's pod parsers
+Perl6::Pod::Parser::AddHeadLevels - group headers by level
 
 =head1 SYNOPSIS
 
@@ -44,14 +44,14 @@ sub on_start_document {
 sub current_level {
     my $self = shift;
     my $current = $self->_lstack->[-1] || return 0;
-    return $current->attrs_by_name->{LEVEL};
+    return $current->attrs_by_name->{hlevel};
 }
 
 sub switch_to_level {
     my ( $self, $to_level ) = @_;
     my $current_level = $self->current_level;
     my $hl = $self->mk_block( 'headlevel', qq!:level($to_level)! );
-    $hl->attrs_by_name->{LEVEL} = $to_level;
+    $hl->attrs_by_name->{hlevel} = $to_level;
     if ( $current_level < $to_level ) {
 
         #up level

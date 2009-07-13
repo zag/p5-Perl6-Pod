@@ -179,6 +179,8 @@ sub on_characters {
     return $self->on_para(@_);
 }
 
+############### 5 basic events 
+
 sub begin_input {
     my $self = shift;
     $self->start_document;
@@ -189,14 +191,11 @@ sub end_input {
     $self->end_document;
 }
 
+
 sub start_block {
     my $self = shift;
-    my ( $name, $opt, ) = @_;
+    my ( $name, $opt ,$str_num ) = @_;
     my $elem = $self->mk_block( $name, $opt );
-
-    #get attributes
-    #create context
-    #{ block_name }=>{ opt1 => opt2}
     $self->start_element($elem);
 }
 
@@ -214,7 +213,7 @@ sub para {
 
 sub end_block {
     my $self = shift;
-    my ( $name, $opt ) = @_;
+    my ( $name, $opt, $str_num ) = @_;
     my $elem = $self->current_element;    #mk_block($name, $opt);
     $self->end_element($elem);
 }
@@ -268,6 +267,7 @@ sub get_elements_from_ref {
     }
     return \@elems;
 }
+
 
 1;
 __END__
