@@ -3,7 +3,8 @@ TODO:
     - Formatting codes
     - Items
     - xhtml formatter
-
+0.02_2
+    + fix depends
 0.02_1
     + add docbook formater
     + scripts/pod6docbook - convert pod to docbook
