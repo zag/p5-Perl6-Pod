@@ -5,7 +5,7 @@
 #       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
 #===============================================================================
 #$Id$
-package T::To::DocBook;
+package T::To::XHTML;
 use strict;
 use warnings;
 use Test::More;
@@ -15,59 +15,59 @@ use Data::Dumper;
 use XML::SAX::Writer;
 use XML::ExtOn('create_pipe');
 
-sub make_doc_parser {
+sub make_xhtml_parser {
     my $t          = shift;
     my $out        = shift;
     my $xml_writer = new XML::SAX::Writer:: Output => $out;
     my $out_filters =
       create_pipe( create_pipe( @_ ? @_ : 'XML::ExtOn', $xml_writer ) );
     my ( $p, $f ) = Perl6::Pod::To::to_abstract(
-        'Perl6::Pod::To::DocBook', $out,
-        doctype => 'chapter',
+        'Perl6::Pod::To::XHTML', $out,
+        doctype => 'xhtml',
         headers => 0
     );
     return wantarray ? ( $p, $f ) : $p;
 }
 
-sub parse_to_doc {
+sub parse_to_xhtml {
     my $t    = shift;
     my $text = shift;
     my $str  = '';
-    my $p    = $t->make_doc_parser( \$str, @_ );
+    my $p    = $t->make_xhtml_parser( \$str, @_ );
     $p->parse( \$text );
     return $str;
 }
 
-
-sub d01_doctype : Test {
+sub to_xml_01_doctype : Test {
     my $t = shift;
     my $buf;
-    $t->make_doc_parser( \$buf )->parse( \<<T1);
+    $t->make_xhtml_parser( \$buf )->parse( \<<T1);
 =begin pod
 =end pod
 T1
-    $t->is_deeply_xml( $buf, q!<chapter/>! );
-    'empty';
+    $t->is_deeply_xml( $buf, q#<xhtml xmlns='http://www.w3.org/1999/xhtml' />#,
+        'empty' );
 }
 
-sub d02_NAME : Test {
+sub to_xml_02_NAME : Test {
     my $t = shift;
     my $buf;
-    $t->make_doc_parser( \$buf )->parse( \<<T1);
+    $t->make_xhtml_parser( \$buf )->parse( \<<T1);
 =begin pod
 =NAME test
 =end pod
 T1
+
     $t->is_deeply_xml(
-        $buf, q!<chapter><title>test
- </title></chapter>!
+        $buf, q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test
+</title></head></xhtml>#
     );
 }
 
-sub d03_Heads : Test {
+sub to_xml_03_Heads : Test {
     my $t = shift;
     my $buf;
-    $t->make_doc_parser( \$buf )->parse( \<<T1);
+    $t->make_xhtml_parser( \$buf )->parse( \<<T1);
 =begin pod
 =NAME test
 =head1 Testing
@@ -78,31 +78,21 @@ level 2
 =head2 Testing
 =end pod
 T1
+
     $t->is_deeply_xml(
         $buf,
-        q! <chapter>
-    <title>test
- </title>
-   <section>
-    <title>Testing
- proverjka
- </title>
-     <section><title>Testing
- level 2
- </title>
-     </section>
-   </section>
-   <section><title>Testing
- </title>
-     <section><title>Testing
- </title>
-      </section>
-   </section>
-</chapter>!, 'multi head level'
+        q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test
+</title></head><h1>Testing
+proverjka
+</h1><h2>Testing
+level 2
+</h2><h1>Testing
+</h1><h2>Testing
+</h2></xhtml>#, 'multi head level'
     );
 }
 
-sub pl01_test_ordered : Test {
+sub to_xml_04_test_ordered : Test {
     my $t   = shift;
     my $pod = <<T1;
 
@@ -113,16 +103,17 @@ entry
 entry2
 =end pod
 T1
+
     $t->is_deeply_xml(
-        $t->parse_to_doc($pod),
-        q#<chapter><orderedlist><listitem><para>entry 
-</para></listitem><listitem><para>entry2
-</para></listitem></orderedlist></chapter>#
+        $t->parse_to_xhtml($pod),
+        q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><ol><li>entry 
+</li><li>entry2
+</li></ol></xhtml>#
       )
 
 }
 
-sub pl01_test_itemized : Test {
+sub to_xml_05_itemized : Test {
     my $t   = shift;
     my $pod = <<T1;
 
@@ -133,16 +124,15 @@ entry
 entry2
 =end pod
 T1
-
     $t->is_deeply_xml(
-        $t->parse_to_doc($pod),
-        q#<chapter><itemizedlist><listitem><para>entry 
-</para></listitem><listitem><para>entry2
-</para></listitem></itemizedlist></chapter>#
+        $t->parse_to_xhtml($pod),
+        q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><ul><li>entry 
+</li><li>entry2
+</li></ul></xhtml>#
     );
 }
 
-sub pl01_test_variable : Test {
+sub to_xml_06_variable : Test {
     my $t   = shift;
     my $pod = <<T1;
 
@@ -153,13 +143,11 @@ entry
 entry2
 =end pod
 T1
-
     $t->is_deeply_xml(
-        $t->parse_to_doc($pod),
-q#<chapter><variablelist><varlistentry><term>TEST</term><listitem><para>entry 
-</para></listitem></varlistentry><varlistentry><term>TEST2</term><listitem><para>entry2
-
-</para></listitem></varlistentry></variablelist></chapter>#
+        $t->parse_to_xhtml($pod),
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><dl><dt><strong>TEST</strong><dd>entry 
+</dd></dt><dt><strong>TEST2</strong><dd>entry2
+</dd></dt></dl></xhtml>#
     );
 
 }

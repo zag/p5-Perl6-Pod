@@ -16,6 +16,8 @@ Module::Build->new
 	     },
     script_files=>[qw!
 	scripts/pod6xml
+	scripts/pod6docbook
+	scripts/pod6xml
     !],
    dist_version_from=>'lib/Perl6/Pod.pm',
    dist_author=>'Zahatski Aliaksandr zag@cpan.org',

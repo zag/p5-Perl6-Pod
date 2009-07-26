@@ -10,11 +10,49 @@ Perl6::Pod::Parser::AddIds - generate attribute id for elements
 
 =head1 SYNOPSIS
 
+       #make filter with namespace for generated id
+       my $add_ids_ns =  new Perl6::Pod::Parser::AddIds:: 
+                            ns=>"namespace";
+       my $add_ids_ns_file =  new Perl6::Pod::Parser::AddIds:: 
+                            ns=>"test.pod";
+       #leave empty namespace
+       my $add_ids =  new Perl6::Pod::Parser::AddIds::;
+        
+       my $out = '';
+       my $to_mem = new Perl6::Pod::To::XML:: out_put => \$out;
+       #make pipe for process pod
+       my $p = create_pipe( 'Perl6::Pod::Parser', $add_ids_ns , $to_mem);
+        
+       $p->parse( \$pod_text );
+        
+       print $out 
 
 =head1 DESCRIPTION
 
+Perl6::Pod::Parser::AddIds - add id attribute to processed pods elements.
 
-DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
+     my $add_ids = new Perl6::Pod::Parser::AddIds:: ns=>"namespace";
+
+For Pod:
+
+        =begin pod
+        =head1 test
+        tst2
+        =end pod
+
+XML is:
+    
+    <pod pod:type='block'
+        xmlns:pod='http://perlcabal.org/syn/S26.html'>
+      <head1 pod:type='block' pod:id='namespace:test_tst2'>test
+    tst2
+      </head1>
+    </pod>
+
+
+Added atribute B<pod:id> :
+
+        pod:id='namespace:test_tst2'
 
 =cut
 
@@ -46,7 +84,7 @@ specification.
 sub _make_id {
     my $parser  = shift;
     my $text    = shift || '';
-    my $base_id = shift || $parser->{base_id} || '';
+    my $base_id = shift || $parser->{ns} || '';
 
     # trim text spaces
     $text =~ s/^\s*//xms;

@@ -1,18 +1,18 @@
 #!/usr/bin/perl
 #===============================================================================
 #
-#         FILE: pod6docbook
+#         FILE: pod6xhtml
 #
-#  DESCRIPTION:  save Perl pod as docbook
+#  DESCRIPTION:  save Perl pod as pod6xhtml
 #       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
 #===============================================================================
-#$Id$
+#$Id: pod6docbook 573 2009-07-11 12:54:28Z zag $
 use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
-use Perl6::Pod::To::DocBook;
+use Perl6::Pod::To::XHTML;
 my ( $help, $man, $doctype, $add_head);
 my %opt =
   ( help => \$help, man => \$man, );
@@ -32,24 +32,24 @@ else {
     $in_fd = \*STDIN;
 }
 
-my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
+my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XHTML', \*STDOUT, %args);
 $p->parse($in_fd);
 
 exit;
 
 =head1 NAME
 
-    pod6docbook  - convert Perl pod to DocBook
+    pod6xhtml  - convert Perl pod to XHTML
 
 =head1 SYNOPSIS
 
-  pod6docbook < somefile.pod > somefile.xml
-  pod6docbook somefile.pod  > somefile.xml
+  pod6xhtml < somefile.pod > somefile.xhtml
+  pod6xhtml somefile.pod  > somefile.xhtml
 
 
    options:
-    -doctype|t - set docbook type ( ie chapter, article, book ...). Default chapter;
-    -add_head|ah - If this option is set , pod6docbook will emit a DOCTYPE as the first line of output.
+    -doctype|t - set docbook type . Default html;
+    -add_head|ah - If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output.
     -help  - print help message
     -man   - print man page
 
@@ -67,21 +67,21 @@ Prints manual page and exits
 
 =item B<-doctype>, B<-t>
 
-Set docbook type ( ie chapter, article, book ...). Default chapter
+Set docbook type . Default html
 
 =item B<-add_head>,B<-ah>
 
-If this option is set , pod6docbook will emit a DOCTYPE as the first line of output
+If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output
 
 =back
 
 =head1 DESCRIPTION
 
-  B<pod6docbook>  - convert Perl pod to DocBook
+  B<pod6xhtml>  - convert Perl pod to XHTML
 
 =head1 EXAMPLE
 
-  pod6docbook < somefile.pod > somefile.xml
+  pod6xhtml < somefile.pod > somefile.xhtml
 
 
 =head1 AUTHOR

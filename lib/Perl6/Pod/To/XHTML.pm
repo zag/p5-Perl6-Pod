@@ -14,7 +14,7 @@ sub on_start_element {
 }
 1;
 
-package Perl6::Pod::To::DocBook;
+package Perl6::Pod::To::XHTML;
 
 #$Id$
 
@@ -22,17 +22,16 @@ package Perl6::Pod::To::DocBook;
 
 =head1 NAME
 
-Perl6::Pod::To::DocBook - DocBook formater 
+ Perl6::Pod::To::XHTML - XHTML formater 
 
 =head1 SYNOPSIS
 
-    my $p = new Perl6::Pod::To::DocBook:: 
-                header => 0, doctype => 'chapter';
-
+    my $p = new Perl6::Pod::To::XHTML:: 
+                header => 0, doctype => 'html';
 
 =head1 DESCRIPTION
 
-Process pod to docbook
+Process pod to xhtml
 
 Sample:
 
@@ -43,18 +42,16 @@ Sample:
 
 Run converter:
 
-        pod6docbook test.pod > test.xml
+        pod6xhtml test.pod > test.xhtml
 
 Result xml:
 
-        <?xml version="1.0"?>
-        <chapter>
-          <title>Test chapter
-        </title>
-          <para>This is a test para
-        </para>
-        </chapter>
-
+        <html xmlns='http://www.w3.org/1999/xhtml'>
+          <head>
+            <title>Test chapter</title>
+          </head>
+          <para>This is a test para</para>
+        </html>
 
 =cut
 
@@ -62,9 +59,9 @@ use strict;
 use warnings;
 use Perl6::Pod::To::XML;
 use XML::SAX::Writer;
-use Perl6::Pod::Parser::AddHeadLevels;
-use Perl6::Pod::To::DocBook::ProcessHeads;
 use Perl6::Pod::Parser::ListLevels;
+use Perl6::Pod::Parser::AddHeadLevels;
+use Perl6::Pod::To::XHTML::ProcessHeads;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To::XML/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -74,7 +71,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
     $self->{out_put} =
-      create_pipe( 'Perl6::Pod::To::DocBook::ProcessHeads', $self->{out_put} );
+      create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeads', $self->{out_put} );
     return create_pipe(
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
@@ -89,22 +86,22 @@ sub start_document {
         if ( $self->{header} ) {
             $out->start_dtd(
                 {
-                    Name => $self->{doctype} || 'chapter',
-                    PublicId => '-//OASIS//DTD DocBook V4.2//EN',
-                    SystemId =>
-                      'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'
+                    Name => $self->{doctype} || 'html',
+                    PublicId => "-//W3C//DTD XHTML 1.1//EN",
+                    SystemId =>"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
                 }
             );
             $out->end_dtd;
         }
-        my $root = $out->mk_element( $self->{doctype} || 'chapter' );
+        my $root = $out->mk_element( $self->{doctype} || 'html' );
+        $out->on_start_prefix_mapping( ''=>"http://www.w3.org/1999/xhtml");
         $out->start_element($root);
     }
 }
 
 sub end_document {
     if ( my $out = $_[0]->out_parser ) {
-        my $root = $out->mk_element( $_[0]->{doctype} || 'chapter' );
+        my $root = $out->mk_element( $_[0]->{doctype} || 'html' );
         $out->end_element($root);
         $out->end_document;
     }
@@ -130,8 +127,8 @@ sub process_element {
     my $self = shift;
     my $elem = shift;
     my $res;
-    if ( $elem->can('to_docbook') ) {
-        $res = $elem->to_docbook( $self, @_ );
+    if ( $elem->can('to_xhtml') ) {
+        $res = $elem->to_xhtml( $self, @_ );
         unless ( ref($res) ) {
             $res = $self->out_parser->mk_from_xml($res);
         }
@@ -196,10 +193,9 @@ sub export_block_item {
     my ( $self, $el, @p ) = @_;
     my $elem =
       $self->mk_element('listitem')
-      ->add_content(
-        $self->mk_element('para')->add_content( $self->mk_characters(@p) ) );
+      ->add_content($self->mk_characters(@p)  );
 
-    #add PDO attr for use in export_block_itemlist
+    #add POD attr for use in export_block_itemlist
     #for varlistentry
     $elem->{POD} = $el->get_attr;
     return $elem;
@@ -210,9 +206,9 @@ sub export_block_itemlist {
     my $attr = $el->attrs_by_name;
     my ( $list_name, $items_name ) = @{
         {
-            ordered    => [ 'orderedlist',  'listitem' ],
-            unordered  => [ 'itemizedlist', 'listitem' ],
-            definition => [ 'variablelist', 'listitem' ]
+            ordered    => [ 'ol',  'li' ],
+            unordered  => [ 'ul', 'li' ],
+            definition => [ 'dl', 'dd' ]
         }->{ $attr->{listtype} }
       };
     my $list = $self->mk_element($list_name);
@@ -223,12 +219,12 @@ sub export_block_itemlist {
             $_->local_name($items_name);
 
             #if variable list, then add varlistentry
-            if ( $list->local_name eq 'variablelist' ) {
+            if ( $list->local_name eq 'dl' ) {
                 my ($term) = @{ $_->{POD}->{term} };
 
                 my $var_entry =
-                  $self->mk_element('varlistentry')
-                  ->add_content( $self->mk_element('term')
+                  $self->mk_element('dt')
+                  ->add_content( $self->mk_element('strong')
                       ->add_content( $self->mk_characters($term) ) );
                 $var_entry->add_content($_);
                 $list->add_content($var_entry);
@@ -246,8 +242,12 @@ sub export_block_itemlist {
 
 sub export_block_NAME {
     my ( $self, $el, $text ) = @_;
-    return $self->mk_element('title')
-      ->add_content( $self->mk_characters($text) );
+    my $head = $self->mk_element('head')->add_content( 
+    $self->mk_element('title')
+      ->add_content( $self->mk_characters($text) ));
+    #mark element as XHTML head
+    $head->{XHTML_HEAD}++;
+    return $head;
 }
 
 1;

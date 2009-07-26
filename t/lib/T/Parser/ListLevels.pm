@@ -28,7 +28,7 @@ q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist 
     );
 }
 
-sub t2_two_interrupted_items_blocks : Test(2) {
+sub t2_two_interrupted_items_blocks : Test {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 =begin pod
@@ -110,10 +110,13 @@ q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:
     );
 }
 
-sub t6_docbook : Test(1) {
+sub t6_docbook : Test {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 T1
+    
+
+    "last"
 }
 1;
 

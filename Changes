@@ -3,6 +3,13 @@ TODO:
     - Formatting codes
     - Items
     - xhtml formatter
+0.3
+    + xhtml formatter
+    + itemlists : ordered, unordered and definitions (without nesting)
+	in dokbook, xhtml
+    + scripts/pod6xhtml - convert pod to xhtml
+    + add tests
+
 0.02_2
     + fix depends
 0.02_1
