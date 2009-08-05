@@ -5,6 +5,19 @@
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
 #$Id$
+package Test::Tag;
+use strict;
+#use warnings;
+use Perl6::Pod::Block;
+use base 'Perl6::Pod::Block';
+use XML::Flow;
+
+sub to_xml {
+    my ( $self, $parser, @in ) = @_;
+    return "<p>@in</p>";
+}
+1;
+
 package T::To::XML;
 use strict;
 use warnings;

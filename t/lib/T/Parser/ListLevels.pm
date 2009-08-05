@@ -60,17 +60,15 @@ sub t3_list_type_ordered : Test(1) {
 entry1
 =for item :numbered
 entry2
-
-Test messase
 =end pod
 T1
+
     $t->is_deeply_xml(
         $x,
         q#
 <pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='ordered'><item pod:type='block' numbered='1'>entry1
 </item><item pod:type='block' numbered='1'>entry2
-</item></itemlist>Test messase
-</pod>#
+</item></itemlist></pod>#
     );
 }
 

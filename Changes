@@ -3,6 +3,12 @@ TODO:
     - Formatting codes
     - Items
     - xhtml formatter
+
+0.4
+    + =code, =para blocks
+    + =format block ( pass text to particular formatters: xhtml, xml, docbook)
+    + =pod block ( supprt ordinary and verbatim paragrapths )
+    
 0.3
     + xhtml formatter
     + itemlists : ordered, unordered and definitions (without nesting)

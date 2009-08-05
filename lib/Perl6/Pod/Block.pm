@@ -94,7 +94,15 @@ sub end {
 
 sub on_para {
     my ( $self, $parser, $txt ) = @_;
+    #process formating codes by default
+    #$self->
+    return $parser->get_elements_from_ref( $parser->parse_str($txt) );
     return $txt;
+}
+
+sub on_child {
+    my ( $self, $parser, $elem  ) = @_;
+    return $elem;
 }
 
 =head2 get_attr [block name]

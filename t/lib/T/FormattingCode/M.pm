@@ -70,28 +70,27 @@ TXT
 sub resolve_filter : Test {
     my $test = shift;
     my $o = $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::CustomCodes' );
-=begin pod
 =use CustomCode TT<>
-sds M<TT: test_code>
-=end pod
+=para sds M<TT: test_code>
 TXT
-
     is_deeply $o,
-      [
-        {
-            'name'   => 'pod',
+[
+          {
+            'name' => 'para',
             'childs' => [
-                'sds ',
-                {
-                    'name'   => 'TT',
-                    'childs' => ['test_code'],
-                    'attr'   => {}
-                },
-                ''
-            ],
+                          'sds ',
+                          {
+                            'name' => 'TT',
+                            'childs' => [
+                                          'test_code'
+                                        ],
+                            'attr' => {}
+                          },
+                          ''
+                        ],
             'attr' => {}
-        }
-      ];
+          }
+        ];
 }
 
 sub custom_code_export_mem : Test {

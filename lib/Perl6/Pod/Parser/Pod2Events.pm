@@ -79,6 +79,7 @@ sub on_characters {
     my $text = shift;
     return unless defined $text;
     my $parser = $self->{parser} || die '$self->{parser} - > undef !';
+
     if ( $text =~ /${\( NEW_LINE )}/ ) {
         $self->_flush_para( $elem )
     }
@@ -92,7 +93,7 @@ sub _flush_para {
     my $self = shift;
     my $elem = shift || return;
     if ( my $agregated = delete $elem->{TEXT} ) {
-        my $parser = $self->{parser} || die '$self->{parser} - > undef !';
+        my $parser = $self->{parser} || die '$self->{parser} -> undef !';
         $parser->para($agregated);
     }
     return
@@ -125,11 +126,11 @@ sub new_line {
             $self->stop_config($el);
 
         }
-        else {
+#        else {
             if ( $el->local_name eq 'begin' ) {
                 $self->characters( { Data => "\n" } );
             }
-        }
+#        }
 
         #skip already stopped
         if ( $el->local_name ne 'begin' ) {
@@ -239,7 +240,6 @@ sub parse {
             1;
           }
           || ( !$self->in_ambient_mode ) && do {
-
             #check if new line
             if (/${\( NEW_LINE )}/) {
                 $self->new_line($str_num);

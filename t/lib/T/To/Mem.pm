@@ -43,15 +43,26 @@ pod_text
 =end pod
 T1
 
-    is_deeply $o,
-      [
-        {
-            'name'   => 'pod',
-            'childs' => ['pod_text'],
-            'attr'   => { 'w1' => 1 }
-        }
-      ],
-      'simply pod';
+
+is_deeply $o,
+ [
+           {
+             'name' => 'pod',
+             'childs' => [
+                           {
+                            'name' => 'para',
+                             'childs' => [
+                                           'pod_text'
+                                        ],
+                             'attr' => {}
+                           }
+                         ],
+             'attr' => {
+                         'w1' => 1
+                       }
+           }
+         ],
+'simply pod';
 }
 
 sub block_02 : Test {

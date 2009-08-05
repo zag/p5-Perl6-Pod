@@ -4,7 +4,9 @@ use strict;
 use Perl6::Pod::Directive::use;
 use Perl6::Pod::Directive::config;
 use Perl6::Pod::Block::comment;
-
+use Perl6::Pod::Block::code;
+use Perl6::Pod::Block::pod;
+use Perl6::Pod::Block::para;
 use Perl6::Pod::FormattingCode::M;
 
 use Tie::UnionHash;
@@ -25,6 +27,9 @@ use constant {
         use    => 'Perl6::Pod::Directive::use',
         config => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
+        code    => 'Perl6::Pod::Block::code',
+        pod    => 'Perl6::Pod::Block::pod',
+        para    => 'Perl6::Pod::Block::para',
         'M<>' =>'Perl6::Pod::FormattingCode::M'
     }
 };

@@ -1,6 +1,5 @@
 package Test::Filter;
 use strict;
-use warnings;
 use Test::More;
 use XML::ExtOn('create_pipe');
 use base 'XML::ExtOn';

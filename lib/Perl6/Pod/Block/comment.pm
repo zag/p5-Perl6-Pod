@@ -10,10 +10,11 @@ Perl6::Pod::Block::comment - handle =comment block
 
 =head1 SYNOPSIS
 
+    =comment Don't nest this code block in the usual way...
 
 =head1 DESCRIPTION
 
-Perl6::Pod::Block::comment - handle =comment block
+B<=comment> - Content to be ignored by all renderers
 
 =cut
 

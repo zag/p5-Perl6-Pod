@@ -39,7 +39,7 @@ sub new {
     unless ( exists $self->{__DEFAULT_CONTEXT} ) {
 
         #create default context
-        my $context = new Perl6::Pod::Parser::Context::;
+        my $context = new Perl6::Pod::Parser::Context:: vars => { root=>$self };
 
         #setup defaults
         $self->{__DEFAULT_CONTEXT} = $context;
@@ -151,6 +151,12 @@ sub on_start_element {
 sub on_start_block {
     my $self = shift;
     my $blk  = shift;
+#    warn "start element ". $blk->local_name;
+    # call on_child for curretn element
+    if ( my $elem = $self->current_element ) {
+    #    warn "on child!" .$elem->local_name ." -> on_child( ". $blk->local_name.")";;
+#        $elem->on_child( $blk)
+    }
     $blk->start( $self, $blk->get_attr() );
     return $blk;
 }
@@ -199,16 +205,31 @@ sub start_block {
     $self->start_element($elem);
 }
 
+
+sub __expand_array_ref {
+    my $self = shift;
+    my @res = ();
+    for ( @_ ) {
+        push @res, ref($_) eq 'ARRAY' ? $self->__expand_array_ref(@$_) : $_
+    }
+    @res
+}
 sub para {
     my $self = shift;
     my $txt  = shift;
-
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
+#        warn "process $txt" .$elem->local_name;
         $txt = $elem->on_para($self, $txt);
     }
-    my $elems = $self->get_elements_from_ref( $self->parse_str($txt) );
-    $self->_process_comm($_) for @$elems;
+    my @content = $self->__expand_array_ref( $txt );
+    for ( @content) {
+        my $elements = ref($_) ? [$_] : [$self->mk_characters($_)];#$self->get_elements_from_ref( $self->parse_str($_) );
+        $self->_process_comm($_) for @$elements;
+
+    }
+#    my $elems = $self->get_elements_from_ref( $self->parse_str($txt) );
+#    $self->_process_comm($_) for @$elems;
 }
 
 sub end_block {

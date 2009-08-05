@@ -82,7 +82,8 @@ sub process_element {
         $res = $elem->to_xml($self, @_);
         unless ( ref( $res ) ) {
             $res = $self->out_parser->mk_from_xml( $res )
-        }
+        } 
+        return  $res
     }
     else {
 
