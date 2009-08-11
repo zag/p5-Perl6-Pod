@@ -8,6 +8,7 @@ use Perl6::Pod::Block::code;
 use Perl6::Pod::Block::pod;
 use Perl6::Pod::Block::para;
 use Perl6::Pod::FormattingCode::M;
+use Perl6::Pod::FormattingCode::L;
 
 use Tie::UnionHash;
 use Data::Dumper;
@@ -30,7 +31,8 @@ use constant {
         code    => 'Perl6::Pod::Block::code',
         pod    => 'Perl6::Pod::Block::pod',
         para    => 'Perl6::Pod::Block::para',
-        'M<>' =>'Perl6::Pod::FormattingCode::M'
+        'M<>' =>'Perl6::Pod::FormattingCode::M',
+        'L<>' =>'Perl6::Pod::FormattingCode::L'
     }
 };
 

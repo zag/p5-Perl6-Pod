@@ -1,4 +1,4 @@
-package Perl6::Pod::To::XHTML::ProcessHeads;
+package Perl6::Pod::To::XHTML::ProcessHeadings;
 
 #$Id$
 
@@ -6,18 +6,18 @@ package Perl6::Pod::To::XHTML::ProcessHeads;
 
 =head1 NAME
 
-Perl6::Pod::To::XHTML::ProcessHeads - convert heads to sections
+Perl6::Pod::To::XHTML::ProcessHeadings - convert  headings to tags
 
 =head1 SYNOPSIS
 
-    use Perl6::Pod::To::XHTML::ProcessHeads;
+    use Perl6::Pod::To::XHTML::ProcessHeadings;
     $self->{out_put} =
-    create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeads', $self->{out_put});
+    create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put});
 
 
 =head1 DESCRIPTION
 
-Perl6::Pod::To::XHTML::ProcessHeads - convert heads to sections
+Perl6::Pod::To::XHTML::ProcessHeadings - convert headings to tags
 
 =cut
 

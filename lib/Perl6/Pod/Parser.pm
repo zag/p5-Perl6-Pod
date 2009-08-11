@@ -39,7 +39,8 @@ sub new {
     unless ( exists $self->{__DEFAULT_CONTEXT} ) {
 
         #create default context
-        my $context = new Perl6::Pod::Parser::Context:: vars => { root=>$self };
+        my $context =
+          new Perl6::Pod::Parser::Context:: vars => { root => $self };
 
         #setup defaults
         $self->{__DEFAULT_CONTEXT} = $context;
@@ -89,7 +90,7 @@ sub mk_fcode {
 
     #make first element
     my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->current_context->use->{$name."<>"}
+    my $mod_name = $self->current_context->use->{ $name . "<>" }
       || 'Perl6::Pod::FormattingCode';
 
     #      or die "Unknown block_type $name. Try =use ...";
@@ -151,10 +152,12 @@ sub on_start_element {
 sub on_start_block {
     my $self = shift;
     my $blk  = shift;
-#    warn "start element ". $blk->local_name;
+
+    #    warn "start element ". $blk->local_name;
     # call on_child for curretn element
     if ( my $elem = $self->current_element ) {
-    #    warn "on child!" .$elem->local_name ." -> on_child( ". $blk->local_name.")";;
+
+#    warn "on child!" .$elem->local_name ." -> on_child( ". $blk->local_name.")";;
 #        $elem->on_child( $blk)
     }
     $blk->start( $self, $blk->get_attr() );
@@ -185,7 +188,7 @@ sub on_characters {
     return $self->on_para(@_);
 }
 
-############### 5 basic events 
+############### 5 basic events
 
 sub begin_input {
     my $self = shift;
@@ -197,39 +200,36 @@ sub end_input {
     $self->end_document;
 }
 
-
 sub start_block {
     my $self = shift;
-    my ( $name, $opt ,$str_num ) = @_;
-    my $elem = $self->mk_block( $name, $opt );
+    my ( $name, $opt, $str_num ) = @_;
+    my $elem = ref($name) ? $name : $self->mk_block( $name, $opt );
     $self->start_element($elem);
 }
 
-
 sub __expand_array_ref {
     my $self = shift;
-    my @res = ();
-    for ( @_ ) {
-        push @res, ref($_) eq 'ARRAY' ? $self->__expand_array_ref(@$_) : $_
+    my @res  = ();
+    for (@_) {
+        push @res, ref($_) eq 'ARRAY' ? $self->__expand_array_ref(@$_) : $_;
     }
-    @res
+    @res;
 }
+
 sub para {
     my $self = shift;
     my $txt  = shift;
+
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
-#        warn "process $txt" .$elem->local_name;
-        $txt = $elem->on_para($self, $txt);
+        $txt = $elem->on_para( $self, $txt );
+        if ( ref($txt) ) {
+            $self->run_para($txt);
+        }
+        else {
+            $self->_process_comm( $self->mk_characters($txt) );
+        }
     }
-    my @content = $self->__expand_array_ref( $txt );
-    for ( @content) {
-        my $elements = ref($_) ? [$_] : [$self->mk_characters($_)];#$self->get_elements_from_ref( $self->parse_str($_) );
-        $self->_process_comm($_) for @$elements;
-
-    }
-#    my $elems = $self->get_elements_from_ref( $self->parse_str($txt) );
-#    $self->_process_comm($_) for @$elems;
 }
 
 sub end_block {
@@ -253,6 +253,72 @@ sub _parse_tree_ {
                 $attr{childs} = $self->_parse_tree_($ptree);
             }
             return \%attr;
+        }
+    }
+}
+
+sub run_para {
+    my $self = shift;
+    my @in   = $self->__expand_array_ref(@_);
+    foreach my $el (@in) {
+        unless ( exists $el->{type} ) {
+            $self->__process_events( $self->__make_events($el) );
+        }
+        else {
+            if ( $el->{type} eq 'para' ) {
+                $self->_process_comm( $self->mk_characters( $el->{data} ) );
+            }
+        }
+    }
+}
+
+#make events for root parser
+sub __make_events {
+    my $self = shift;
+    my @res  = ();
+    foreach my $el (@_) {
+        unless ( ref($el) ) {
+            $el = { type => 'para', data => $el };
+        }
+
+        #process refs
+        if ( exists $el->{type} ) {
+            push @res, $el;
+        }
+        else {
+            my $name = $el->{name};
+
+            #make start stop
+            push @res,
+              {
+                type => 'start_fcode',
+                data => $name
+              },
+              $self->__make_events( @{ $el->{childs} } ),
+              {
+                type => 'end_fcode',
+                data => $name
+              };
+        }
+    }
+    return @res;
+}
+
+sub __process_events {
+    my $self  = shift;
+    my $rootp = $self;    #->context->{vars}->{root};
+    foreach my $ev (@_) {
+        my $type = $ev->{type};
+        if ( $type eq 'para' ) {
+            $rootp->para( $ev->{data} );
+        }
+        else {
+
+            #process format code
+            my $fc = $self->mk_fcode( $ev->{data} );
+            ( $ev->{type} eq 'start_fcode' )
+              ? $rootp->start_block( $fc, '', 0 )
+              : $rootp->end_block( $fc, '', 0 );
         }
     }
 }
@@ -289,7 +355,44 @@ sub get_elements_from_ref {
     return \@elems;
 }
 
+#process para: make tree of text
+sub parse_para {
+    my $self = shift;
+    my @in   = $self->__expand_array_ref(@_);
+    my @out  = ();
+    foreach my $el (@in) {
+        if ( ref $el ) {
+            push @out, $el;
+        }
+        else {
+            my $elems_ref = $self->parse_str($el);
+            foreach my $item (@$elems_ref) {
+                unless ( ref($item) ) {
 
+                    #got characters
+                    $item = { data => $item, type => 'para' };
+                }
+
+                push @out, $item;
+            }
+        }
+    }
+    return \@out;
+}
+
+#make XML::ExtOn objects from array
+sub _make_elements {
+    my $self = shift;
+    my @res  = ();
+    for (@_) {
+        push @res, ref($_)
+          ? ref($_) eq 'ARRAY'
+              ? $self->_make_elements(@$_)
+              : $_
+          : $self->mk_characters($_);
+    }
+    return @res;
+}
 1;
 __END__
 

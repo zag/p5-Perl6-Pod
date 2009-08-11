@@ -13,6 +13,7 @@ use T::To;
 use base 'T::To';
 use Data::Dumper;
 use XML::SAX::Writer;
+use Perl6::Pod::To::XHTML::MakeBody;
 use XML::ExtOn('create_pipe');
 
 sub make_xhtml_parser {
@@ -135,7 +136,6 @@ T1
 sub to_xml_06_variable : Test {
     my $t   = shift;
     my $pod = <<T1;
-
 =begin pod
 =for item :term<TEST> 
 entry 
@@ -149,7 +149,90 @@ q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><dl><dt><strong>TEST</strong><dd>e
 </dd></dt><dt><strong>TEST2</strong><dd>entry2
 </dd></dt></dl></xhtml>#
     );
+}
 
+sub x01_add_custom_heads : Test {
+    my $t         = shift;
+    my $x         = '';
+    my $to_parser = new Perl6::Pod::To::XHTML::
+      out_put => \$x,
+      header  => 1,
+      head    => [
+        link => {
+            rel  => "stylesheet",
+            href => "/styles/main.1232622176.css"
+        }
+      ];
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    $p->parse( \<<T);
+=pod
+asdasdad
+T
+    $t->is_deeply_xml(
+        $x,
+q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd' ><html xmlns='http://www.w3.org/1999/xhtml'><head><link rel='stylesheet' href='/styles/main.1232622176.css' /></head><p>asdasdad
+</p></html>#
+      )
+
+}
+
+sub x01_add_custom_heads_and_NAME : Test {
+    my $t         = shift;
+    my $x         = '';
+    my $to_parser = new Perl6::Pod::To::XHTML::
+      out_put => \$x,
+      header  => 1,
+      head    => [
+        link => {
+            rel  => "stylesheet",
+            href => "/styles/main.1232622176.css"
+        }
+      ];
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    $p->parse( \<<T);
+=pod
+=NAME Test
+
+asdasdad
+T
+    $t->is_deeply_xml(
+        $x,
+q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd' ><html xmlns='http://www.w3.org/1999/xhtml'><head><title>Test
+</title><link rel='stylesheet' href='/styles/main.1232622176.css' /></head></html>#
+    );
+}
+
+sub a002_add_body_head : Test {
+    my $t           = shift;
+    my $x           = '';
+    my $xml_writer  = new XML::SAX::Writer:: Output => \$x;
+    my $body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
+    my $out_filter  = create_pipe( $body_filter, $xml_writer );
+    my $to_parser   = new Perl6::Pod::To::XHTML::
+      out_put => $out_filter,
+      header  => 1,
+      head    => [
+        link => {
+            rel  => "stylesheet",
+            href => "/styles/main.1232622176.css"
+        }
+      ];
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    $p->parse( \<<T);
+=begin pod
+=NAME Test
+
+asdasdad
+asdasd
+=end pod
+T
+    $t->is_deeply_xml(
+        $x,
+q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd' ><html xmlns='http://www.w3.org/1999/xhtml'><head><title>Test
+ </title><link rel='stylesheet' href='/styles/main.1232622176.css' /></head><body><p>asdasdad
+ asdasd
+ </p></body></html>#
+    );
 }
 
 1;

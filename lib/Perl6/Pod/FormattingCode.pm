@@ -35,6 +35,10 @@ sub get_attr {
  
 }
 
+sub on_para {
+    my ($self ,$parser, $txt) = @_;
+    return $txt
+}
 1;
 __END__
 

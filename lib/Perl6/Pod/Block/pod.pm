@@ -57,7 +57,7 @@ sub on_para {
     my $self   = shift;
     my $parser = shift;
     my $txt    = shift;
-
+    return unless defined $txt;
     #convert ordinary para to =para
     # and verbatim text to =code
     my $rparser = $self->context->{vars}->{root};

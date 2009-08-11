@@ -27,6 +27,18 @@ package Perl6::Pod::To::XHTML;
 
     my $p = new Perl6::Pod::To::XHTML:: 
                 header => 0, doctype => 'html';
+fill html head
+    my $p = new Perl6::Pod::To::XHTML:: 
+                header => 1, doctype => 'html',
+                head=>[ 
+                    link=>
+                        {
+                            rel=>"stylesheet",
+                            href=>"/styles/main.1232622176.css"
+                        } 
+                    ],
+               body=>1 #add <body> tag. Default: 0;
+    
 
 =head1 DESCRIPTION
 
@@ -60,7 +72,9 @@ use Perl6::Pod::To::XML;
 use XML::SAX::Writer;
 use Perl6::Pod::Parser::ListLevels;
 use Perl6::Pod::Parser::AddHeadLevels;
-use Perl6::Pod::To::XHTML::ProcessHeads;
+use Perl6::Pod::To::XHTML::ProcessHeadings;
+use Perl6::Pod::To::XHTML::MakeHead;
+use Perl6::Pod::To::XHTML::MakeBody;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To::XML/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -68,9 +82,21 @@ use Data::Dumper;
 
 sub new {
     my $class = shift;
-    my $self  = $class->SUPER::new(@_);
+    my $self  = $class->SUPER::new(body=>0, @_);
+    if ( my $heads = $self->{head} ) {
+
+        #make head filter
+        my $headfilter = new Perl6::Pod::To::XHTML::MakeHead:: head => $heads;
+        $self->{out_put} = create_pipe( $headfilter, $self->{out_put} );
+
+    }
+    if ( $self->{body} ) {
+        #make body
+        my $add_body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
+        $self->{out_put} = create_pipe( $add_body_filter, $self->{out_put} );
+    }
     $self->{out_put} =
-      create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeads', $self->{out_put} );
+      create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put} );
     return create_pipe(
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
@@ -87,13 +113,13 @@ sub start_document {
                 {
                     Name => $self->{doctype} || 'html',
                     PublicId => "-//W3C//DTD XHTML 1.1//EN",
-                    SystemId =>"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
+                    SystemId => "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
                 }
             );
             $out->end_dtd;
         }
         my $root = $out->mk_element( $self->{doctype} || 'html' );
-        $out->on_start_prefix_mapping( ''=>"http://www.w3.org/1999/xhtml");
+        $out->on_start_prefix_mapping( '' => "http://www.w3.org/1999/xhtml" );
         $out->start_element($root);
     }
 }
@@ -191,8 +217,7 @@ sub on_end_block {
 sub export_block_item {
     my ( $self, $el, @p ) = @_;
     my $elem =
-      $self->mk_element('listitem')
-      ->add_content($self->mk_characters(@p)  );
+      $self->mk_element('listitem')->add_content( $self->mk_characters(@p) );
 
     #add POD attr for use in export_block_itemlist
     #for varlistentry
@@ -205,7 +230,7 @@ sub export_block_itemlist {
     my $attr = $el->attrs_by_name;
     my ( $list_name, $items_name ) = @{
         {
-            ordered    => [ 'ol',  'li' ],
+            ordered    => [ 'ol', 'li' ],
             unordered  => [ 'ul', 'li' ],
             definition => [ 'dl', 'dd' ]
         }->{ $attr->{listtype} }
@@ -241,9 +266,12 @@ sub export_block_itemlist {
 
 sub export_block_NAME {
     my ( $self, $el, $text ) = @_;
-    my $head = $self->mk_element('head')->add_content( 
-    $self->mk_element('title')
-      ->add_content( $self->mk_characters($text) ));
+    my $head =
+      $self->mk_element('head')
+      ->add_content(
+        $self->mk_element('title')->add_content( $self->mk_characters($text) )
+      );
+
     #mark element as XHTML head
     $head->{XHTML_HEAD}++;
     return $head;

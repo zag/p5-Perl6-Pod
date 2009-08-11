@@ -95,15 +95,58 @@ sub end {
 sub on_para {
     my ( $self, $parser, $txt ) = @_;
     #process formating codes by default
-    #$self->
-    return $parser->get_elements_from_ref( $parser->parse_str($txt) );
-    return $txt;
+    return $parser->parse_para($txt); 
+}
+
+#make events for root parser DEPRECATED
+sub __make_events {
+    my $self = shift;
+    my @res  = ();
+    foreach my $el (@_) {
+        unless ( ref($el) ) {
+            $el = { type=>'para', data=>$el }
+        }
+        #process refs
+        if  ( exists $el->{type} ) {
+           push @res, $el 
+        } else {
+            my $name = $el->{name};
+            #make start stop
+            push @res, { 
+                type=>'start_fcode',
+                data =>$name
+                }, $self->__make_events(@{$el->{childs}}), { 
+                type=>'end_fcode',
+                data =>$name
+                }
+        }
+    }
+    return @res;
+}
+
+=head2 parse_para
+
+DEPRECATED
+
+Parse format codes
+
+=cut
+
+sub parse_para {
+    my $self  = shift;
+    my $rpara = $self->context->{vars}->{root};
+    my @args = ();
+    foreach my $para ( @_ )  {
+       push @args ,  ref( $para ) ? $para :  @{ $rpara->parse_str($para) }
+    }
+    return $self->__make_events( @args )
 }
 
 sub on_child {
     my ( $self, $parser, $elem  ) = @_;
     return $elem;
 }
+
 
 =head2 get_attr [block name]
 

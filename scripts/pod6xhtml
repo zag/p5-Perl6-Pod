@@ -13,15 +13,27 @@ use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
 use Perl6::Pod::To::XHTML;
-my ( $help, $man, $doctype, $add_head);
-my %opt =
-  ( help => \$help, man => \$man, );
-GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head )
-  or pod2usage(2);
+my ( $help, $man, $doctype, $add_head, $css_file );
+my %opt = ( help => \$help, man => \$man, );
+GetOptions(
+    \%opt, 'help|?', 'man',
+    'doctype|t=s' => \$doctype,
+    'add_head|ah' => \$add_head,
+    'css|t=s' => \$css_file
+) or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
-my %args = (header=>$add_head, doctype=>$doctype);
+my %args = ( header => $add_head, doctype => $doctype, body=>1 );
+
+if ($css_file) {
+    $args{head} = [
+        link => {
+            rel  => "stylesheet",
+            href => "$css_file"
+        }
+    ];
+}
 
 my $infile = shift;
 my $in_fd;
@@ -32,7 +44,7 @@ else {
     $in_fd = \*STDIN;
 }
 
-my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XHTML', \*STDOUT, %args);
+my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XHTML', \*STDOUT, %args );
 $p->parse($in_fd);
 
 exit;
@@ -45,11 +57,13 @@ exit;
 
   pod6xhtml < somefile.pod > somefile.xhtml
   pod6xhtml somefile.pod  > somefile.xhtml
+  pod6xhtml -css main.css somefile.pod  > somefile.xhtml
 
 
    options:
     -doctype|t - set docbook type . Default html;
     -add_head|ah - If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output.
+    -css <css_file> - add stylesheet link to head of xhtml file.
     -help  - print help message
     -man   - print man page
 
@@ -72,6 +86,10 @@ Set docbook type . Default html
 =item B<-add_head>,B<-ah>
 
 If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output
+
+=item B<-css> cssfile 
+
+Add stylesheet link to head of xhtml file
 
 =back
 

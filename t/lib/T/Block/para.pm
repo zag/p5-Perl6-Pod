@@ -100,8 +100,6 @@ $t->is_deeply_xml( $x,q#<html xmlns='http://www.w3.org/1999/xhtml'><p>    test c
  </p></html>#)
 }
 
-
-
 1;
 
 

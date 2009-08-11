@@ -139,7 +139,7 @@ T1
 package main;
 use strict;
 use warnings;
-use Test::More(tests=>22);
+use Test::More(tests=>30);
 use Data::Dumper;
 my $FORMATTING_CODE = q{[BCDEIKLMNPRSTUVXZ]};
 use_ok 'Perl6::Pod::Parser';
@@ -156,6 +156,7 @@ use_ok 'Perl6::Pod::To::XML';
 use strict;
 use warnings;
 use lib 't/lib';
+use T::Parser;
 Test::Class->runtests;
 use utf8;
 

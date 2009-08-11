@@ -26,7 +26,8 @@ use base 'Perl6::Pod::Parser';
 sub on_start_element {
     my ( $self, $el ) = @_;
     my $lname = $el->local_name;
-    return $el unless $lname eq 'M' and $el->isa('Perl6::Pod::FormattingCode::M');
+    return $el
+      unless $lname eq 'M' and $el->isa('Perl6::Pod::FormattingCode::M');
     $el->{__CUSTOM_CODE_M} = '';
     $el->delete_element;
     return $el;
@@ -44,9 +45,13 @@ sub on_end_element {
     return $el unless exists $el->{__CUSTOM_CODE_M};
     my $str = $el->{__CUSTOM_CODE_M};
     my ( $custom_code_name, $para ) = $str =~ /\s*(\w+)\s*:\s*(.*)/s;
-    my $custom_el = $self->mk_fcode($custom_code_name);
-    $custom_el->add_content( $self->mk_characters($para) );
-    return [ $el, $custom_el ];
+    if ( my $rootp = $el->context->{vars}->{root} ) {
+        my $custom_el = $self->mk_fcode($custom_code_name);
+        $rootp->start_block($custom_el);
+        $rootp->para($para);
+        $rootp->end_block($custom_el);
+    }
+    return $el;
 }
 
 1;
