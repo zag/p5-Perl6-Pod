@@ -235,5 +235,35 @@ q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml1
     );
 }
 
+sub a001_add_custom_heads_and_NAME : Test {
+    my $t         = shift;
+    my $x         = '';
+    my $to_parser = new Perl6::Pod::To::XHTML::
+      out_put => \$x,
+      header  => 0,
+      body    => 0,
+      ;
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    my $str = <<T;
+=begin pod
+=head1 asd
+
+=for item :term<Term1>
+B<1>
+=head2 sdsd
+=for item :term<Term2>
+2
+=end pod
+T
+    $p->parse( \$str );
+    $t->is_deeply_xml(
+        $x,
+        q#<html xmlns='http://www.w3.org/1999/xhtml'><h1>asd
+ </h1><dl><dt><strong>Term1</strong><dd><B>1</B>
+ </dd></dt></dl><h2>sdsd
+ </h2><dl><dt><strong>Term2</strong><dd>2
+ </dd></dt></dl></html>#
+    );
+}
 1;
 

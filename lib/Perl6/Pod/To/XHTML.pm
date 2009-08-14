@@ -214,10 +214,20 @@ sub on_end_block {
     return $el;
 }
 
+sub _make_events {
+    my $self = shift;
+    my @in = $self-> __expand_array_ref( @_);
+    my @out = ();
+    foreach my $elem ( @in ) {
+        push @out, ref( $elem) ? $elem : $self->mk_characters($elem);
+    }
+    return @out
+}
+
 sub export_block_item {
     my ( $self, $el, @p ) = @_;
     my $elem =
-      $self->mk_element('listitem')->add_content( $self->mk_characters(@p) );
+      $self->mk_element('listitem')->add_content( $self->_make_events( @p) );
 
     #add POD attr for use in export_block_itemlist
     #for varlistentry

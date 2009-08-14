@@ -135,7 +135,6 @@ sub xml_ref {
 sub is_deeply_xml {
     my $test = shift;
     my ( $got, $exp, @params ) = @_;
-#    is_deeply _xml_to_ref($got), _xml_to_ref($exp), @params;
     unless (  is_deeply $test->xml_ref($got), $test->xml_ref($exp), @params ) {
         diag "got:", "<" x40;
         diag $got;

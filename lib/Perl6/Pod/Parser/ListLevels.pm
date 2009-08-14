@@ -27,9 +27,10 @@ use Data::Dumper;
 sub on_start_element {
     my ( $self, $el ) = @_;
     my $lname = $el->local_name;
+    return $el if $self->{IN_ITEM};
     my @res   = ($el);
     if ( $lname =~ /^item/ ) {
-
+        $self->{IN_ITEM}++;
         #item element
         unless ( $self->{IN_ITEMLIST}++ ) {
 
@@ -51,13 +52,21 @@ sub on_start_element {
 
     }
     else {
-        if ( delete $self->{IN_ITEMLIST} ) {
+        if ( delete  $self->{IN_ITEMLIST} ) {
             unshift @res, $self->mk_end_element( $self->mk_block('itemlist') );
         }
     }
     \@res;
 }
 
+sub on_end_element {
+    my ($self, $el) = @_;
+    my $lname = $el->local_name;
+    if ( $lname =~ /^item/ ) {
+           delete $self->{IN_ITEM};
+    }
+    return $el;
+}
 sub end_document {
     my $self = shift;
 
@@ -80,11 +89,12 @@ sub on_para {
 
     #close itemlist by para block
     if ( exists $self->{IN_ITEMLIST} and $el->local_name eq 'itemlist' ) {
+	warn "aaaa";
         $self->_process_comm(
             $self->mk_end_element( $self->mk_block('itemlist') ) );
         delete $self->{IN_ITEMLIST};
     }
-    $txt;
+    return $self->SUPER::on_para( $el, $txt );
 }
 
 1;

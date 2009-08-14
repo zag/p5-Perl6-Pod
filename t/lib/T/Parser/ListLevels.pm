@@ -39,16 +39,13 @@ sub t2_two_interrupted_items_blocks : Test {
 =item a2
 =end pod
 T1
-    $t->is_deeply_xml(
-        $x,
+$t->is_deeply_xml ($x,
 q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>i1
 </item><item pod:type='block'>i2
 </item></itemlist><head1 pod:type='block'>test
 </head1><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>a1
 </item><item pod:type='block'>a2
-</item></itemlist></pod>
-#
-      )
+</item></itemlist></pod>#)
 
 }
 
@@ -108,14 +105,32 @@ q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:
     );
 }
 
+sub t06_test_formatting_codes_in_lists : Test {
+    my $t = shift;
+    my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
+=begin pod
+=for item term:<TE>
+sds L<dsd>
+=for item term:<TT>
+* sd sds
+=head1 sd
+=end pod
+T1
+    $t->is_deeply_xml(
+        $x,
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>sds <L pod:type='code'>dsd</L>
+ </item><item pod:type='block'>* sd sds
+ </item></itemlist><head1 pod:type='block'>sd
+ </head1></pod>#
+    );
+}
+
 sub t6_docbook : Test {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 T1
-    
 
-    "last"
+    "last";
 }
 1;
-
 
