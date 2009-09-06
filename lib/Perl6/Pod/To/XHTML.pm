@@ -185,7 +185,11 @@ sub print_export {
     my $self = shift;
     for (@_) {
         my @data = ref($_) eq 'ARRAY' ? @{$_} : $_;
-        $self->out_parser->_process_comm($_) for @data;
+        foreach my $el (@data) {
+            $el = $self->mk_characters( $el) unless ref $el;
+            $self->out_parser->_process_comm($el)
+        }
+#        $self->out_parser->_process_comm($_) for @data;
     }
 }
 

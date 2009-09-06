@@ -28,21 +28,51 @@ Usually, in schemes where an internal address makes sense, it will be separated 
 
 use warnings;
 use strict;
+use Data::Dumper;
 use Perl6::Pod::FormattingCode;
 use base 'Perl6::Pod::FormattingCode';
 
 sub on_para {
     my ($self , $parser, $txt) = @_;
-    #make atts
+    #extract linkname and content
+    my ( $lname, $lcontent ) = ('', defined $txt ? $txt : '');
+    if  ($lcontent =~ /\|/ ) {
+        my @all;
+        ($lname, @all) =  split( /\s*\|\s*/, $lcontent );
+        $lcontent = join "",@all
+    } 
+    my $attr = $self->attrs_by_name;
+    #clean whitespaces
+    $lname =~s/^\s+//;    $lname =~s/\s+$//;
+    $attr->{name} = $lname;
+    my ($scheme, $address , $section)  = $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
+    $attr->{scheme} = $scheme;
+    $address = '' unless defined $address;
+    $attr->{is_external} = $address =~ s/^\/\///;
+    #clean whitespaces
+    $address =~s/^\s+//;    $address =~s/\s+$//;
+    $attr->{address} = $address;
+    #fix L<doc:#Special Features>
+    $attr->{section} = defined $section ? $section : '';
     $txt;
 }
 
 sub to_xhtml {
     my ($self , $parser, @in) = @_;
-    my $a = $parser->mk_element('a');
-    $a->attrs_by_name()->{href} =  $in[0];
-    $a->add_content( $parser->mk_characters( $in[0]) );
-    return $a
+    my $attr = $self->attrs_by_name();
+    for ( $attr->{scheme}) { 
+    /^https?/ && do {
+        my $a = $parser->mk_element('a');
+        my $url =  $attr->{address};
+        $url .= "#". $attr->{section} if $attr->{section};
+        $url = $_."://". $url if $attr->{is_external};
+        my $name = $attr->{name} || $attr->{address};
+        $a->attrs_by_name()->{href} =  $url;
+        $a->add_content( $parser->mk_characters( $name ) );
+        return $a
+     }
+     || do { return $self->mk_characters( $in[0] ) }
+     }
 }
 1;
 
