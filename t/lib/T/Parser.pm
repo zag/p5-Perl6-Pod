@@ -124,7 +124,7 @@ q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><ParsePara
     );
 }
 
-sub p04_process_para : Test(2){
+sub p04_process_para : Test(2) {
     my $t         = shift;
     my $out       = '';
     my $to_parser = new Perl6::Pod::To::XML:: out_put => \$out;
@@ -133,28 +133,27 @@ sub p04_process_para : Test(2){
 test S<L<k>>
 T
     my $ref1 = $p->parse_para($txt);
-    is_deeply $ref1,[
-          {
+    is_deeply $ref1, [
+        {
             'type' => 'para',
             'data' => 'test '
-          },
-          {
-            'name' => 'S',
+        },
+        {
+            'name'   => 'S',
             'childs' => [
-                          {
-                            'name' => 'L',
-                            'childs' => [
-                                          'k'
-                                        ]
-                          }
-                        ]
-          },
-          {
+                {
+                    'name'   => 'L',
+                    'childs' => [ 'k' ]
+                }
+            ]
+        },
+        {
             'type' => 'para',
             'data' => '
 '
-          }
-        ], 'check stuct';
+        }
+      ],
+      'check stuct';
     is_deeply $ref1, $p->parse_para($ref1), 'duble pass';
 }
 
@@ -169,46 +168,47 @@ S<L<k>>test
 T
     my $ref = $p->parse_para($txt);
     is_deeply $ref, [
-          {
-            'name' => 'S',
+        {
+            'name'   => 'S',
             'childs' => [
-                          {
-                            'name' => 'L',
-                            'childs' => [
-                                          'k'
-                                        ]
-                          }
-                        ]
-          },
-          {
+                {
+                    'name'   => 'L',
+                    'childs' => [ 'k' ]
+                }
+            ]
+        },
+        {
             'type' => 'para',
             'data' => 'test
 '
-          }
-        ], 'check parse_para for S<L<k>>test';
+        }
+      ],
+      'check parse_para for S<L<k>>test';
 
-    is_deeply [ $p->__make_events($ref->[0]) ], [
-          {
+    is_deeply [ $p->__make_events( $ref->[0] ) ],
+      [
+        {
             'data' => 'S',
             'type' => 'start_fcode'
-          },
-          {
+        },
+        {
             'data' => 'L',
             'type' => 'start_fcode'
-          },
-          {
+        },
+        {
             'data' => 'k',
             'type' => 'para'
-          },
-          {
+        },
+        {
             'data' => 'L',
             'type' => 'end_fcode'
-          },
-          {
+        },
+        {
             'data' => 'S',
             'type' => 'end_fcode'
-          }
-        ], '__make_events for element';
+        }
+      ],
+      '__make_events for element';
     $p->begin_input;
     $p->start_block( 'pod',,  0 );
     $p->start_block( 'para',, 0 );
@@ -216,8 +216,11 @@ T
     $p->end_block( 'para',, 0 );
     $p->end_block( 'pod',,  0 );
     $p->end_input;
-$t->is_deeply_xml ( $out, q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><S pod:type='code'><L pod:type='code'>k</L></S>test
- </para></pod>#);
+    $t->is_deeply_xml(
+        $out,
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><S pod:type='code'><L pod:section='' pod:type='code' pod:scheme='' pod:is_external='' pod:name='' pod:address=''>k</L></S>test
+ </para></pod>#
+    );
 }
 
 1;

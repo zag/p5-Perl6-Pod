@@ -2,11 +2,13 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+0.8
+    + fix tests
 0.7
-    +add L<> schemes and tests
+    + add L<> schemes and tests
 0.6
-    +add lists tests
-    +fix format codes in lists
+    + add lists tests
+    + fix format codes in lists
 0.5
     + base support of formatting codes
     + pod6xhtml: add css option

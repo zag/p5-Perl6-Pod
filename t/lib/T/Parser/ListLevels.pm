@@ -118,11 +118,10 @@ sds L<dsd>
 T1
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>sds <L pod:type='code'>dsd</L>
- </item><item pod:type='block'>* sd sds
- </item></itemlist><head1 pod:type='block'>sd
- </head1></pod>#
-    );
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>sds <L pod:section='' pod:type='code' pod:scheme='' pod:is_external='' pod:name='' pod:address=''>dsd</L>
+</item><item pod:type='block'>* sd sds
+</item></itemlist><head1 pod:type='block'>sd
+</head1></pod>#);
 }
 
 sub t6_docbook : Test {
