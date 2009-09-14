@@ -22,6 +22,7 @@ DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
 use warnings;
 use strict;
 use Carp;
+use open ':utf8';
 use IO::File;
 use Test::More;
 use Data::Dumper;

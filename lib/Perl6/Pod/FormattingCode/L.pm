@@ -71,7 +71,7 @@ sub to_xhtml {
         $a->add_content( $parser->mk_characters( $name ) );
         return $a
      }
-     || do { return $self->mk_characters( $in[0] ) }
+     || do { return $parser->mk_characters( $in[0] ) }
      }
 }
 1;
