@@ -13,10 +13,10 @@ use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
 use Perl6::Pod::To::DocBook;
-my ( $help, $man, $doctype, $add_head);
+my ( $help, $man, $doctype, $add_head, $custom_formatter);
 my %opt =
   ( help => \$help, man => \$man, );
-GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head )
+GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head , 'formatter|f=s'=>\$custom_formatter)
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -32,7 +32,7 @@ else {
     $in_fd = \*STDIN;
 }
 
-my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
+my $p = Perl6::Pod::To::to_abstract( $custom_formatter|| 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
 $p->parse($in_fd);
 
 exit;
@@ -50,6 +50,7 @@ exit;
    options:
     -doctype|t - set docbook type ( ie chapter, article, book ...). Default chapter;
     -add_head|ah - If this option is set , pod6docbook will emit a DOCTYPE as the first line of output.
+    -formatter|f - set output formatter class, default Perl6::Pod::To::DocBook
     -help  - print help message
     -man   - print man page
 
@@ -72,6 +73,10 @@ Set docbook type ( ie chapter, article, book ...). Default chapter
 =item B<-add_head>,B<-ah>
 
 If this option is set , pod6docbook will emit a DOCTYPE as the first line of output
+
+=item B<-formatter>, B<-f>
+
+Set output formatter class, default Perl6::Pod::To::DocBook
 
 =back
 

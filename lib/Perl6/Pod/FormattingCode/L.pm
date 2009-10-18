@@ -6,7 +6,7 @@ package Perl6::Pod::FormattingCode::L;
 
 =head1 NAME
 
-Perl6::Pod::FormattingCode::L - handle L<> formatting code
+Perl6::Pod::FormattingCode::L - handle "L" formatting code
 
 =head1 SYNOPSIS
 

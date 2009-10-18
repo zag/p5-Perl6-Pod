@@ -141,6 +141,16 @@ sub on_end_block {
     return $el;
 }
 
+sub _make_events {
+    my $self = shift;
+    my @in = $self-> __expand_array_ref( @_);
+    my @out = ();
+    foreach my $elem ( @in ) {
+        push @out, ref( $elem) ? $elem : $self->mk_characters($elem);
+    }
+    return @out
+}
+
 1;
 __END__
 

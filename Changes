@@ -2,6 +2,8 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+
+    +fix docbook TERM
 0.9
     + use utf8 for open 
     + [fix] L<name|link>

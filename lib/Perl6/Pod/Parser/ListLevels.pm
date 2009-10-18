@@ -89,7 +89,6 @@ sub on_para {
 
     #close itemlist by para block
     if ( exists $self->{IN_ITEMLIST} and $el->local_name eq 'itemlist' ) {
-	warn "aaaa";
         $self->_process_comm(
             $self->mk_end_element( $self->mk_block('itemlist') ) );
         delete $self->{IN_ITEMLIST};
