@@ -20,6 +20,12 @@ Module::Build->new
 	scripts/pod6xml
     !],
    dist_version_from=>'lib/Perl6/Pod.pm',
+    meta_merge=>{
+     resources=> {
+        repository => 'git://github.com/zag/p5-Perl6-Pod.git',
+        bugtracker=>'http://rt.cpan.org/Public/Dist/Display.html?Name=Perl6::Pod'
+    }
+    },
    dist_author=>'Zahatski Aliaksandr zag@cpan.org',
     create_makefile_pl=>$ENV{DO_OUTCPAN} ? 'traditional':'passthrough'
     )->create_build_script;
