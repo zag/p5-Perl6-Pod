@@ -13,6 +13,7 @@ Module::Build->new
 	'Pod::Usage'=>0,
 	'Getopt::Long'=>0,
 	'Test::Class'=>0,
+	'Filter::Simple'=>0
 	     },
     script_files=>[qw!
 	scripts/pod6xml
