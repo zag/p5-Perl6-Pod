@@ -258,7 +258,10 @@ sub export_block_itemlist {
 
             #if variable list, then add varlistentry
             if ( $list->local_name eq 'dl' ) {
-                my ($term) = @{ $_->{POD}->{term} };
+                my $term = $_->{POD}->{term};
+                if ( ref( $term)) {
+                    $term = join " ",@$term;
+                }
 
                 my $var_entry =
                   $self->mk_element('dt')
