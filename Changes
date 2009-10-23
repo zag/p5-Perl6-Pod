@@ -2,6 +2,8 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+0.11
+    +fix depends
 0.10
     +add souce filter for perl5 scripts
     +fix docbook TERM
