@@ -71,7 +71,7 @@ Create block element.
 sub mk_fcode {
     my $self = shift;
     my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->context->use->{$name."<>"}
+    my $mod_name = $self->context->use->{ $name . "<>" }
       || 'Perl6::Pod::FormattingCode'
       ;    # or die "Unknown block_type $name. Try =use ...";
            #get prop
@@ -94,8 +94,9 @@ sub end {
 
 sub on_para {
     my ( $self, $parser, $txt ) = @_;
+
     #process formating codes by default
-    return $parser->parse_para($txt); 
+    return $parser->parse_para($txt);
 }
 
 #make events for root parser DEPRECATED
@@ -104,21 +105,27 @@ sub __make_events {
     my @res  = ();
     foreach my $el (@_) {
         unless ( ref($el) ) {
-            $el = { type=>'para', data=>$el }
+            $el = { type => 'para', data => $el };
         }
+
         #process refs
-        if  ( exists $el->{type} ) {
-           push @res, $el 
-        } else {
+        if ( exists $el->{type} ) {
+            push @res, $el;
+        }
+        else {
             my $name = $el->{name};
+
             #make start stop
-            push @res, { 
-                type=>'start_fcode',
-                data =>$name
-                }, $self->__make_events(@{$el->{childs}}), { 
-                type=>'end_fcode',
-                data =>$name
-                }
+            push @res,
+              {
+                type => 'start_fcode',
+                data => $name
+              },
+              $self->__make_events( @{ $el->{childs} } ),
+              {
+                type => 'end_fcode',
+                data => $name
+              };
         }
     }
     return @res;
@@ -135,18 +142,17 @@ Parse format codes
 sub parse_para {
     my $self  = shift;
     my $rpara = $self->context->{vars}->{root};
-    my @args = ();
-    foreach my $para ( @_ )  {
-       push @args ,  ref( $para ) ? $para :  @{ $rpara->parse_str($para) }
+    my @args  = ();
+    foreach my $para (@_) {
+        push @args, ref($para) ? $para : @{ $rpara->parse_str($para) };
     }
-    return $self->__make_events( @args )
+    return $self->__make_events(@args);
 }
 
 sub on_child {
-    my ( $self, $parser, $elem  ) = @_;
+    my ( $self, $parser, $elem ) = @_;
     return $elem;
 }
-
 
 =head2 get_attr [block name]
 
@@ -158,14 +164,30 @@ Unless provided <block_name> return attributes for current block.
 sub get_attr {
     my $self    = shift;
     my $context = $self->context;
-    my $name =  shift || $self->local_name ;
+    my $name    = shift || $self->local_name;
+
     #warn $context->config;
-    my $pre_config_opt = $context->config->{ $name } || '';
+    my $pre_config_opt = $context->config->{$name} || '';
     my $opt            = $self->{_pod_options};
     my $hash           = $context->_opt2hash( $pre_config_opt . " " . $opt );
     my %res            = ();
     while ( my ( $key, $val ) = each %$hash ) {
         $res{$key} = $val->{value};
+    }
+
+    #resolve :like
+    if ( my $like = $res{like} ) {
+        my @like       = ref($like) eq 'ARRAY' ? @$like : ($like);
+        my %block_uniq = ();
+        my %likes_hash = ();
+        while ( my $liked = shift @like ) {
+            next if $block_uniq{$liked}++;
+            %likes_hash = ( %{ $context->get_attr($liked) }, %likes_hash );
+            if ( my $like = $likes_hash{like} ) {
+                push @like, ref($like) eq 'ARRAY' ? @$like : ($like);
+            }
+        }
+        %res = ( %likes_hash, %res );
     }
     \%res;
 }
@@ -173,19 +195,21 @@ sub get_attr {
 #default export methods
 
 sub to_xml1 {
-    my $self     = shift;
-    my $parser   = shift;
-    my $ln       = $self->local_name;
-    my $attr     = $self->get_attr;
-    my $elem = $parser->mk_element( $ln);
-    my $eattr = $elem->attrs_by_name;
-    %{$elem->attrs_by_name}= %$attr;
+    my $self   = shift;
+    my $parser = shift;
+    my $ln     = $self->local_name;
+    my $attr   = $self->get_attr;
+    my $elem   = $parser->mk_element($ln);
+    my $eattr  = $elem->attrs_by_name;
+    %{ $elem->attrs_by_name } = %$attr;
     my @content = ();
-    foreach my $in_param ( @_) {
-        push @content, $in_param
+
+    foreach my $in_param (@_) {
+        push @content, $in_param;
     }
-    return $elem
+    return $elem;
 }
+
 sub to_sax2 {
     return $_[0];
 }
