@@ -40,9 +40,9 @@ Unordered lists
 
 Definition lists 
 
-    =item :term<XML>
+    =for item :term<XML>
     Extensible Markup Language
-    =item :term<HTML>
+    =for item :term<HTML>
     Hyper Text Markup Language
 
 
