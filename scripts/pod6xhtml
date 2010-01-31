@@ -61,7 +61,7 @@ exit;
 
 
    options:
-    -doctype|t - set docbook type . Default html;
+    -doctype|t - set doc type . Default html;
     -add_head|ah - If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output.
     -css <css_file> - add stylesheet link to head of xhtml file.
     -help  - print help message

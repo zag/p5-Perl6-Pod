@@ -122,6 +122,14 @@ sub on_para {
     push @{ $element->{_CONTENT_} }, $text;
     return;
 }
+sub on_start_block {
+    my $self = shift;
+    my $cname =''; 
+    if ( my $current = $self->current_element) {
+        $cname=$self->current_element->local_name;
+    }
+    return $self->SUPER::on_start_block(@_);
+}
 
 sub on_end_block {
     my $self = shift;
@@ -129,13 +137,12 @@ sub on_end_block {
     return $el unless $el->isa('Perl6::Pod::Block');
     my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
     my $data = $self->__handle_export( $el, @$content );
-    my $cel = $self->current_element;
+    my $cel = $self->current_root_element;
     if ($cel) {
         push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
         return;
     }
     else {
-
         $self->print_export($data);
     }
     return $el;

@@ -41,29 +41,32 @@ sub on_start_element {
     my ( $self, $el ) = @_;
     return $el unless $self->{SKIP_ROOT}++;
     return $el if $self->{OK} or $self->{HEADMODE};
+
     #if start head set flag
-    if ( $el->local_name eq 'head') {
+    if ( $el->local_name eq 'head' ) {
         $self->{HEADMODE}++;
-    } else {
-        my $start = $self->mk_start_element($self->mk_element('body'));
+    }
+    else {
+        my $start = $self->mk_start_element( $self->mk_element('body') );
         $self->{OK}++;
-        return [ $start, $el]
+        return [ $start, $el ];
     }
     $el;
 }
+
 sub on_end_element {
-    my ($self, $el) = @_;
-    if ($el->local_name eq 'head' ) {
+    my ( $self, $el ) = @_;
+    if ( $el->local_name eq 'head' ) {
         delete $self->{HEADMODE};
+    }
+    if ( $self->{OK} and my $current = $self->current_element ) {
+        my $cname = $current->local_name;
+        if ( $cname eq 'body' ) {
+            delete $self->{OK};    #clean check flag
+            return [ $self->mk_end_element( $self->current_element ), $el ];
+        }
     }
     return $el;
 }
 
-sub end_document {
-    my $self = shift;
-    if ( $self->{OK} ) {
-        $self->_process_comm($self->mk_end_element( $self->mk_element('body')))
-    }
-    return $self->SUPER::end_document(@_);
-}
 1;

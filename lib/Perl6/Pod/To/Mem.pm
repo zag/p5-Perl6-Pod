@@ -104,7 +104,7 @@ sub on_end_block {
     return $el unless $el->isa('Perl6::Pod::Block');
     my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
     my $data = $self->__handle_export( $el, @$content );
-    my $cel = $self->current_element;
+    my $cel = $self->current_root_element;
     if ($cel) {
         push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
         return;

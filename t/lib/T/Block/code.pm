@@ -16,6 +16,15 @@ use XML::ExtOn('create_pipe');
 use base 'TBase';
 
 
+sub c001_explicit_implicit{
+    my $t = shift;
+    my $x = $t->parse_to_xml (<<T);
+=begin pod
+test para.test para.test.pas
+=end pod
+T
+diag "a:".$x;exit;
+}
 sub c01_explicit_implicit : Test {
     my $t = shift;
     my $x = $t->parse_to_xml (<<T);

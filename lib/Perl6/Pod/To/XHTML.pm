@@ -75,6 +75,7 @@ use Perl6::Pod::Parser::AddHeadLevels;
 use Perl6::Pod::To::XHTML::ProcessHeadings;
 use Perl6::Pod::To::XHTML::MakeHead;
 use Perl6::Pod::To::XHTML::MakeBody;
+use Perl6::Pod::Parser::Doformatted;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To::XML/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -98,6 +99,7 @@ sub new {
     $self->{out_put} =
       create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put} );
     return create_pipe(
+        'Perl6::Pod::Parser::Doformatted',
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
         'Test::Filter', $self
@@ -206,7 +208,7 @@ sub on_end_block {
     return $el unless $el->isa('Perl6::Pod::Block');
     my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
     my $data = $self->__handle_export( $el, @$content );
-    my $cel = $self->current_element;
+    my $cel = $self->current_root_element;
     if ($cel) {
         push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
         return;

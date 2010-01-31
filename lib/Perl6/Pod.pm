@@ -69,7 +69,7 @@ DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
 
 =cut
 
-$Perl6::Pod::VERSION = '0.12';
+$Perl6::Pod::VERSION = '0.13';
 
 use warnings;
 use strict;

@@ -153,7 +153,6 @@ sub on_start_element {
 sub on_start_block {
     my $self = shift;
     my $blk  = shift;
-
     #    warn "start element ". $blk->local_name;
     # call on_child for curretn element
     if ( my $elem = $self->current_element ) {
@@ -167,6 +166,7 @@ sub on_start_block {
 
 sub on_end_element {
     my $self = shift;
+#    warn ref($self)." on end element". $_[0]->local_name;
     return $self->on_end_block(@_);
 }
 

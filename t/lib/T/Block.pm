@@ -138,5 +138,39 @@ sub b06_like_attribute_array : Test {
       }, ":like['test3','test4']>";
 }
 
+sub b07_allow_attribute: Test  {
+    return "skip";
+    my $t = shift;
+    my $x = $t->parse_to_xml(<<T,);
+=begin pod
+=for para :allow<B>
+B<Test more text>I<test>
+=end pod
+T
+    diag $x;exit;
+    my $c = new Perl6::Pod::Parser::Context;
+    $c->config->{'test1'} = ":w1 :like<test4>";
+    $c->config->{'test2'} = ":w2(2) :w3(4) :like<test3>";
+    $c->config->{'test3'} = ":w3(3) :o1(4) :w4(2)";
+    $c->config->{'test4'} = ":w4";
+    my $b = new Perl6::Pod::Block::
+      name    => 'test1',
+      context => $c,
+      options => ":o1('3') :like['test3','test4']>";
+    my $tattr = $b->get_attr;
+    delete $tattr->{like};
+    is_deeply $tattr,
+      {
+        'w4' => 2,
+        'o1' => '3',
+        'w3' => 3,
+        'w1' => 1
+      }, ":like['test3','test4']>";
+}
+
+
+
+
+
 1;
 

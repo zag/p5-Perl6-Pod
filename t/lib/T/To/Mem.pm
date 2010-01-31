@@ -43,7 +43,6 @@ pod_text
 =end pod
 T1
 
-
 is_deeply $o,
  [
            {

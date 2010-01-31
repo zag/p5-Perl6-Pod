@@ -65,6 +65,7 @@ use XML::SAX::Writer;
 use Perl6::Pod::Parser::AddHeadLevels;
 use Perl6::Pod::To::DocBook::ProcessHeads;
 use Perl6::Pod::Parser::ListLevels;
+use Perl6::Pod::Parser::Doformatted;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To::XML/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -76,6 +77,7 @@ sub new {
     $self->{out_put} =
       create_pipe( 'Perl6::Pod::To::DocBook::ProcessHeads', $self->{out_put} );
     return create_pipe(
+        'Perl6::Pod::Parser::Doformatted',
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
         'Test::Filter', $self
@@ -180,7 +182,7 @@ sub on_end_block {
     return $el unless $el->isa('Perl6::Pod::Block');
     my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
     my $data = $self->__handle_export( $el, @$content );
-    my $cel = $self->current_element;
+    my $cel = $self->current_root_element;
     if ($cel) {
         push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
         return;
@@ -253,6 +255,11 @@ sub export_block_NAME {
       ->add_content( $self->mk_characters($text) );
 }
 
+sub export_code_I {
+    my ( $self, $el, $text ) = @_;
+    return $self->mk_element('emphasis')
+      ->add_content( $self->mk_characters($text) );#
+}
 1;
 __END__
 

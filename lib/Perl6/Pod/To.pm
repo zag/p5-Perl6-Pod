@@ -51,13 +51,13 @@ sub on_start_block {
 sub export_block {
     my ( $self, $elem, $text ) = @_;
     my $lname = $elem->local_name;
-    warn ref($self)."->export_block_$lname() not found. And not overriden export_block method ";
+#    warn ref($self)."->export_block_$lname() not found. And not overriden export_block method ";
 }
 
 sub export_code {
     my ( $self, $elem, $text ) = @_;
     my $lname = $elem->local_name;
-    warn ref($self)."->export_code_$lname() not found. And not overriden export_code method ";
+#    warn ref($self)."->export_code_$lname() not found. And not overriden export_code method ";
 }
 
 sub on_para {
@@ -116,11 +116,11 @@ sub print_export {
 sub on_end_block {
     my $self = shift;
     my $el   = shift;
+#    warn "!!!end". $el->local_name;
     return $el unless $el->isa('Perl6::Pod::Block');
-
     my $text = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
     my $data = $self->__handle_export( $el, $text );
-    my $cel = $self->current_element;
+    my $cel = $self->current_root_element;
     if ($cel) {
         $cel->{_CONTENT_} .= $data;
         return;
