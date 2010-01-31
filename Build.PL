@@ -6,7 +6,7 @@ Module::Build->new
    prereq => {
 	'XML::Parser'=>'0',
 	'XML::Writer'=>'0',
-	'XML::ExtOn'=>'0.11',
+	'XML::ExtOn'=>'0.12',
 	'XML::Flow'=>'0',
 	'XML::SAX::Writer' => 0,
 	'Encode'=>0,
