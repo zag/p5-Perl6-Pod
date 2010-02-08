@@ -7,6 +7,7 @@ use Perl6::Pod::Block::comment;
 use Perl6::Pod::Block::code;
 use Perl6::Pod::Block::pod;
 use Perl6::Pod::Block::para;
+use Perl6::Pod::Block::table;
 use Perl6::Pod::FormattingCode::M;
 use Perl6::Pod::FormattingCode::L;
 
@@ -25,14 +26,15 @@ my $OPTION_EXTRACT = qr{ :()($IDENT)($BALANCED_BRACKETS?) | :(!)($IDENT)() }xms;
 
 use constant {
     DEFAULT_USE => {
-        use    => 'Perl6::Pod::Directive::use',
-        config => 'Perl6::Pod::Directive::config',
+        use     => 'Perl6::Pod::Directive::use',
+        config  => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
         code    => 'Perl6::Pod::Block::code',
-        pod    => 'Perl6::Pod::Block::pod',
+        pod     => 'Perl6::Pod::Block::pod',
         para    => 'Perl6::Pod::Block::para',
-        'M<>' =>'Perl6::Pod::FormattingCode::M',
-        'L<>' =>'Perl6::Pod::FormattingCode::L'
+        table   => 'Perl6::Pod::Block::table',
+        'M<>'   => 'Perl6::Pod::FormattingCode::M',
+        'L<>'   => 'Perl6::Pod::FormattingCode::L'
     }
 };
 

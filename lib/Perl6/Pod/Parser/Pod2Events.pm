@@ -80,12 +80,12 @@ sub on_characters {
     return unless defined $text;
     my $parser = $self->{parser} || die '$self->{parser} - > undef !';
 
-    if ( $text =~ /${\( NEW_LINE )}/ ) {
-        $self->_flush_para( $elem )
-    }
-    else {
+#    if ( $text =~ /${\( NEW_LINE )}/ ) {
+#        $self->_flush_para( $elem )
+#    }
+#    else {
         $elem->{TEXT} .= $text;
-    }
+#    }
     return;
 }
 
@@ -105,6 +105,7 @@ sub on_end_element {
 
     #flush agregated characters
     $self->_flush_para( $elem);
+
     my $parser = $self->{parser} || die '$self->{parser} - > undef !';
     $parser->end_block( $elem->{NAME}, $elem->{OPT}, $elem->{END_LINE} );
     $elem;
@@ -149,12 +150,13 @@ sub before_start_directive {
     my $str_num = shift;
     if ( my $current = $self->current_element ) {
         $self->stop_config($current);
-        $self->_flush_para( $current );
-        unless ( $current->local_name eq 'begin' ) {
+        if ( $current->local_name eq 'begin' ) {
+                $self->_flush_para( $current );
+        } else {
             $current->{END_LINE} = $str_num;
             $self->end_element($current);
 
-        }
+        } 
     }
 }
 
@@ -240,12 +242,17 @@ sub parse {
             1;
           }
           || ( !$self->in_ambient_mode ) && do {
-            #check if new line
-            if (/${\( NEW_LINE )}/) {
+          # close stop
+           my $current = $self->current_element;
+           unless ( $current->{STOP_CONFIG} ) {
+             $self->stop_config($current);
+            }
+           my $lname = $self->current_element->local_name;
+           #check if new line
+            if (/${\( NEW_LINE )}/ && $lname ne 'begin') {
                 $self->new_line($str_num);
             }
             else {
-                my $lname = $self->current_element->local_name;
                 #for directives use|config|encoding
                 if ($lname =~ /${\( BLOCK_NULL_CONTENT )}/) {
                   $self->before_start_directive(); 

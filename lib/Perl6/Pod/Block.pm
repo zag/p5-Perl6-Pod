@@ -71,6 +71,11 @@ Create block element.
 sub mk_fcode {
     my $self = shift;
     my ( $name, $pod_opt ) = @_;
+    unless (defined $name) { 
+        warn "empty" . Dumper( [ map { [ caller($_) ] } ( 0 .. 6 ) ] );
+        exit;
+    warn "make $name $pod_opt"; exit;  
+    };
     my $mod_name = $self->context->use->{ $name . "<>" }
       || 'Perl6::Pod::FormattingCode'
       ;    # or die "Unknown block_type $name. Try =use ...";

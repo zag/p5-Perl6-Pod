@@ -34,6 +34,33 @@ use warnings;
 use strict;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+use Test::More;
+use Data::Dumper;
+
+sub _on_para {
+    my ($self , $parser, $txt)  = @_;
+#    diag "on_para";
+    my @parts = split /^\n/m, $txt;
+    diag "on_para : ".scalar(@parts);
+    if ( @parts == 1 ) {
+        return $self->SUPER::on_para($parser, $txt)    
+    }
+    diag "extra process para". Dumper(\@parts);
+    my @res = ();
+    foreach my $txt ( @parts ) {
+    my $para = $parser->current_element->mk_block( $self->local_name, $self->{_pod_options});
+    $para->add_content( $parser->mk_characters( $txt));
+#    push @res, $para;
+    $parser->current_element->add_content($para);
+#    $self->add_content($para);
+    }
+#    $self->delete_element;
+    return undef;
+#    return [ ];
+#    return $txt;
+#    return [$txt, $txt] 
+}
+
 
 sub to_xhtml { 
     my $self = shift;

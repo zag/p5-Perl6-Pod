@@ -9,6 +9,7 @@ use base 'Test::Class';
 use Test::More;
 use Perl6::Pod::To::Mem;
 use Perl6::Pod::To::XML;
+use Perl6::Pod::To::DocBook;
 use XML::Flow;
 use XML::ExtOn ('create_pipe');
 
@@ -56,7 +57,46 @@ sub parse_to_xml {
     my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
     $p->parse( \$text );
     return wantarray ? ( $p, $f, $out ) : $out;
+}
 
+sub make_xhtml_parser {
+    my $t          = shift;
+    my $out        = shift;
+    my $xml_writer = new XML::SAX::Writer:: Output => $out;
+    my $out_filters =
+      create_pipe( create_pipe( @_ ? @_ : 'XML::ExtOn', $xml_writer ) );
+    my ( $p, $f ) = Perl6::Pod::To::to_abstract(
+        'Perl6::Pod::To::XHTML', $out,
+        doctype => 'xhtml',
+        headers => 0
+    );
+    return wantarray ? ( $p, $f ) : $p;
+}
+
+sub parse_to_xhtml {
+    my $test = shift;
+    my ( $text, @filters ) = @_;
+    my $out    = '';
+    my $to_mem = new Perl6::Pod::To::XHTML::
+      out_put => \$out,
+      doctype => 'xhtml',
+      headers => 0;
+    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
+    $p->parse( \$text );
+    return wantarray ? ( $p, $f, $out ) : $out;
+}
+
+sub parse_to_docbook {
+    my $test = shift;
+    my ( $text, @filters ) = @_;
+    my $out    = '';
+    my $to_mem = new Perl6::Pod::To::DocBook::
+      out_put => \$out,
+      doctype => 'chapter',
+      headers => 0;
+    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
+    $p->parse( \$text );
+    return wantarray ? ( $p, $f, $out ) : $out;
 }
 
 sub make_parser {
@@ -108,8 +148,9 @@ sub _xml_to_ref {
 
 sub xml_ref {
     my $self = shift;
-    my $xml = shift;
+    my $xml  = shift;
     my %tags;
+
     #collect tags names;
     map { $tags{$_}++ } $xml =~ m/<(\w+)/gis;
 
@@ -135,15 +176,14 @@ sub xml_ref {
 sub is_deeply_xml {
     my $test = shift;
     my ( $got, $exp, @params ) = @_;
-    unless (  is_deeply $test->xml_ref($got), $test->xml_ref($exp), @params ) {
-        diag "got:", "<" x40;
+    unless ( is_deeply $test->xml_ref($got), $test->xml_ref($exp), @params ) {
+        diag "got:", "<" x 40;
         diag $got;
-        diag "expected:", ">" x40;
+        diag "expected:", ">" x 40;
         diag $exp;
 
-    };
+    }
 }
-
 
 sub startup : Test(startup) {
 

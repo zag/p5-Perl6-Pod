@@ -22,7 +22,7 @@ sub start_block {
 sub para {
     my $self = shift;
     my $txt  = shift;
-    push @{ $self->{BLOCKS} }, { event => '_para', name => 'para' };
+    push @{ $self->{BLOCKS} }, { event => '_para', name => 'para'};
 }
 
 sub end_block {
@@ -309,16 +309,11 @@ para test para
 =end para
 
 TXT08
-
 is_deeply $r08->{BLOCKS}, [
           {
             'name' => 'para',
             'opt' => ':w2<2>',
             'event' => '_begin'
-          },
-          {
-            'name' => 'para',
-            'event' => '_para'
           },
           {
             'name' => 'para',

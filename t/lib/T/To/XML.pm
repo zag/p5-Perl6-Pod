@@ -41,20 +41,28 @@ sub x1_create : Test(3) {
     isa_ok( $f1->{out_put}, 'XML::ExtOn', 'if output is ExtOn' );
 }
 
-sub x2_codes : Test(2) {
+sub x2_1para {
     my $t = shift;
-    my $buf;
-    my ( $p, $f ) = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XML', \$buf );
-    isa_ok( $f->{out_put}, 'XML::ExtOn', 'if output is string buffer' );
+    my $x= $t->parse_to_xml( <<T);
+=begin pod
+=begin para
+test1
 
-    $p->parse( \<<TXT);
+test2
+=end para
+=end pod
+T
+#    diag "a".$x; exit;    
+
+}
+sub x2_acodes : Test {
+    my $t = shift;
+    my $x= $t->parse_to_xml( <<TXT);
 =begin pod
 =use Test::Tag test2
 =config test1 :we1
 =begin para
 N<erC<ds>>this is a para
-
-this is a para
 =end para
 =for test1 :w1
 test
@@ -62,60 +70,15 @@ test
 Heelo
 =end pod
 TXT
+#    diag $x;
+    $t->is_deeply_xml( $x, q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><N pod:type='code'>er<C pod:type='code'>ds</C></N>this is a para
+</para><test1 pod:type='block' we1='1' w1='1'>test
+</test1><p>Heelo
+ </p></pod>#);
 
-    sub gen_h {
-        my $attr_name = shift;
-        return sub {
-            my $attr = shift;
-            return { $attr_name => { attr => $attr, content => \@_ } };
-          }
-    }
-    my $fr    = new XML::Flow \$buf;
-    my $tree1 = {};
-    $fr->read(
-        {
-            pod => sub { $tree1 = \@_ },
-            C   => gen_h('C'),
-            N   => gen_h('N'),
-            para => gen_h('para'),
-
-        }
-    );
-
-    is_deeply $tree1, [
-        {
-            'pod:type'  => 'block',
-            'xmlns:pod' => 'http://perlcabal.org/syn/S26.html'
-        },
-        {
-            'para' => {
-                'content' => [
-                    {
-                        'N' => {
-                            'content' => [
-                                'er',
-                                {
-                                    'C' => {
-                                        'content' => ['ds'],
-                                        'attr'    => { 'pod:type' => 'code' }
-                                    }
-                                }
-                            ],
-                            'attr' => { 'pod:type' => 'code' }
-                        }
-                    },
-                    'this is a para
-this is a para
-'
-                ],
-                'attr' => { 'pod:type' => 'block' }
-            }
-        }
-      ],
-      'check xml for code';
 }
 
-sub x3_test_like  {
+sub x3_test_like :Test {
     my $t= shift;
     my $x = $t->parse_to_xml(<<T);
 =begin pod
@@ -126,7 +89,10 @@ sub x3_test_like  {
 format code M<TT: test mssage>
 =end pod
 T
-#    diag $x;
+   $t->is_deeply_xml( $x, 
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><head1 pod:type='block' w1='1'>This is a head1
+</head1><para pod:type='block'>format code <M pod:type='code'>TT: test mssage</M>
+</para></pod>#)
 }
 1;
 

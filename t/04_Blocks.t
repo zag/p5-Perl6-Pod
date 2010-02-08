@@ -10,6 +10,7 @@ use T::Block::format;
 use T::Block::code;
 use T::Block::pod;
 use T::Block::para;
+use T::Block::table;
 Test::Class->runtests;
 
 

@@ -58,13 +58,18 @@ sub on_para {
     my $parser = shift;
     my $txt    = shift;
     return unless defined $txt;
+
     #convert ordinary para to =para
     # and verbatim text to =code
     my $rparser = $self->context->{vars}->{root};
-    my $block_name = ( $txt =~ /^\s+/ ) ? 'code' : 'para';
-    $rparser->start_block( $block_name, '', 666 );
-    $rparser->para( $txt );
-    $rparser->end_block($block_name, '', 666);
+
+    #split para to ordinary and verbatim blocks
+    foreach my $txt ( split /^\n/m, $txt ) {
+        my $block_name = ( $txt =~ /^\s+/ ) ? 'code' : 'para';
+        $rparser->start_block( $block_name, '', 666 );
+        $rparser->para($txt);
+        $rparser->end_block( $block_name, '', 666 );
+    }
     return;
 }
 
