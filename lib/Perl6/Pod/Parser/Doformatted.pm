@@ -1,6 +1,6 @@
 #===============================================================================
 #
-#  DESCRIPTION:  
+#  DESCRIPTION:  handle :formatted configuration option
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================

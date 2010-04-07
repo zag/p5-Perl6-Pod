@@ -2,10 +2,13 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
-0.14
-    - implement =table
+
+0.15  07.04.2010
+    + handle :allow attribute
+0.14 
+    + implement =table
 0.13
-    - implement :formatted
+    + implement :formatted
 0.12
     + implement :like
 0.11

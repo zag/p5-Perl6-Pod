@@ -6,13 +6,26 @@ package Perl6::Pod::Block::table;
 
 =head1 NAME
 
-Perl6::Pod::Block::code - Verbatim pre-formatted sample source code
+Perl6::Pod::Block::table  - Simple tables
 
 =head1 SYNOPSIS
 
-     =begin code
-      print "Ok";
-     =end code
+    =table
+        The Shoveller   Eddie Stevens     King Arthur's singing shovel   
+        Blue Raja       Geoffrey Smith    Master of cutlery              
+        Mr Furious      Roy Orson         Ticking time bomb of fury      
+        The Bowler      Carol Pinnsler    Haunted bowling ball           
+
+
+    =for table :caption('Tales in verse')
+     Year  |                Name
+     ======+==========================================
+     1830  | The Tale of the Priest and of His Workman Balda
+     1830  | The Tale of the Female Bear 
+     1831  | The Tale of Tsar Saltan
+     1833  | The Tale of the Fisherman and the Fish
+     1833  | The Tale of the Dead Princess
+     1834  | The Tale of the Golden Cockerel
 
 =head1 DESCRIPTION
 
@@ -21,6 +34,17 @@ Simple tables can be specified in Perldoc using a =table block. The table may be
 Each individual table cell is separately formatted, as if it were a nested =para.
 
 Columns are separated by whitespace (by regex {2,}), vertical lines (|), or border intersections (+). Rows can be specified in one of two ways: either one row per line, with no separators; or multiple lines per row with explicit horizontal separators (whitespace, intersections (+), or horizontal lines: -, =, _) between every row. Either style can also have an explicitly separated header row at the top. 
+
+Each individual table cell is separately formatted, as if it were a nested =para.
+
+This means you can create tables compactly, line-by-line:
+
+    =table
+        The Shoveller   Eddie Stevens     King Arthur's singing shovel   
+        Blue Raja       Geoffrey Smith    Master of cutlery              
+        Mr Furious      Roy Orson         Ticking time bomb of fury      
+        The Bowler      Carol Pinnsler    Haunted bowling ball           
+
 
 or line-by-line with multi-line headers:
 
@@ -194,7 +218,6 @@ sub on_para {
         }
     }
     return $self->_make_events( $parser, \@res_rows );
-    return '';
 }
 
 sub to_xhtml {
@@ -283,3 +306,26 @@ sub to_docbook {
 }
 
 1;
+__END__
+
+
+=head1 SEE ALSO
+
+L<http://perlcabal.org/syn/S26.html>
+
+=head1 AUTHOR
+
+Zahatski Aliaksandr, <zag@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2010 by Zahatski Aliaksandr
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+
+=cut
+
+

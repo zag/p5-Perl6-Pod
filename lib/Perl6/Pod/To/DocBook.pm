@@ -66,6 +66,7 @@ use Perl6::Pod::Parser::AddHeadLevels;
 use Perl6::Pod::To::DocBook::ProcessHeads;
 use Perl6::Pod::Parser::ListLevels;
 use Perl6::Pod::Parser::Doformatted;
+use Perl6::Pod::Parser::Doallow;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To::XML/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -78,6 +79,7 @@ sub new {
       create_pipe( 'Perl6::Pod::To::DocBook::ProcessHeads', $self->{out_put} );
     return create_pipe(
         'Perl6::Pod::Parser::Doformatted',
+        'Perl6::Pod::Parser::Doallow',
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
         'Test::FilterDocBook', $self
