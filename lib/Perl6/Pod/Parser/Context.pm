@@ -52,6 +52,7 @@ sub new {
         _use      => DEFAULT_USE,
         _config   => {},
         _encoding => 'UTF-8',
+        _custom   => {},
         @_
     );
 
@@ -90,7 +91,7 @@ sub config {
 
 =head2 usef
 
-return ref to hash of pod options per blockname
+return ref to hash of plugin  per formatcode name
 
 =cut
 
@@ -100,13 +101,25 @@ sub usef {
 
 =head2 use
 
-return ref to hash of pod options per blockname
+return ref to hash of perl module per blockname
 
 =cut
 
 sub use {
     return $_[0]->{_use};
 }
+
+=head2 custom
+
+return ref to hash of user defined keys,vals
+
+=cut
+
+sub custom {
+    return $_[0]->{_custom};
+}
+
+
 
 =head2 set_use <module_name>, ':config_options'
 
