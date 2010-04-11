@@ -167,8 +167,6 @@ sub on_start_block {
 
 sub on_end_element {
     my $self = shift;
-
-    #    warn ref($self)." on end element". $_[0]->local_name;
     return $self->on_end_block(@_);
 }
 
@@ -267,7 +265,7 @@ sub run_para {
         if ( UNIVERSAL::isa( $el, 'XML::ExtOn::Element' ) ) {
             $self->_process_comm($el);
             next;
-        }
+        } 
         unless ( exists $el->{type} ) {
             $self->__process_events( $self->__make_events($el) );
         }
