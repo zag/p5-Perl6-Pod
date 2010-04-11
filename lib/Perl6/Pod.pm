@@ -48,6 +48,41 @@ Definition lists
 
 =head1 DESCRIPTION
 
+Pod is an evolution of Perl 5's Plain Old Documentation (POD) markup. Compared to Perl 5 POD, Perldoc's Pod dialect is much more uniform, somewhat more compact, and considerably more expressive. The Pod dialect also differs in that it is a purely descriptive mark-up notation, with no presentational components. 
+
+=head2 General syntactic structure 
+
+Pod documents are specified using directives, which are used to declare configuration information and to delimit blocks of textual content. Every directive starts with an equals sign (=) in the first column.
+
+The content of a document is specified within one or more blocks. Every Pod block may be declared in any of three equivalent forms: delimited style, paragraph style, or abbreviated style. 
+
+=head3 Delimited blocks 
+
+=head3 Paragraph blocks 
+
+=head3 Paragraph blocks 
+
+=head3 Block equivalence 
+
+=head3 Standard configuration options
+
+=head2 Blocks 
+
+=head3 Formatting codes
+
+
+=head2 Diffs to SYNOPSIS 26 by 25 Apr 2007 edition
+
+
+=over
+
+=item delete "Code" type from perl6-ish option pairs due security  and portability(compatibilitty) issues
+
+=item use :allow attribute for any block or formatting codes
+
+=item Change =use  format. Make it similar to =config
+
+=back
 
 Perl6::Pod - in general, a set of classes, scripts and modules for maintance Perl6's pod documentation using perl5.
 
@@ -65,7 +100,11 @@ The suite contain the following classes:
 
 =back
 
+
+
 DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
+
+
 
 =cut
 
