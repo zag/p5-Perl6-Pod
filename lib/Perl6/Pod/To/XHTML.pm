@@ -84,7 +84,7 @@ use Data::Dumper;
 
 sub new {
     my $class = shift;
-    my $self  = $class->SUPER::new(body=>0, @_);
+    my $self = $class->SUPER::new( body => 0, @_ );
     if ( my $heads = $self->{head} ) {
 
         #make head filter
@@ -93,6 +93,7 @@ sub new {
 
     }
     if ( $self->{body} ) {
+
         #make body
         my $add_body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
         $self->{out_put} = create_pipe( $add_body_filter, $self->{out_put} );
@@ -104,7 +105,8 @@ sub new {
         'Perl6::Pod::Parser::Doallow',
         'Perl6::Pod::Parser::ListLevels',
         'Perl6::Pod::Parser::AddHeadLevels',
-        'Test::Filter', $self
+        'Test::Filter',
+        $self
     );
 }
 
@@ -190,10 +192,9 @@ sub print_export {
     for (@_) {
         my @data = ref($_) eq 'ARRAY' ? @{$_} : $_;
         foreach my $el (@data) {
-            $el = $self->mk_characters( $el) unless ref $el;
-            $self->out_parser->_process_comm($el)
+            $el = $self->mk_characters($el) unless ref $el;
+            $self->out_parser->_process_comm($el);
         }
-#        $self->out_parser->_process_comm($_) for @data;
     }
 }
 
@@ -224,18 +225,18 @@ sub on_end_block {
 
 sub _make_events {
     my $self = shift;
-    my @in = $self-> __expand_array_ref( @_);
-    my @out = ();
-    foreach my $elem ( @in ) {
-        push @out, ref( $elem) ? $elem : $self->mk_characters($elem);
+    my @in   = $self->__expand_array_ref(@_);
+    my @out  = ();
+    foreach my $elem (@in) {
+        push @out, ref($elem) ? $elem : $self->mk_characters($elem);
     }
-    return @out
+    return @out;
 }
 
 sub export_block_item {
     my ( $self, $el, @p ) = @_;
     my $elem =
-      $self->mk_element('listitem')->add_content( $self->_make_events( @p) );
+      $self->mk_element('listitem')->add_content( $self->_make_events(@p) );
 
     #add POD attr for use in export_block_itemlist
     #for varlistentry
@@ -263,8 +264,8 @@ sub export_block_itemlist {
             #if variable list, then add varlistentry
             if ( $list->local_name eq 'dl' ) {
                 my $term = $_->{POD}->{term};
-                if ( ref( $term)) {
-                    $term = join " ",@$term;
+                if ( ref($term) ) {
+                    $term = join " ", @$term;
                 }
 
                 my $var_entry =
