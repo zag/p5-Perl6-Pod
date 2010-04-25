@@ -252,16 +252,11 @@ sub export_block_itemlist {
 }
 
 sub export_block_NAME {
-    my ( $self, $el, $text ) = @_;
+    my ( $self, $el, @in ) = @_;
     return $self->mk_element('title')
-      ->add_content( $self->mk_characters($text) );
+      ->add_content( $self->_make_events(@in) ) ;
 }
 
-sub export_code_I {
-    my ( $self, $el, $text ) = @_;
-    return $self->mk_element('emphasis')
-      ->add_content( $self->mk_characters($text) );#
-}
 1;
 __END__
 

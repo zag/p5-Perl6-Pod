@@ -43,11 +43,41 @@ sub to_xml {
     return $parser->_make_xml_element($self)->add_content($parser->mk_cdata(@_));
 }
 
+=head2 to_xhtml
+
+    =code
+    test code
+
+Render to:
+
+    <pre><code>
+        test code
+    </code></pre>
+=cut
+
 sub to_xhtml { 
     my $self = shift;
     my $parser = shift;
     my $el = $parser->mk_element('code')->insert_to( $parser->mk_element('pre') );
     $el->add_content( $parser->mk_characters( @_));
+}
+
+=head2 to_docbook
+
+    =code
+    test code
+
+Render to:
+
+     <chapter><programlisting><![CDATA[    test code
+     ]]></programlisting></chapter>
+
+=cut
+sub to_docbook {
+    my $self = shift;
+    my $parser = shift;
+    my $el = $parser->mk_element('programlisting');
+    $el->add_content( $parser->mk_cdata( @_));
 }
 
 sub on_para {

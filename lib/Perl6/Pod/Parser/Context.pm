@@ -11,6 +11,8 @@ use Perl6::Pod::Block::table;
 use Perl6::Pod::FormattingCode::M;
 use Perl6::Pod::FormattingCode::L;
 use Perl6::Pod::FormattingCode::P;
+use Perl6::Pod::FormattingCode::B;
+use Perl6::Pod::FormattingCode::I;
 
 use Tie::UnionHash;
 use Data::Dumper;
@@ -36,6 +38,8 @@ use constant {
         table   => 'Perl6::Pod::Block::table',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
         'L<>'   => 'Perl6::Pod::FormattingCode::L',
+        'B<>'   => 'Perl6::Pod::FormattingCode::B',
+        'I<>'   => 'Perl6::Pod::FormattingCode::I',
 #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
     }
 };

@@ -78,6 +78,20 @@ TT
  </code></pre></html># )
 }
 
+sub c04_to_docbook : Test {
+    my $t = shift;
+    my $x = $t->parse_to_docbook( <<T );
+=begin pod
+=code
+    test code
+=end pod
+T
+    $t->is_deeply_xml( $x,
+q#<chapter><programlisting><![CDATA[    test code
+ ]]></programlisting></chapter>#
+    )
+}
+
 1;
 
 

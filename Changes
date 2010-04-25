@@ -3,6 +3,9 @@ TODO:
     - Formatting codes
     - Items
 
+0.17 25.04.2010
+    + B<>, I<> formatting codes
+    + export =code to docbook 
 0.16 11.04.2010
     + Perl6::Pod::Test - base class for tests
     + add utility mods

@@ -164,5 +164,23 @@ q#<chapter><variablelist><varlistentry><term>TEST</term><listitem><para>entry
 
 }
 
+sub pl02_test_variable : Test {
+    my $t   = shift;
+    my $pod = <<T1;
+
+=begin pod
+=for item :term('TEST + AAA') 
+entry1 
+=for item :term<TEST2> 
+entry2
+=end pod
+T1
+    $t->is_deeply_xml(
+        $t->parse_to_doc($pod),
+q#<chapter><variablelist><varlistentry><term>TEST + AAA</term><listitem><para>entry1 
+</para></listitem></varlistentry><varlistentry><term>TEST2</term><listitem><para>entry2
+</para></listitem></varlistentry></variablelist></chapter>#)
+}
+
 1;
 

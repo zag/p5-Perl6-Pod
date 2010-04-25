@@ -259,7 +259,7 @@ T
     $t->is_deeply_xml(
         $x,
         q#<html xmlns='http://www.w3.org/1999/xhtml'><h1>asd
- </h1><dl><dt><strong>Term1</strong><dd><B>1</B>
+ </h1><dl><dt><strong>Term1</strong><dd><strong>1</strong>
  </dd></dt></dl><h2>sdsd
  </h2><dl><dt><strong>Term2</strong><dd>2
  </dd></dt></dl></html>#

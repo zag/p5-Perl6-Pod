@@ -179,4 +179,26 @@ q%<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:
 
 }
 
+sub l12_link_with_name_docbook : Test {
+    my $t  = shift;
+    my $x = $t->parse_to_docbook( <<'T');
+=begin pod
+=NAME  test L<name|http://test> test
+=end pod
+T
+    $t->is_deeply_xml( $x, q# <chapter><title>test <ulink url='http://test'>name</ulink> test
+</title></chapter>#);
+}
+
+sub l13_link_only_addr_docbook : Test {
+    my $t  = shift;
+    my $x = $t->parse_to_docbook( <<'T');
+=begin pod
+=NAME  test L<http://example.com> test
+=end pod
+T
+    $t->is_deeply_xml( $x, q#<chapter><title>test <ulink url='http://example.com'>http://example.com</ulink> test
+</title></chapter>#)
+}
+
 1;

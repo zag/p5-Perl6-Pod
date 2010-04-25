@@ -24,6 +24,13 @@ use Perl6::Pod::To::XHTML;
 use XML::Flow;
 use XML::ExtOn ('create_pipe');
 
+sub new {
+    my $class = shift;
+    $class = ref $class if ref $class;
+    my $self = bless( {@_}, $class );
+    return $self;
+}
+
 =head2 parse_mem \$pod_str, ['filter1']
 
 return out_put from To::Mem formatter

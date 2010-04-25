@@ -100,7 +100,6 @@ sub parse_URI {
     
     my ( $scheme, $address, $section ) =
       $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
-
     #set default scheme
     unless ($scheme) {
         $scheme = 'file';

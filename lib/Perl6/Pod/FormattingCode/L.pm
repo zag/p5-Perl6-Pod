@@ -33,46 +33,76 @@ use Perl6::Pod::FormattingCode;
 use base 'Perl6::Pod::FormattingCode';
 
 sub on_para {
-    my ($self , $parser, $txt) = @_;
+    my ( $self, $parser, $txt ) = @_;
+
     #extract linkname and content
-    my ( $lname, $lcontent ) = ('', defined $txt ? $txt : '');
-    if  ($lcontent =~ /\|/ ) {
+    my ( $lname, $lcontent ) = ( '', defined $txt ? $txt : '' );
+    if ( $lcontent =~ /\|/ ) {
         my @all;
-        ($lname, @all) =  split( /\s*\|\s*/, $lcontent );
-        $lcontent = join "",@all
-    } 
+        ( $lname, @all ) = split( /\s*\|\s*/, $lcontent );
+        $lcontent = join "", @all;
+    }
     my $attr = $self->attrs_by_name;
+
     #clean whitespaces
-    $lname =~s/^\s+//;    $lname =~s/\s+$//;
+    $lname =~ s/^\s+//;
+    $lname =~ s/\s+$//;
     $attr->{name} = $lname;
-    my ($scheme, $address , $section)  = $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
+    my ( $scheme, $address, $section ) =
+      $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
     $attr->{scheme} = $scheme;
     $address = '' unless defined $address;
     $attr->{is_external} = $address =~ s/^\/\///;
+
     #clean whitespaces
-    $address =~s/^\s+//;    $address =~s/\s+$//;
+    $address =~ s/^\s+//;
+    $address =~ s/\s+$//;
     $attr->{address} = $address;
+
     #fix L<doc:#Special Features>
     $attr->{section} = defined $section ? $section : '';
     $txt;
 }
 
 sub to_xhtml {
-    my ($self , $parser, @in) = @_;
+    my ( $self, $parser, @in ) = @_;
     my $attr = $self->attrs_by_name();
-    for ( $attr->{scheme}) { 
-    /^https?/ && do {
-        my $a = $parser->mk_element('a');
-        my $url =  $attr->{address};
-        $url .= "#". $attr->{section} if $attr->{section};
-        $url = $_."://". $url if $attr->{is_external};
-        my $name = $attr->{name} || $attr->{address};
-        $a->attrs_by_name()->{href} =  $url;
-        $a->add_content( $parser->mk_characters( $name ) );
-        return $a
-     }
-     || do { return $parser->mk_characters( $in[0] ) }
-     }
+    for ( $attr->{scheme} ) {
+        /^https?/ && do {
+            my $a   = $parser->mk_element('a');
+            my $url = $attr->{address};
+            $url .= "#" . $attr->{section} if $attr->{section};
+            $url = $_ . "://" . $url if $attr->{is_external};
+            my $name = $attr->{name} || $attr->{address};
+            $a->attrs_by_name()->{href} = $url;
+            $a->add_content( $parser->mk_characters($name) );
+            return $a;
+          }
+          || do { return $parser->mk_characters( $in[0] ) }
+    }
+}
+
+sub to_docbook {
+    my ( $self, $parser, @in ) = @_;
+    my $attr = $self->attrs_by_name();
+    for ( $attr->{scheme} ) {
+        /^https?/ && do {
+            my $ulink = $parser->mk_element('ulink');
+            my $url   = $attr->{address};
+            $url .= "#" . $attr->{section} if $attr->{section};
+            $url = $_ . "://" . $url if $attr->{is_external};
+            $ulink->attrs_by_name->{url} = $url;
+            my $name = $attr->{name};
+            $ulink->add_content( $name
+                ? $parser->mk_characters($name)
+                : $parser->_make_events(@in) );
+
+            #        $ulink->add_content( $parser->mk_characters( $name ) );
+            return $ulink;
+          }
+          || do { return $parser->mk_characters( $in[0] ) }
+    }
+
 }
 1;
 

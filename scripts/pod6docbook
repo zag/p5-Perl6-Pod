@@ -13,14 +13,13 @@ use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
 use Perl6::Pod::To::DocBook;
-my ( $help, $man, $doctype, $add_head, $custom_formatter);
+my ( $help, $man, $doctype, $add_head, $custom_formatter, %use_block);
 my %opt =
   ( help => \$help, man => \$man, );
-GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head , 'formatter|f=s'=>\$custom_formatter)
+GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$add_head , 'formatter|f=s'=>\$custom_formatter, 'use_block=s'=>\%use_block)
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
-
 my %args = (header=>$add_head, doctype=>$doctype);
 
 my $infile = shift;
@@ -33,7 +32,15 @@ else {
 }
 
 my $p = Perl6::Pod::To::to_abstract( $custom_formatter|| 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
+#setup initial use
+if ( %use_block) {
+    my $use = $p->current_context->use;
+    while ( my ($mod, $block_name) = each %use_block ) {
+        $use->{$block_name} =  $mod;
+    }
+}
 $p->parse($in_fd);
+
 
 exit;
 
@@ -51,6 +58,11 @@ exit;
     -doctype|t - set docbook type ( ie chapter, article, book ...). Default chapter;
     -add_head|ah - If this option is set , pod6docbook will emit a DOCTYPE as the first line of output.
     -formatter|f - set output formatter class, default Perl6::Pod::To::DocBook
+    -use_block MOD_NAME=Block_name  - set module for handle Block_name. Equivalent for:
+         =begin pod
+         =use MOD_NAME Block_name
+         =end pod
+
     -help  - print help message
     -man   - print man page
 
@@ -77,6 +89,14 @@ If this option is set , pod6docbook will emit a DOCTYPE as the first line of out
 =item B<-formatter>, B<-f>
 
 Set output formatter class, default Perl6::Pod::To::DocBook
+
+=item B<-use_block>
+
+Set module for handle Block_name Equivalent for B<=use> direcive :
+
+         =begin pod
+         =use MOD_NAME Block_name
+         =end pod
 
 =back
 
