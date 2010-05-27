@@ -17,6 +17,23 @@ sub to_mem {
     my ( $self, $parser, $para ) = @_;
     return { name => "ok", attr => $self->get_attr };
 }
+sub to_xml {
+    my ( $self, $parser, $para ) = @_;
+    my $ok = $parser->mk_element("ok");
+    %{$ok->attrs_by_name()} = %{$self->get_attr};
+    return $ok;
+}
+1;
+
+package CustomCodeCB;
+use strict;
+use warnings;
+use base 'Perl6::Pod::Block';
+
+sub to_mem {
+    my ( $self, $parser, $para ) = @_;
+    return { name => "ok", attr => $self->get_attr };
+}
 1;
 
 package CustomCodeFF;
@@ -96,52 +113,29 @@ TXT
 sub custom_code_export_mem : Test {
     my $test = shift;
     my ( $p, $f, $o ) =
-      $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::CustomCodes' );
-=use CustomCodeCF CF<>
+      $test->parse_to_xml( <<TXT, 'Perl6::Pod::Parser::CustomCodes' );
+=use CustomCodeCF CF
 =begin head1
 M<CF:eer>
 =end head1
 TXT
-    is_deeply $o,
-      [
-        {
-            'name'   => 'head1',
-            'childs' => [
-                {
-                    'name' => 'ok',
-                    'attr' => {}
-                },
-                ''
-            ],
-            'attr' => {}
-        }
-      ];
+    $test->is_deeply_xml( $o, q#<head1 pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><ok />
+</head1>#)
+
 }
 sub code_preconfig : Test {
     my $test  =shift;
-    my ($p, $f, $o) = $test->parse_mem(<<TXT, 'Perl6::Pod::Parser::CustomCodes');
-=use CustomCodeCF OO<>
-=config OO<> :w1
+    my ($p, $f, $o) = $test->parse_to_xml(<<TXT, 'Perl6::Pod::Parser::CustomCodes');
+=use CustomCodeCB OO
+=config OO :w1
 =begin para
 M<OO: r>
 =end para
 TXT
-is_deeply $o,
-[
-           {
-             'name' => 'para',
-             'childs' => [
-                           {
-                             'name' => 'ok',
-                             'attr' => {
-                                         'w1' => 1
-                                       }
-                           },
-                           ''
-                         ],
-             'attr' => {}
-           }
-         ];
+$test->is_deeply_xml ($o,
+q#<para pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><OO pod:type='block' w1='1'>r</OO>
+</para>#)
+
 }
 
 sub multiline_M : Test {

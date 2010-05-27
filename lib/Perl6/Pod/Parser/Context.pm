@@ -59,6 +59,7 @@ sub new {
         _config   => {},
         _encoding => 'UTF-8',
         _custom   => {},
+        _class_opts=>{},
         @_
     );
 
@@ -125,7 +126,15 @@ sub custom {
     return $_[0]->{_custom};
 }
 
+=head2 class_opts
 
+return ref to hash of Class optioons to create loaded by use mods
+
+=cut
+
+sub class_opts {
+    return $_[0]->{_class_opts}
+}
 
 =head2 set_use <module_name>, ':config_options'
 

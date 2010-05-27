@@ -30,6 +30,15 @@ sub on_start_element {
     my ($self, $el ) = @_;
     my $lname = $el->local_name;
     if ($lname eq 'headlevel') {
+        my $attrs = $el->attrs_by_name;
+        my $child = $attrs->{child};
+        #if block semantic
+        # delete head level
+        my $is_semantic = $child eq uc($child);
+        if ( $is_semantic) {
+            $el->delete_element;
+            return $el;
+        }
         %{ $el->attrs_by_name  } = ();
         $el->local_name('section');
     } elsif ($lname =~ /^head/) {

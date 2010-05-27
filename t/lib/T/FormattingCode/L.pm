@@ -181,7 +181,8 @@ q%<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:
 
 sub l12_link_with_name_docbook : Test {
     my $t  = shift;
-    my $x = $t->parse_to_docbook( <<'T');
+#    my $x = $t->parse_to_xml( <<'T',  'Perl6::Pod::Parser::AddHeadLevels' );
+    my $x = $t->parse_to_docbook( <<'T' );
 =begin pod
 =NAME  test L<name|http://test> test
 =end pod

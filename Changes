@@ -3,6 +3,11 @@ TODO:
     - Formatting codes
     - Items
 
+0.18 27.05.2010
+    + =use : handle class attributes, eval PERL6POD for included mods
+    + M<>: The M<> formatting code is the inline equivalent of a named block.
+    + mark semantic blocks as =head1 ( level 1)
+    
 0.17 25.04.2010
     + B<>, I<> formatting codes
     + export =code to docbook 

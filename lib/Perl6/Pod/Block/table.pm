@@ -66,8 +66,9 @@ use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 use constant {
     NEW_LINE           => qr/^ \s* $/xms,
-    COLUMNS_SEPARATE   => qr/\s*\|\s*|\+|[\ ]{2,}/xms,
+    COLUMNS_SEPARATE   => qr/\s*\|\s*|[\ ]{2,}/xms,
     COLUMNS_FORMAT_ROW => qr/(\s+)?[\=\-]+[\=\-\+\n]+(\s+)?/xms,
+    COLUMNS_FORMAT_ROW_SEPARATE   => qr/\s*\|\s*|\+|[\ ]{2,}/xms,
 };
 
 sub end {
@@ -91,6 +92,7 @@ sub _get_count_cols {
         #try find format line
         # ---------|-----------, =====+=======
         if ( $line =~ /${\( COLUMNS_FORMAT_ROW )}/ ) {
+            @columns = split( /${\( COLUMNS_FORMAT_ROW_SEPARATE )}/, $line );
             $row_count = scalar(@columns);
             $self->{NEED_NEAD}++;
             last;

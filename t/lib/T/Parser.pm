@@ -25,7 +25,7 @@ use strict;
 use warnings;
 use Test::More;
 use Perl6::Pod::FormattingCode;
-use base 'Perl6::Pod::FormattingCode';
+use base 'Perl6::Pod::Block';
 
 sub on_para {
     my ( $self, $p, $txt ) = @_;
@@ -67,13 +67,13 @@ sub p01_custom_code_on_para : Test {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T, 'Perl6::Pod::Parser::CustomCodes' );
 =begin pod
-=use CustomFormattingCode Tcustom<>
+=use CustomFormattingCode Tcustom
 M<Tcustom:some text>
 =end pod
 T
     $t->is_deeply_xml(
         $x,
-q# <pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><Tcustom pod:type='code' pod:on_para='1'>some text</Tcustom>
+q# <pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><Tcustom pod:type='block' pod:on_para='1'>some text</Tcustom>
  </para></pod>#
     );
 }

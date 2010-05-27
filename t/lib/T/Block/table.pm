@@ -13,7 +13,7 @@ use Perl6::Pod::To::XHTML;
 use XML::ExtOn('create_pipe');
 use base 'TBase';
 
-sub c01_table_xml : Test {
+sub c01_table_xml:Test {
     my $t = shift;
     my $x = $t->parse_to_xml (<<T);
 =begin pod
@@ -133,6 +133,54 @@ $t->is_deeply_xml ($x, q#<?xml version="1.0"?>
     </tgroup>
   </table>
 </chapter>#)
+}
+
+sub c04_table_wo_ident:Test {
+    my $t = shift;
+    my $x = $t->parse_to_xml (<<T);
+=begin pod
+=begin table :caption("a")
+= :w<2>
+Superhero     | Secret          
+--------------|-------------
+The Shoveller | Eddie Stevens   
+=end table
+=end pod
+T
+$t->is_deeply_xml ($x,q#
+<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>
+      <table w='2' pod:type='block' caption='a' pod:table_row_count='2'>
+            <table pod:type='block' pod:table_type='head_start'>
+                  <table pod:type='block' pod:table_type='head'>
+                        <table pod:type='block' pod:table_type='head_column'>Superhero</table>
+                        <table pod:type='block' pod:table_type='head_column'>Secret</table>
+                  </table>
+            </table>
+            <table pod:type='block' pod:table_type='body_start'>
+                  <table pod:type='block' pod:table_type='row'>
+                        <table pod:type='block' pod:table_type='row_column'>The Shoveller</table>
+                        <table pod:type='block' pod:table_type='row_column'>Eddie Stevens</table>
+                  </table>
+            </table>
+      </table>
+</pod>#); 
+}
+
+
+sub c04_table_with_intersections:Test {
+    my $t = shift;
+    my $x = $t->parse_to_docbook (<<T);
+=begin pod
+=for table :caption("a")
+= :w<2>
+Superhero      Secret  Also
+--------------+------+-------
+The Shoveller |  +  | Eddie Stevens   
+
+=end pod
+T
+    print $x,"\n";
+#$t->is_deeply_xml ($x,q#
 }
 1;
 

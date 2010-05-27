@@ -201,7 +201,9 @@ sub export_block_item {
     my $elem =
       $self->mk_element('listitem')
       ->add_content(
-        $self->mk_element('para')->add_content( $self->mk_characters(@p) ) );
+         $self->mk_element('para')->add_content( $self->_make_events(@p) ) );
+#        $self->mk_element('para')->add_content( $self->mk_characters(@p) ) );
+
 
     #add PDO attr for use in export_block_itemlist
     #for varlistentry

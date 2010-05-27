@@ -27,6 +27,7 @@ use Perl6::Pod::FormattingCode;
 
 sub new {
     my ( $class, %args ) = @_;
+    
     my $doc_context = new XML::ExtOn::Context::;
     my $self =
       $class->SUPER::new( context => $doc_context, name => $args{name} );
@@ -34,11 +35,25 @@ sub new {
     #save orig context
     $self->{__context}    = $args{context} || die 'need context !';
     $self->{_pod_options} = $args{options} || '';
+    #handle class options, if defined when Module load ( =use )
+    $self->{_class_options} = $args{class_options};
     $self;
 }
 
 sub context {
     $_[0]->{__context};
+}
+
+sub get_class_options {
+    my $self  = shift;
+    my $_class_opt = $self->{_class_options} || return {};
+    my $hash =  $self->context->_opt2hash($_class_opt);
+    my %res;
+    while ( my ( $key, $val ) = each %$hash ) {
+       $res{$key} = $val->{value};
+    }
+    \%res
+
 }
 
 =head2 mk_block <BLOCK_NAME>, <POD_OPTIONS>
@@ -56,7 +71,9 @@ sub mk_block {
     my $block = $mod_name->new(
         name    => $name,
         context => $self->context,
-        options => $pod_opt
+        options => $pod_opt,
+        class_options => $self->context->class_opts->{ $name }
+
     );
     return $block;
 
@@ -83,7 +100,9 @@ sub mk_fcode {
     my $block = $mod_name->new(
         name    => $name,
         context => $self->context,
-        options => $pod_opt
+        options => $pod_opt,
+        class_options => $self->context->class_opts->{ $name . "<>"}
+
     );
     return $block;
 

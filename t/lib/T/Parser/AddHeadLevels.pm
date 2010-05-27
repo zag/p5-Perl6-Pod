@@ -10,80 +10,53 @@ use base 'TBase';
 use Perl6::Pod::Parser::AddHeadLevels;
 use Data::Dumper;
 
-sub test_one_level : Test {
+sub h01_test_one_level : Test {
     my $test = shift;
+#    my ( $p, $f, $o ) =
+    #  $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
     my ( $p, $f, $o ) =
-      $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
+      $test->parse_to_xml( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
 =begin pod
 =head1 test1
 =end pod
 TXT
-    is_deeply $o,
-      [
-        {
-            'name'   => 'pod',
-            'childs' => [
-                {
-                    'name'   => 'headlevel',
-                    'childs' => [
-                        {
-                            'name'   => 'head1',
-                            'childs' => ['test1'],
-                            'attr'   => {}
-                        }
-                    ],
-                    'attr' => { 'level' => 1 }
-                }
-            ],
-            'attr' => {}
-        }
-      ];
+    $test->is_deeply_xml( $o, <<T);
+<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
+    <head1 pod:type="block">test1
+</head1>
+  </headlevel>
+</pod>
+T
 }
 
-sub test_two_levels : Test {
+sub h02_test_two_levels : Test {
     my $test = shift;
-    my $o = $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
+     my $o = $test->parse_to_xml( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels');
 =begin pod
 =head1 test1
 =head2 test2
 =end pod
 TXT
-    is_deeply $o,
-      [
-        {
-            'name'   => 'pod',
-            'childs' => [
-                {
-                    'name'   => 'headlevel',
-                    'childs' => [
-                        {
-                            'name'   => 'head1',
-                            'childs' => ['test1'],
-                            'attr'   => {}
-                        },
-                        {
-                            'name'   => 'headlevel',
-                            'childs' => [
-                                {
-                                    'name'   => 'head2',
-                                    'childs' => ['test2'],
-                                    'attr'   => {}
-                                }
-                            ],
-                            'attr' => { 'level' => 2 }
-                        }
-                    ],
-                    'attr' => { 'level' => 1 }
-                }
-            ],
-            'attr' => {}
-        }
-      ];
+    $test->is_deeply_xml( $o, <<T);
+<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
+    <head1 pod:type="block">test1
+</head1>
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
+      <head2 pod:type="block">test2
+</head2>
+    </headlevel>
+  </headlevel>
+</pod>
+T
 }
 
-sub test_two_levelsX : Test {
+sub h04_test_two_levelsX : Test {
     my $test = shift;
-    my $o = $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
+    my $o = $test->parse_to_xml( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
 =begin pod
 =head1
 =head2
@@ -94,98 +67,37 @@ sub test_two_levelsX : Test {
 =head2
 =end pod
 TXT
+#print $o;exit;
+   $test->is_deeply_xml( $o, <<T);
+<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
+    <head1 pod:type="block"/>
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
+      <head2 pod:type="block"/>
+      <headlevel level="3" pod:type="block" pod:hlevel="3" child="head3">
+        <head3 pod:type="block"/>
+      </headlevel>
+    </headlevel>
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
+      <head2 pod:type="block"/>
+      <headlevel level="3" pod:type="block" pod:hlevel="3" child="head3">
+        <head3 pod:type="block"/>
+      </headlevel>
+    </headlevel>
+  </headlevel>
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
+    <head1 pod:type="block"/>
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
+      <head2 pod:type="block"/>
+    </headlevel>
+  </headlevel>
+</pod>
+T
 
-    #    print Dumper $o;
-
-    is_deeply $o,
-      [
-        {
-            'name'   => 'pod',
-            'childs' => [
-                {
-                    'name'   => 'headlevel',
-                    'childs' => [
-                        {
-                            'name'   => 'head1',
-                            'childs' => [],
-                            'attr'   => {}
-                        },
-                        {
-                            'name'   => 'headlevel',
-                            'childs' => [
-                                {
-                                    'name'   => 'head2',
-                                    'childs' => [],
-                                    'attr'   => {}
-                                },
-                                {
-                                    'name'   => 'headlevel',
-                                    'childs' => [
-                                        {
-                                            'name'   => 'head3',
-                                            'childs' => [],
-                                            'attr'   => {}
-                                        }
-                                    ],
-                                    'attr' => { 'level' => 3 }
-                                }
-                            ],
-                            'attr' => { 'level' => 2 }
-                        },
-                        {
-                            'name'   => 'headlevel',
-                            'childs' => [
-                                {
-                                    'name'   => 'head2',
-                                    'childs' => [],
-                                    'attr'   => {}
-                                },
-                                {
-                                    'name'   => 'headlevel',
-                                    'childs' => [
-                                        {
-                                            'name'   => 'head3',
-                                            'childs' => [],
-                                            'attr'   => {}
-                                        }
-                                    ],
-                                    'attr' => { 'level' => 3 }
-                                }
-                            ],
-                            'attr' => { 'level' => 2 }
-                        }
-                    ],
-                    'attr' => { 'level' => 1 }
-                },
-                {
-                    'name'   => 'headlevel',
-                    'childs' => [
-                        {
-                            'name'   => 'head1',
-                            'childs' => [],
-                            'attr'   => {}
-                        },
-                        {
-                            'name'   => 'headlevel',
-                            'childs' => [
-                                {
-                                    'name'   => 'head2',
-                                    'childs' => [],
-                                    'attr'   => {}
-                                }
-                            ],
-                            'attr' => { 'level' => 2 }
-                        }
-                    ],
-                    'attr' => { 'level' => 1 }
-                }
-            ],
-            'attr' => {}
-        }
-      ];
 }
 
-sub h1_repeated_12323123 : Test(no_plan) {
+sub h1_repeated_12323123 : Test(1) {
     my $t = shift;
     my $o = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::AddHeadLevels');
 =begin pod
@@ -200,30 +112,29 @@ sub h1_repeated_12323123 : Test(no_plan) {
 
 =end pod
 T1
-#print $o;
 $t->is_deeply_xml( $o,<<T2, 'xml for heads 12323123');
 <?xml version="1.0"?>
 <pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
-  <headlevel level="1" pod:type="block" pod:hlevel="1">
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
     <head1 pod:type="block"/>
-    <headlevel level="2" pod:type="block" pod:hlevel="2">
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
       <head2 pod:type="block"/>
-      <headlevel level="3" pod:type="block" pod:hlevel="3">
+      <headlevel level="3" pod:type="block" pod:hlevel="3" child="head3">
         <head3 pod:type="block"/>
       </headlevel>
     </headlevel>
-    <headlevel level="2" pod:type="block" pod:hlevel="2">
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
       <head2 pod:type="block"/>
-      <headlevel level="3" pod:type="block" pod:hlevel="3">
+      <headlevel level="3" pod:type="block" pod:hlevel="3" child="head3">
         <head3 pod:type="block"/>
       </headlevel>
     </headlevel>
   </headlevel>
-  <headlevel level="1" pod:type="block" pod:hlevel="1">
+  <headlevel level="1" pod:type="block" pod:hlevel="1" child="head1">
     <head1 pod:type="block"/>
-    <headlevel level="2" pod:type="block" pod:hlevel="2">
+    <headlevel level="2" pod:type="block" pod:hlevel="2" child="head2">
       <head2 pod:type="block"/>
-      <headlevel level="3" pod:type="block" pod:hlevel="3">
+      <headlevel level="3" pod:type="block" pod:hlevel="3" child="head3">
         <head3 pod:type="block"/>
       </headlevel>
     </headlevel>
@@ -234,14 +145,16 @@ T2
 }
 
 sub test_two_levelsX_ : Test {
-    return "";
+    #return "";
     my $test = shift;
-    my $o = $test->parse_mem( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
+    my $lname = "uus";
+   my $o = $test->parse_to_xml( <<TXT, 'Perl6::Pod::Parser::AddHeadLevels' );
 =begin pod
-=head1 test1
+=NAME Test
+=head2 test1
 =end pod
 TXT
-    print Dumper $o;
+    ok $o;
 }
 
 1;

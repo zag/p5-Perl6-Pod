@@ -71,12 +71,15 @@ sub mk_block {
       || 'Perl6::Pod::Block';
 
     #      or die "Unknown block_type $name. Try =use ...";
+    #create class_options
+    my $class_options = $self->current_context->class_opts->{$name};
 
     #get prop
     my $block = $mod_name->new(
-        name    => $name,
-        context => $self->current_context,
-        options => $pod_opt
+        name          => $name,
+        context       => $self->current_context,
+        options       => $pod_opt,
+        class_options => $class_options
     );
 
 }
@@ -95,12 +98,12 @@ sub mk_fcode {
       || 'Perl6::Pod::FormattingCode';
 
     #      or die "Unknown block_type $name. Try =use ...";
-
     #get prop
     my $block = $mod_name->new(
         name    => $name,
         context => $self->current_context,
-        options => $pod_opt
+        options => $pod_opt,
+        class_options => $self->current_context->class_opts->{ $name . "<>" }
     );
 
 }
@@ -265,7 +268,7 @@ sub run_para {
         if ( UNIVERSAL::isa( $el, 'XML::ExtOn::Element' ) ) {
             $self->_process_comm($el);
             next;
-        } 
+        }
         unless ( exists $el->{type} ) {
             $self->__process_events( $self->__make_events($el) );
         }

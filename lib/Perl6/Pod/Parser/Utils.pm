@@ -97,9 +97,9 @@ sub parse_URI {
                              \s*$//x) {
         $attr->{rules} = $1
     }
-    
     my ( $scheme, $address, $section ) =
-      $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
+    # Pod::Insertion::Name or http://www.com/d.pod(head1 :todo, para)
+      $lcontent =~ /\s*(\w+)\s*\:(?!\:)([^\#]*)(?:\#(.*))?/;
     #set default scheme
     unless ($scheme) {
         $scheme = 'file';

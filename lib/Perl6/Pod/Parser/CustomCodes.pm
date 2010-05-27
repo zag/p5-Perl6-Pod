@@ -46,7 +46,8 @@ sub on_end_element {
     my $str = $el->{__CUSTOM_CODE_M};
     my ( $custom_code_name, $para ) = $str =~ /\s*(\w+)\s*:\s*(.*)/s;
     if ( my $rootp = $el->context->{vars}->{root} ) {
-        my $custom_el = $self->mk_fcode($custom_code_name);
+#        warn "MAKE CODE $custom_code_name";
+        my $custom_el = $self->mk_block($custom_code_name);
         $rootp->start_block($custom_el);
         $rootp->para($para);
         $rootp->end_block($custom_el);
