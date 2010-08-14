@@ -8,6 +8,8 @@ use Perl6::Pod::Block::code;
 use Perl6::Pod::Block::pod;
 use Perl6::Pod::Block::para;
 use Perl6::Pod::Block::table;
+use Perl6::Pod::Block::output;
+use Perl6::Pod::Block::input;
 use Perl6::Pod::FormattingCode::M;
 use Perl6::Pod::FormattingCode::L;
 use Perl6::Pod::FormattingCode::P;
@@ -36,6 +38,8 @@ use constant {
         pod     => 'Perl6::Pod::Block::pod',
         para    => 'Perl6::Pod::Block::para',
         table   => 'Perl6::Pod::Block::table',
+        output  => 'Perl6::Pod::Block::output',
+        input   => 'Perl6::Pod::Block::input',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
         'L<>'   => 'Perl6::Pod::FormattingCode::L',
         'B<>'   => 'Perl6::Pod::FormattingCode::B',
@@ -376,4 +380,25 @@ sub set_attr {
 }
 
 1;
+__END__
+
+=head1 SEE ALSO
+
+L<http://zag.ru/perl6-pod/S26.html>,
+Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
+Perl6::Pod::Lib
+
+=head1 AUTHOR
+
+Zahatski Aliaksandr, <zag@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2009-2010 by Zahatski Aliaksandr
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
 

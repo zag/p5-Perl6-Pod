@@ -3,6 +3,9 @@ TODO:
     - Formatting codes
     - Items
 
+0.19 14.08.2010
+    + I/O blocks : =input, =output
+
 0.18 27.05.2010
     + =use : handle class attributes, eval PERL6POD for included mods
     + M<>: The M<> formatting code is the inline equivalent of a named block.

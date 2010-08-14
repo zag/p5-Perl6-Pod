@@ -407,7 +407,9 @@ __END__
 
 =head1 SEE ALSO
 
-L<http://perlcabal.org/syn/S26.html>
+L<http://zag.ru/perl6-pod/S26.html>,
+Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
+Perl6::Pod::Lib
 
 =head1 AUTHOR
 

@@ -58,17 +58,150 @@ The content of a document is specified within one or more blocks. Every Pod bloc
 
 =head3 Delimited blocks 
 
-=head3 Paragraph blocks 
+The general syntax is:
+
+    =begin BLOCK_TYPE  OPTIONAL CONFIG INFO
+    =                  OPTIONAL EXTRA CONFIG INFO
+    BLOCK CONTENTS
+    =end BLOCK_TYPE
+
+For example:
+
+    =begin table  :caption<Table of Contents>
+        Constants           1
+        Variables           10
+        Subroutines         33
+        Everything else     57
+    =end table
+
+    =begin Name  :required
+    =            :width(50)
+    The applicant's full name
+    =end Name
+
+    =begin Contact  :optional
+    The applicant's contact details
+    =end Contact
+
 
 =head3 Paragraph blocks 
+
+Paragraph blocks are introduced by a =for marker and terminated by the next Pod directive or the first blank line (which is not considered to be part of the block's contents). The =for marker is followed by the name of the block and optional configuration information. The general syntax is:
+
+    =for BLOCK_TYPE  OPTIONAL CONFIG INFO
+    =                OPTIONAL EXTRA CONFIG INFO
+    BLOCK DATA
+
+For example:
+
+    =for table  :caption<Table of Contents>
+        Constants           1
+        Variables           10
+        Subroutines         33
+        Everything else     57
+
+    =for Name  :required
+    =          :width(50)
+    The applicant's full name
+
+    =for Contact  :optional
+    The applicant's contact details
+
+=head3 Abbreviated blocks
+
+Abbreviated blocks are introduced by an '=' sign in the first column, which is followed immediately by the typename of the block. The rest of the line is treated as block data, rather than as configuration. The content terminates at the next Pod directive or the first blank line (which is not part of the block data). The general syntax is:
+
+    =BLOCK_TYPE  BLOCK DATA
+    MORE BLOCK DATA
+
+For example:
+
+    =table
+        Constants           1
+        Variables           10
+        Subroutines         33
+        Everything else     57
+
+    =Name     The applicant's full name
+    =Contact  The applicant's contact details
+
+Note that abbreviated blocks cannot specify configuration information. If configuration is required, use a =for or =begin/=end instead. 
 
 =head3 Block equivalence 
 
+The three block specifications (delimited, paragraph, and abbreviated) are treated identically by the underlying documentation model, so you can use whichever form is most convenient for a particular documentation task. In the descriptions that follow, the abbreviated form will generally be used, but should be read as standing for all three forms equally.
+
+For example, although Headings shows only:
+
+    =head1 Top Level Heading
+
+this automatically implies that you could also write that block as:
+
+    =for head1
+    Top Level Heading
+
+or:
+
+    =begin head1
+    Top Level Heading
+    =end head1
+
 =head3 Standard configuration options
+
+Pod predefines a small number of standard configuration options that can be applied uniformly to built-in block types. These include:
+
+
+=head4 :numbered
+
+This option specifies that the block is to be numbered. The most common use of this option is to create numbered headings and ordered lists, but it can be applied to any block.
+
+It is up to individual renderers to decide how to display any numbering associated with other types of blocks.
+
+=head4 :term
+
+This option specifies that a list item is the definition of a term. See Definition lists. 
+
+=head4 :formatted
+
+This option specifies that the contents of the block should be treated as if they had one or more formatting codes placed around them.
+
+For example, instead of:
+
+        =for comment
+            The next para is both important and fundamental,
+            so doubly emphasize it...
+
+        =begin para
+        B<I<
+        Warning: Do not immerse in water. Do not expose to bright light.
+        Do not feed after midnight.
+        >>
+        =end para
+
+you can just write:
+
+        =begin para :formatted<B I>
+        Warning: Do not immerse in water. Do not expose to bright light.
+        Do not feed after midnight.
+        =end para
+
+The internal representations of these two versions are exactly the same, except that the second one retains the :formatted option information as part of the resulting block object.
+
+Like all formatting codes, codes applied via a :formatted are inherently cumulative. For example, if the block itself is already inside a formatting code, that formatting code will still apply, in addition to the extra "basis" and "important" formatting specified by :formatted<B I>.
+
+=head4 :like
+
+This option specifies that a block or config has the same formatting properties as the type named by its value. This is useful for creating related configurations. For example:
+
+        =config head2  :like<head1> :formatted<I>
+
+=head4 :allow
+
+This option expects a list of formatting codes that are to be recognized within any V<> codes that appear in (or are implicitly applied to) the current block. The option is most often used on =code blocks to allow mark-up within those otherwise verbatim blocks, though it can be used in any block that contains verbatim text. See Formatting within code blocks. 
 
 =head2 Blocks 
 
-=head3 Formatting codes
+=head2 Formatting codes
 
 
 =head2 Diffs to SYNOPSIS 26 by 25 Apr 2007 edition
@@ -108,7 +241,7 @@ DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
 
 =cut
 
-$Perl6::Pod::VERSION = '0.18';
+$Perl6::Pod::VERSION = '0.19';
 
 use warnings;
 use strict;
@@ -233,10 +366,11 @@ FILTER {
 1;
 __END__
 
-
 =head1 SEE ALSO
 
-L<http://perlcabal.org/syn/S26.html>
+L<http://zag.ru/perl6-pod/S26.html>,
+Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
+Perl6::Pod::Lib
 
 =head1 AUTHOR
 
@@ -247,7 +381,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 by Zahatski Aliaksandr
+Copyright (C) 2009-2010 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

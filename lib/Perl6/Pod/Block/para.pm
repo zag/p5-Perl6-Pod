@@ -49,10 +49,11 @@ sub to_xhtml {
 
 __END__
 
-
 =head1 SEE ALSO
 
-L<http://perlcabal.org/syn/S26.html>
+L<http://zag.ru/perl6-pod/S26.html>,
+Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
+Perl6::Pod::Lib
 
 =head1 AUTHOR
 
@@ -60,12 +61,11 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009 - 2010  by Zahatski Aliaksandr
+Copyright (C) 2009-2010 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
-
 
 =cut
 
