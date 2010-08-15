@@ -37,10 +37,10 @@ The =output block is used to specify pre-formatted terminal or file output which
 
 Export:
 
-* to docbook as B<screen> element
-* to html:
-        <pre class="screen-output">
-        </pre>
+* to docbook as B<screen> element (http://www.docbook.org/tdg/en/html/screen.html)
+* to html(http://www.w3.org/TR/html401/struct/text.html#edef-SAMP):
+        <pre><samp>
+        </samp></pre>
 
 =cut
 
@@ -53,8 +53,8 @@ sub to_xhtml {
     my $self   = shift;
     my $parser = shift;
     my $el =
-      $parser->mk_element('pre')->add_content( $parser->_make_elements(@_) );
-    $el->attrs_by_name->{class} = 'screen-output';
+      $parser->mk_element('samp')->add_content( $parser->_make_elements(@_) )
+      ->insert_to( $parser->mk_element('pre') );
     return $el;
 }
 

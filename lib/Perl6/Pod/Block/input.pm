@@ -37,10 +37,10 @@ The =input block is used to specify pre-formatted keyboard input, which should b
 
 Export:
 
-* to docbook as B<screen> element
-* to html:
-        <pre class="screen-input">
-        </pre>
+* to docbook as B<userinput> element (L<http://www.docbook.org/tdg/en/html/userinput.html>)
+* to html (L<http://www.w3.org/TR/html401/struct/text.html#edef-KBD>):
+        <pre><kbd>
+        </kbd></pre>
 
 =cut
 
@@ -52,9 +52,9 @@ use base 'Perl6::Pod::Block';
 sub to_xhtml {
     my $self   = shift;
     my $parser = shift;
-    my $el = 
-      $parser->mk_element('pre')->add_content( $parser->_make_elements(@_) );
-    $el->attrs_by_name->{class} = 'screen-input';
+    my $el =
+      $parser->mk_element('kbd')->add_content( $parser->_make_elements(@_) )
+      ->insert_to( $parser->mk_element('pre') );
     return $el;
 }
 
@@ -62,7 +62,7 @@ sub to_docbook {
     my $self   = shift;
     my $parser = shift;
     my $el =
-      $parser->mk_element('screen')->add_content( $parser->_make_elements(@_) );
+      $parser->mk_element('userinput')->add_content( $parser->_make_elements(@_) );
     return $el;
 }
 
@@ -76,6 +76,8 @@ __END__
 L<http://zag.ru/perl6-pod/S26.html>,
 Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
 Perl6::Pod::Lib
+
+
 
 =head1 AUTHOR
 

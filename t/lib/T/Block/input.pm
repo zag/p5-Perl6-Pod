@@ -45,9 +45,9 @@ sub p02_xhtml : Test {
 T
 $t->is_deeply_xml(
         $x,
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><pre class='screen-input'>  1.2.3
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><pre><kbd>  1.2.3
    sdsd sd sd sd
- </pre></xhtml>#
+ </kbd></pre></xhtml>#
     );
 }
 
@@ -63,9 +63,9 @@ sub p03_docbook : Test {
 T
 $t->is_deeply_xml(
         $x,
-q# <chapter><screen>  1.2.3
+q#<chapter><userinput>  1.2.3
    sdsd sd sd sd
- </screen></chapter>#
+ </userinput></chapter>#
     );
 }
 

@@ -3,6 +3,8 @@ TODO:
     - Formatting codes
     - Items
 
+0.20 15 Aug 2010
+    + use standart tags( xhtml and docbook) for user input and output
 0.19 14.08.2010
     + I/O blocks : =input, =output
 

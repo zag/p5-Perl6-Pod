@@ -45,9 +45,9 @@ sub p02_xhtml : Test {
 T
 $t->is_deeply_xml(
         $x,
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><pre class='screen-output'>  1.2.3
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><pre><samp>  1.2.3
    sdsd sd sd sd
- </pre></xhtml>#
+ </samp></pre></xhtml>#
     );
 }
 
