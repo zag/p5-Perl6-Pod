@@ -10,6 +10,7 @@ use Perl6::Pod::Block::para;
 use Perl6::Pod::Block::table;
 use Perl6::Pod::Block::output;
 use Perl6::Pod::Block::input;
+use Perl6::Pod::FormattingCode::C;
 use Perl6::Pod::FormattingCode::M;
 use Perl6::Pod::FormattingCode::L;
 use Perl6::Pod::FormattingCode::P;
@@ -40,6 +41,7 @@ use constant {
         table   => 'Perl6::Pod::Block::table',
         output  => 'Perl6::Pod::Block::output',
         input   => 'Perl6::Pod::Block::input',
+        'C<>'   => 'Perl6::Pod::FormattingCode::C',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
         'L<>'   => 'Perl6::Pod::FormattingCode::L',
         'B<>'   => 'Perl6::Pod::FormattingCode::B',
