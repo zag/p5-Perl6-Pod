@@ -211,7 +211,7 @@ sub on_para {
             my @colums = split( /${\( COLUMNS_SEPARATE )}/, $line );
             $i++;
             for ( my $n = 0 ; $n <= $#colums ; $n++ ) {
-                push @{ $rows[$n] }, $colums[$n] || '';
+                push @{ $rows[$n] }, defined ($colums[$n]) ? $colums[$n] : '';
             }
             if ( @colums == $col_count and !$self->{NEED_NEAD} ) {
                 push @res_rows, $self->_make_row( \@rows );
