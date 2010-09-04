@@ -32,7 +32,7 @@ Exported :
 
 =over 
 
-=item *  doc book 
+=item *  docbook 
 
     <code></code>
 

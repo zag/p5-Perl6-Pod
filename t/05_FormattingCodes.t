@@ -10,6 +10,8 @@ use T::FormattingCode::L;
 use T::FormattingCode::B;
 use T::FormattingCode::I;
 use T::FormattingCode::C;
+use T::FormattingCode::X;
+
 Test::Class->runtests;
 
 

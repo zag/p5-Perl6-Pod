@@ -2,8 +2,11 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+0.22 04 Sep 2010
+    + implement X<> formatting code
+    + fix cell content for =table
 
-0.20 18 Aug 2010
+0.21 18 Aug 2010
     + implement C<> formatting code
 
 0.20 15 Aug 2010
