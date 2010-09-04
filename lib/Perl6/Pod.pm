@@ -231,15 +231,11 @@ The suite contain the following classes:
 
 =back
 
-
-
 DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
-
-
 
 =cut
 
-$Perl6::Pod::VERSION = '0.21';
+$Perl6::Pod::VERSION = '0.22';
 
 use warnings;
 use strict;
