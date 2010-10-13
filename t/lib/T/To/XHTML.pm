@@ -12,14 +12,14 @@ use Test::More;
 use T::To;
 use base 'T::To';
 use Data::Dumper;
-use XML::SAX::Writer;
+use XML::ExtOn::Writer;
 use Perl6::Pod::To::XHTML::MakeBody;
 use XML::ExtOn('create_pipe');
 
 sub make_xhtml_parser {
     my $t          = shift;
     my $out        = shift;
-    my $xml_writer = new XML::SAX::Writer:: Output => $out;
+    my $xml_writer = new XML::ExtOn::Writer:: Output => $out;
     my $out_filters =
       create_pipe( create_pipe( @_ ? @_ : 'XML::ExtOn', $xml_writer ) );
     my ( $p, $f ) = Perl6::Pod::To::to_abstract(
@@ -205,7 +205,7 @@ q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml1
 sub a002_add_body_head : Test {
     my $t           = shift;
     my $x           = '';
-    my $xml_writer  = new XML::SAX::Writer:: Output => \$x;
+    my $xml_writer  = new XML::ExtOn::Writer:: Output => \$x;
     my $body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
     my $out_filter  = create_pipe( $body_filter, $xml_writer );
     my $to_parser   = new Perl6::Pod::To::XHTML::

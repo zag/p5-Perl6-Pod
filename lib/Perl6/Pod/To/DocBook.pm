@@ -61,7 +61,6 @@ Result xml:
 use strict;
 use warnings;
 use Perl6::Pod::To::XML;
-use XML::SAX::Writer;
 use Perl6::Pod::Parser::AddHeadLevels;
 use Perl6::Pod::To::DocBook::ProcessHeads;
 use Perl6::Pod::Parser::ListLevels;

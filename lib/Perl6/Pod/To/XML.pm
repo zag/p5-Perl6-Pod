@@ -21,7 +21,7 @@ DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
 use strict;
 use warnings;
 use Perl6::Pod::To;
-use XML::SAX::Writer;
+use XML::ExtOn::Writer;
 use XML::ExtOn('create_pipe');
 use base qw/Perl6::Pod::To/;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
@@ -35,7 +35,7 @@ sub new {
         $self->{out_put} = create_pipe( 'XML::ExtOn', $out );
     }
     elsif ( !UNIVERSAL::isa( $out, 'XML::ExtOn' ) ) {
-        my $xml_writer = new XML::SAX::Writer:: Output => $out;
+        my $xml_writer = new XML::ExtOn::Writer:: Output => $out;
         $self->{out_put} = create_pipe( 'XML::ExtOn', $xml_writer );
     }
     return $self;

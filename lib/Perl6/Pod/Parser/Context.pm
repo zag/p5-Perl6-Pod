@@ -17,6 +17,7 @@ use Perl6::Pod::FormattingCode::P;
 use Perl6::Pod::FormattingCode::B;
 use Perl6::Pod::FormattingCode::I;
 use Perl6::Pod::FormattingCode::X;
+use Perl6::Pod::FormattingCode::E;
 
 use Tie::UnionHash;
 use Data::Dumper;
@@ -48,7 +49,9 @@ use constant {
         'B<>'   => 'Perl6::Pod::FormattingCode::B',
         'I<>'   => 'Perl6::Pod::FormattingCode::I',
         'X<>'   => 'Perl6::Pod::FormattingCode::X',
-#        'P<>'   => 'Perl6::Pod::FormattingCode::P',
+
+        #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
+        'E<>' => 'Perl6::Pod::FormattingCode::E',
     }
 };
 
@@ -62,12 +65,12 @@ sub new {
 
     #set default contexts
     my %args = (
-        _usef     => {},
-        _use      => DEFAULT_USE,
-        _config   => {},
-        _encoding => 'UTF-8',
-        _custom   => {},
-        _class_opts=>{},
+        _usef       => {},
+        _use        => DEFAULT_USE,
+        _config     => {},
+        _encoding   => 'UTF-8',
+        _custom     => {},
+        _class_opts => {},
         @_
     );
 
@@ -141,7 +144,7 @@ return ref to hash of Class optioons to create loaded by use mods
 =cut
 
 sub class_opts {
-    return $_[0]->{_class_opts}
+    return $_[0]->{_class_opts};
 }
 
 =head2 set_use <module_name>, ':config_options'

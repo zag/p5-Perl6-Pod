@@ -13,7 +13,7 @@ use_ok 'Perl6::Pod::Parser';
 use_ok 'Perl6::Pod::Parser::Context';
 use_ok 'Perl6::Pod::Block';
 use_ok 'XML::ExtOn', 'create_pipe';
-use_ok 'XML::SAX::Writer';
+use_ok 'XML::ExtOn::Writer';
 use_ok 'Perl6::Pod::Parser::Pod2Events';
 use_ok 'Perl6::Pod::Parser::Context';
 ####################test context ##########

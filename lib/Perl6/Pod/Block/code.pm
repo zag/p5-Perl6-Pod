@@ -59,7 +59,7 @@ sub to_xhtml {
     my $self = shift;
     my $parser = shift;
     my $el = $parser->mk_element('code')->insert_to( $parser->mk_element('pre') );
-    $el->add_content( $parser->mk_characters( @_));
+    $el->add_content( $self->_make_elements(@_) );
 }
 
 =head2 to_docbook
@@ -73,24 +73,40 @@ Render to:
      ]]></programlisting></chapter>
 
 =cut
+
 sub to_docbook {
     my $self = shift;
     my $parser = shift;
     my $el = $parser->mk_element('programlisting');
-    $el->add_content( $parser->mk_cdata( @_));
+    $el->add_content( $self->_make_elements($parser,@_) );
 }
 
-sub on_para {
-    my ($self , $parser, $txt)  = @_;
-    return  $txt;
+#add escaping
+sub _make_elements {
+    my $self = shift;
+    my $parser = shift;
+    my @res  = ();
+    for (@_) {
+        push @res, ref($_)
+          ? ref($_) eq 'ARRAY'
+              ? $parser->_make_elements(@$_)
+              : $_
+          : $parser->mk_characters(_html_escape($_));
+    }
+    return @res;
 }
 
-sub on_child {
-    my ($self ,$parser, $child )= @_;
-    diag "got child!";
+
+sub _html_escape {
+    my ( $txt ) =@_;
+    $txt   =~ s/&/&amp;/g;
+    $txt   =~ s/</&lt;/g;
+    $txt   =~ s/>/&gt;/g;
+    $txt   =~ s/"/&quot;/g;
+    $txt   =~ s/'/&apos;/g;
+    $txt
 }
 1;
-
 __END__
 
 

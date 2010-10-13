@@ -23,7 +23,7 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use XML::SAX::Writer;
+use XML::ExtOn::Writer;
 use base 'T::To';
 
 sub x1_create : Test(3) {
@@ -31,9 +31,9 @@ sub x1_create : Test(3) {
 
     #tests for create
     my $buf0;
-    my $o0 = new XML::SAX::Writer:: Output => \$buf0;
+    my $o0 = new XML::ExtOn::Writer:: Output => \$buf0;
     ok UNIVERSAL::isa( $o0, 'XML::Filter::BufferText' ),
-      'class of instance of XML::SAX::Writer';
+      'class of instance of XML::ExtOn::Writer';
     my ( $p0, $f0 ) = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XML', $o0 );
     isa_ok( $f0->{out_put}, 'XML::ExtOn', 'if output is writer' );
     my $o1 = new XML::ExtOn::;

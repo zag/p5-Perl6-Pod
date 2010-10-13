@@ -54,12 +54,11 @@ use warnings;
 
 sub on_para {
     my ($self, $p ,$t )= @_;
-    $t;
-#    return $self->htnml_escape($t);
+    _html_escape($t)
 }
 
-sub htnml_escape {
-    my ($self, $txt ) =@_;
+sub _html_escape {
+    my ( $txt ) =@_;
     $txt   =~ s/&/&amp;/g;
     $txt   =~ s/</&lt;/g;
     $txt   =~ s/>/&gt;/g;

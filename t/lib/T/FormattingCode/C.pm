@@ -61,5 +61,21 @@ q#<chapter><para><code>test &gt; &amp;</code>
     );
 }
 
+
+sub t05_extra : Test {
+    my $t = shift;
+    my $x = $t->parse_to_xhtml( <<T);
+=para
+C<< test > & E<nbsp> >>
+T
+    ok $x =~ /&nbsp;/;
+#    diag $x;
+#    $t->is_deeply_xml( $x,
+#q#<chapter><para><code>test &gt; &amp;</code>
+#</para></chapter>#
+#   );
+}
+
+
 1;
 

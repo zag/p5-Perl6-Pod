@@ -12,7 +12,7 @@ Perl6::Pod::To::XHTML::MakeBody - add body section
 
     use Perl6::Pod::To::XHTML::MakeBody;
     my $x         = '';
-    my $xml_writer = new XML::SAX::Writer:: Output => \$x;
+    my $xml_writer = new XML::ExtOn::Writer:: Output => \$x;
     my $body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
     my $out_filter = create_pipe($body_filter,  $xml_writer);
     my $to_parser = new Perl6::Pod::To::XHTML::

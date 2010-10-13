@@ -21,6 +21,7 @@ use Perl6::Pod::To::Mem;
 use Perl6::Pod::To::XML;
 use Perl6::Pod::To::DocBook;
 use Perl6::Pod::To::XHTML;
+use XML::ExtOn::Writer;
 use XML::Flow;
 use XML::ExtOn ('create_pipe');
 
@@ -67,7 +68,7 @@ sub parse_to_xml {
 sub make_xhtml_parser {
     my $t          = shift;
     my $out        = shift;
-    my $xml_writer = new XML::SAX::Writer:: Output => $out;
+    my $xml_writer = new XML::ExtOn::Writer:: Output => $out;
     my $out_filters =
       create_pipe( create_pipe( @_ ? @_ : 'XML::ExtOn', $xml_writer ) );
     my ( $p, $f ) = Perl6::Pod::To::to_abstract(
