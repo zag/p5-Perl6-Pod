@@ -61,15 +61,15 @@ sub _make_xml_element {
     my $elem     = shift;
     my $e_type   = $elem->isa('Perl6::Pod::FormattingCode') ? 'code' : 'block';
     my $out_elem = $self->out_parser->mk_element( $elem->local_name );
-    my ($out_attr, $attr) = ($out_elem->attrs_by_name, $elem->get_attr );
-    while ( my ($key, $val) = each %$attr ) {
+    my ( $out_attr, $attr ) = ( $out_elem->attrs_by_name, $elem->get_attr );
+    while ( my ( $key, $val ) = each %$attr ) {
         my $xml_str = $val;
-        if (ref($val) eq 'ARRAY') {
+        if ( ref($val) eq 'ARRAY' ) {
             $xml_str = join "," => @$val;
         }
-        $out_attr->{$key}= $xml_str;
+        $out_attr->{$key} = $xml_str;
     }
-    %{ $out_elem->attrs_by_ns_uri(POD_URI) } = %{ $elem->attrs_by_name};
+    %{ $out_elem->attrs_by_ns_uri(POD_URI) } = %{ $elem->attrs_by_name };
     $out_elem->attrs_by_ns_uri(POD_URI)->{type} = $e_type;
     return $out_elem;
 }
@@ -79,11 +79,11 @@ sub process_element {
     my $elem = shift;
     my $res;
     if ( $elem->can('to_xml') ) {
-        $res = $elem->to_xml($self, @_);
-        unless ( ref( $res ) ) {
-            $res = $self->out_parser->mk_from_xml( $res )
-        } 
-        return  $res
+        $res = $elem->to_xml( $self, @_ );
+        unless ( ref($res) ) {
+            $res = $self->out_parser->mk_from_xml($res);
+        }
+        return $res;
     }
     else {
 
@@ -122,11 +122,12 @@ sub on_para {
     push @{ $element->{_CONTENT_} }, $text;
     return;
 }
+
 sub on_start_block {
-    my $self = shift;
-    my $cname =''; 
-    if ( my $current = $self->current_element) {
-        $cname=$self->current_element->local_name;
+    my $self  = shift;
+    my $cname = '';
+    if ( my $current = $self->current_element ) {
+        $cname = $self->current_element->local_name;
     }
     return $self->SUPER::on_start_block(@_);
 }
@@ -150,12 +151,37 @@ sub on_end_block {
 
 sub _make_events {
     my $self = shift;
-    my @in = $self-> __expand_array_ref( @_);
-    my @out = ();
-    foreach my $elem ( @in ) {
-        push @out, ref( $elem) ? $elem : $self->mk_characters($elem);
+    my @in   = $self->__expand_array_ref(@_);
+    my @out  = ();
+    foreach my $elem (@in) {
+        push @out, ref($elem) ? $elem : $self->mk_characters($self->_html_escape($elem));
     }
-    return @out
+    return @out;
+}
+
+#add escaping unless ref is SCALAR
+sub _make_elements {
+    my $self = shift;
+    my @res  = ();
+    for (@_) {
+        push @res, ref($_)
+          ? ref($_) eq 'ARRAY'
+              ? $self->_make_elements(@$_)
+              : ref($_) eq 'SCALAR' ? $self->mk_characters($_)
+            : $_
+          : $self->mk_characters( $self->_html_escape($_) );
+    }
+    return @res;
+}
+
+sub _html_escape {
+    my ( $self, $txt ) = @_;
+    $txt =~ s/&/&amp;/g;
+    $txt =~ s/</&lt;/g;
+    $txt =~ s/>/&gt;/g;
+#    $txt =~ s/"/&quot;/g;
+#    $txt =~ s/'/&apos;/g;
+    $txt;
 }
 
 1;

@@ -227,7 +227,7 @@ sub _make_events {
     my @in   = $self->__expand_array_ref(@_);
     my @out  = ();
     foreach my $elem (@in) {
-        push @out, ref($elem) ? $elem : $self->mk_characters($elem);
+        push @out, ref($elem) ? $elem : $self->mk_characters($self->_html_escape($elem));
     }
     return @out;
 }
