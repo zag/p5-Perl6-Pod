@@ -87,7 +87,19 @@ sub _to_xhtml_entity {
         return sprintf( '&#%d;', $ord ) if defined $ord;
         return qq{&$str;};
     }
-    die "Number not supported in E<>";
+    # Otherwise, it's the numeric codepoint in some base...
+    else {
+        # Convert Perl 6 octals and decimals to Perl 5 notation...
+        if ($str !~ s{\A 0o}{0}xms) {       # Convert octal
+            $str =~ s{\A 0d}{}xms;          # Convert explicit decimal
+            $str =~ s{\A 0+ (?=\d)}{}xms;   # Convert implicit decimal
+        }
+
+        # Then return the XHTML numeric code...
+        return sprintf '&#%d;', eval $str;
+    }
+
+    die "Unsupported identity in E<>";
 }
 
 =head2 to_docbook

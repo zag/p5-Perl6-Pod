@@ -59,7 +59,7 @@ sub to_xhtml {
     my $self = shift;
     my $parser = shift;
     my $el = $parser->mk_element('code')->insert_to( $parser->mk_element('pre') );
-    $el->add_content( $self->_make_elements(@_) );
+    $el->add_content( $self->_make_elements($parser,@_) );
 }
 
 =head2 to_docbook
