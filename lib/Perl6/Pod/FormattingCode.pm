@@ -37,8 +37,9 @@ sub get_attr {
 
 sub on_para {
     my ($self ,$parser, $txt) = @_;
-    return $txt
+    return $self->SUPER::on_para($parser,$txt)
 }
+
 1;
 __END__
 

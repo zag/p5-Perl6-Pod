@@ -64,11 +64,14 @@ q#<chapter><para><code>test &gt; &amp;</code>
 
 sub t05_extra : Test {
     my $t = shift;
+
     my $x = $t->parse_to_xhtml( <<T);
 =para
 C<< test > & E<nbsp> >>
+sdssd C<E<>>
 T
-    ok $x =~ /&nbsp;/;
+
+    ok $x =~ /E&lt;nbsp&gt;/;
 #    diag $x;
 #    $t->is_deeply_xml( $x,
 #q#<chapter><para><code>test &gt; &amp;</code>

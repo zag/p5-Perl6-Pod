@@ -22,6 +22,7 @@ use warnings;
 use Data::Dumper;
 use XML::ExtOn::Element;
 use XML::ExtOn::Context;
+use Pod::Parser; #for process format codes
 use base 'XML::ExtOn::Element';
 use Perl6::Pod::FormattingCode;
 
@@ -116,61 +117,17 @@ sub end {
     my ( $self, $attr ) = @_;
 }
 
-sub on_para {
-    my ( $self, $parser, $txt ) = @_;
+=head2 on_para
 
-    #process formating codes by default
-    return $parser->parse_para($txt);
-}
-
-#make events for root parser DEPRECATED
-sub __make_events {
-    my $self = shift;
-    my @res  = ();
-    foreach my $el (@_) {
-        unless ( ref($el) ) {
-            $el = { type => 'para', data => $el };
-        }
-
-        #process refs
-        if ( exists $el->{type} ) {
-            push @res, $el;
-        }
-        else {
-            my $name = $el->{name};
-
-            #make start stop
-            push @res,
-              {
-                type => 'start_fcode',
-                data => $name
-              },
-              $self->__make_events( @{ $el->{childs} } ),
-              {
-                type => 'end_fcode',
-                data => $name
-              };
-        }
-    }
-    return @res;
-}
-
-=head2 parse_para
-
-DEPRECATED
-
-Parse format codes
+Process content of block.
 
 =cut
 
-sub parse_para {
-    my $self  = shift;
-    my $rpara = $self->context->{vars}->{root};
-    my @args  = ();
-    foreach my $para (@_) {
-        push @args, ref($para) ? $para : @{ $rpara->parse_str($para) };
-    }
-    return $self->__make_events(@args);
+sub on_para {
+    my ( $self, $parser, $txt ) = @_;
+    #process formating codes by default
+    return $self->parse_para($txt);
+#    return $parser->parse_para($txt);
 }
 
 sub on_child {
@@ -237,6 +194,72 @@ sub to_xml1 {
 sub to_sax2 {
     return $_[0];
 }
+
+sub _to_string_ {
+   my $self = shift;
+   my $elem = shift;
+    if ( ref($elem) ) {
+        if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
+            return join "", map { ref($_) ? $self->_to_string_($_) : $_ }
+                  $elem->children ;
+        }
+        elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
+            return $elem->raw_text();
+        }
+    }
+}
+
+sub _parse_tree2_ {
+    my $self = shift;
+    my $elem = shift;
+    if ( ref($elem) ) {
+        if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
+            return [ map { ref($_) ? $self->_parse_tree2_($_) : $_ }
+                  $elem->children ];
+        }
+        elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
+            my %attr = ( name => $elem->cmd_name );
+            if ( my $ptree = $elem->parse_tree ) {
+                $attr{childs} = $self->_to_string_($ptree);
+            }
+            return \%attr;
+        }
+    }
+    
+}
+
+sub parse_str {
+    my $self = shift;
+    my $str  = shift;
+    my $p    = new Pod::Parser::;
+    my $res  = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str, 123 ) );
+    return $res;
+}
+
+sub parse_para {
+    my $self = shift;
+    my @in   = @_;
+    my @out  = ();
+    foreach my $el (@in) {
+        if ( ref $el ) {
+            push @out, $el;
+        }
+        else {
+            my $elems_ref = $self->parse_str($el);
+            foreach my $item (@$elems_ref) {
+                unless ( ref($item) ) {
+
+                    #got characters
+                    $item = { data => $item, type => 'para' };
+                }
+
+                push @out, $item;
+            }
+        }
+    }
+    return \@out;
+}
+
 
 1;
 __END__

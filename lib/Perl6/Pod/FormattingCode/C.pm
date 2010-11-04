@@ -54,7 +54,8 @@ use warnings;
 
 sub on_para {
     my ($self, $p ,$t )= @_;
-    _html_escape($t)
+    #no process format codes
+    return $t;
 }
 
 sub _html_escape {
@@ -62,8 +63,8 @@ sub _html_escape {
     $txt   =~ s/&/&amp;/g;
     $txt   =~ s/</&lt;/g;
     $txt   =~ s/>/&gt;/g;
-    $txt   =~ s/"/&quot;/g;
-    $txt   =~ s/'/&apos;/g;
+#    $txt   =~ s/"/&quot;/g;
+#    $txt   =~ s/'/&apos;/g;
     $txt
 }
 

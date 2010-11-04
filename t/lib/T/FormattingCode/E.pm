@@ -28,8 +28,9 @@ sub t01_as_xhtml : Test {
     my $t= shift;
     my $x = $t->parse_to_xhtml( <<T);
 =para
-Text  E<lt> E<gt> E<nbsp> E<laquo> 
+Text  E<lt> E<gt> E<nbsp> E<laquo> E<lt;gt>
 T
+    diag $x;
     ok $x =~ /&laquo;/;
 #    $t->is_deeply_xml( $x,
 # q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><p>Text  &lt; &gt; &nbsp; &laquo; </p></xhtml># );

@@ -70,7 +70,6 @@ test
 Heelo
 =end pod
 TXT
-#    diag $x;
     $t->is_deeply_xml( $x, q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><N pod:type='code'>er<C pod:type='code'>ds</C></N>this is a para
 </para><test1 pod:type='block' we1='1' w1='1'>test
 </test1><p>Heelo

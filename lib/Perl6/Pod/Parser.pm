@@ -223,7 +223,6 @@ sub __expand_array_ref {
 sub para {
     my $self = shift;
     my $txt  = shift;
-
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
         $txt = $elem->on_para( $self, $txt );
@@ -241,24 +240,6 @@ sub end_block {
     my ( $name, $opt, $str_num ) = @_;
     my $elem = $self->current_element;    #mk_block($name, $opt);
     $self->end_element($elem);
-}
-
-sub _parse_tree_ {
-    my $self = shift;
-    my $elem = shift;
-    if ( ref($elem) ) {
-        if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
-            return [ map { ref($_) ? $self->_parse_tree_($_) : $_ }
-                  $elem->children ];
-        }
-        elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
-            my %attr = ( name => $elem->cmd_name );
-            if ( my $ptree = $elem->parse_tree ) {
-                $attr{childs} = $self->_parse_tree_($ptree);
-            }
-            return \%attr;
-        }
-    }
 }
 
 sub run_para {
@@ -302,7 +283,7 @@ sub __make_events {
                 type => 'start_fcode',
                 data => $name
               },
-              $self->__make_events( @{ $el->{childs} } ),
+              $self->__make_events( ref($el->{childs}) ? @{ $el->{childs} } : $el->{childs}),
               {
                 type => 'end_fcode',
                 data => $name
@@ -331,14 +312,6 @@ sub __process_events {
     }
 }
 
-sub parse_str {
-    my $self = shift;
-    my $str  = shift;
-    my $p    = new Pod::Parser::;
-    my $res  = $self->_parse_tree_( Pod::Parser->new->parse_text( $str, 123 ) );
-    return $res;
-}
-
 sub get_elements_from_ref {
     my $self = shift;
     my $ref  = shift;
@@ -361,31 +334,6 @@ sub get_elements_from_ref {
         push @elems, $elem;
     }
     return \@elems;
-}
-
-#process para: make tree of text
-sub parse_para {
-    my $self = shift;
-    my @in   = $self->__expand_array_ref(@_);
-    my @out  = ();
-    foreach my $el (@in) {
-        if ( ref $el ) {
-            push @out, $el;
-        }
-        else {
-            my $elems_ref = $self->parse_str($el);
-            foreach my $item (@$elems_ref) {
-                unless ( ref($item) ) {
-
-                    #got characters
-                    $item = { data => $item, type => 'para' };
-                }
-
-                push @out, $item;
-            }
-        }
-    }
-    return \@out;
 }
 
 #make XML::ExtOn objects from array
