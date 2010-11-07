@@ -320,7 +320,7 @@ sub export_block__NOTE_ {
     $a->attrs_by_name->{name} = "ftn.nid${nid}";
     $a->attrs_by_name->{href} = "#nid${nid}";
     $a->add_content(
-        $self->mk_element('sup')->add_content( $self->mk_characters("$nid.") )
+        $self->mk_element('sup')->add_content( $self->mk_characters("$nid. ") )
     );
     return $self->mk_element('p')->add_content( $a, $self->_make_events(@p) );
 
