@@ -130,8 +130,9 @@ sub start_document {
 }
 
 sub end_document {
-    if ( my $out = $_[0]->out_parser ) {
-        my $root = $out->mk_element( $_[0]->{doctype} || 'html' );
+    my $self = shift;
+    if ( my $out = $self->out_parser ) {
+        my $root = $out->mk_element( $self->{doctype} || 'html' );
         $out->end_element($root);
         $out->end_document;
     }
@@ -227,7 +228,10 @@ sub _make_events {
     my @in   = $self->__expand_array_ref(@_);
     my @out  = ();
     foreach my $elem (@in) {
-        push @out, ref($elem) ? $elem : $self->mk_characters($self->_html_escape($elem));
+        push @out,
+          ref($elem)
+          ? $elem
+          : $self->mk_characters( $self->_html_escape($elem) );
     }
     return @out;
 }
@@ -298,6 +302,30 @@ sub export_block_NAME {
     return $head;
 }
 
+#process N footnote
+sub export_block__NOTES_ {
+    my ( $self, $el, @p ) = @_;
+    my $div = $self->mk_element('div');
+    $div->attrs_by_name->{class} = 'footnote';
+    return $div->add_content(
+        $self->mk_element('p')->add_content( $self->mk_characters("NOTES") ),
+        $self->_make_events(@p) );
+
+}
+
+sub export_block__NOTE_ {
+    my ( $self, $el, @p ) = @_;
+    my $nid = $el->attrs_by_name->{note_id};
+    my $a   = $self->mk_element('a');
+    $a->attrs_by_name->{name} = "ftn.nid${nid}";
+    $a->attrs_by_name->{href} = "#nid${nid}";
+    $a->add_content(
+        $self->mk_element('sup')->add_content( $self->mk_characters("$nid.") )
+    );
+    return $self->mk_element('p')->add_content( $a, $self->_make_events(@p) );
+
+}
+
 1;
 __END__
 
@@ -319,4 +347,5 @@ it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
+
 

@@ -50,7 +50,7 @@ sub on_para {
     $attr->{name} = $lname;
     my ( $scheme, $address, $section ) =
       $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
-    $attr->{scheme} = $scheme;
+    $attr->{scheme} = $scheme||'';
     $address = '' unless defined $address;
     $attr->{is_external} = $address =~ s/^\/\///;
 
@@ -61,14 +61,21 @@ sub on_para {
 
     #fix L<doc:#Special Features>
     $attr->{section} = defined $section ? $section : '';
+    #fix L<#id>
+    if (!defined($scheme) and $lcontent ) {
+        if ($lcontent =~ /^\s*(?:\#(.*))/) {
+            $attr->{section} = $1
+        }
+    }
     $txt;
 }
 
 sub to_xhtml {
     my ( $self, $parser, @in ) = @_;
     my $attr = $self->attrs_by_name();
+
     for ( $attr->{scheme} ) {
-        /^https?/ && do {
+        ( /^https?/ || $attr->{section} ) && do {
             my $a   = $parser->mk_element('a');
             my $url = $attr->{address};
             $url .= "#" . $attr->{section} if $attr->{section};
@@ -86,7 +93,7 @@ sub to_docbook {
     my ( $self, $parser, @in ) = @_;
     my $attr = $self->attrs_by_name();
     for ( $attr->{scheme} ) {
-        /^https?/ && do {
+        /^https?/  && do {
             my $ulink = $parser->mk_element('ulink');
             my $url   = $attr->{address};
             $url .= "#" . $attr->{section} if $attr->{section};

@@ -49,7 +49,7 @@ sub parse_mem {
 
 }
 
-=head2 parse_mem \$pod_str, ['filter1']
+=head2 parse_to_xml \$pod_str, ['filter1']
 
 return out_put from To::Mem formatter
 
@@ -60,9 +60,27 @@ sub parse_to_xml {
     my ( $text, @filters ) = @_;
     my $out = '';
     my $to_mem = new Perl6::Pod::To::XML:: out_put => \$out;
+#    $to_mem->parse(\$text);
+#    return wantarray ? ( $to_mem, $f, $out ) : $out;
     my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
     $p->parse( \$text );
     return wantarray ? ( $p, $f, $out ) : $out;
+}
+
+=head2 pod2xml \$pod_str, ['filter1']
+
+return out_put from To::Mem formatter
+
+=cut
+
+sub pod6xml {
+    my $test = shift;
+    my ( $text, @filters ) = @_;
+    my $out = '';
+    my $to_mem = new Perl6::Pod::To::XML:: out_put => \$out, header=>1;
+    my $p = create_pipe(@filters,$to_mem);
+    $p->parse(\$text);
+    return wantarray ? ( $to_mem, $out ) : $out;
 }
 
 sub make_xhtml_parser {

@@ -201,6 +201,16 @@ sub begin_input {
 
 sub end_input {
     my $self = shift;
+    #begin flush for footers
+    if ( my $f = $self->{CODE_N_HASH}) {
+        my $pod = "=begin _NOTES_\n";
+        foreach my $num ( sort keys %$f) {
+            my $note = $f->{$num};
+            $pod.="$num\t$note->{text}\n";
+        }
+        $pod .= "=end _NOTES_\n";
+        $self->_parse_chunk(\$pod);
+    }
     $self->end_document;
 }
 
@@ -226,12 +236,14 @@ sub para {
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
         $txt = $elem->on_para( $self, $txt );
+        return unless defined $txt;
         if ( ref($txt) ) {
             $self->run_para($txt);
         }
         else {
             $self->_process_comm( $self->mk_characters($txt) );
         }
+
     }
 }
 

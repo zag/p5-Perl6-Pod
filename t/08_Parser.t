@@ -139,7 +139,7 @@ T1
 package main;
 use strict;
 use warnings;
-use Test::More(tests=>30);
+use Test::More(tests=>28);
 use Data::Dumper;
 my $FORMATTING_CODE = q{[BCDEIKLMNPRSTUVXZ]};
 use_ok 'Perl6::Pod::Parser';

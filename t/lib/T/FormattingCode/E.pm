@@ -30,10 +30,18 @@ sub t01_as_xhtml : Test {
 =para
 Text  E<lt> E<gt> E<nbsp> E<laquo> E<lt;gt>
 T
-    diag $x;
     ok $x =~ /&laquo;/;
-#    $t->is_deeply_xml( $x,
-# q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><p>Text  &lt; &gt; &nbsp; &laquo; </p></xhtml># );
+}
+
+sub t03_as_xhtml : Test {
+    my $t= shift;
+    my $x = $t->parse_to_xhtml( <<T);
+=begin pod
+E< lt ; LEFT DOUBLE ANGLE BRACKET >
+=cend pod
+
+T
+    ok $x =~ /&lt;&#12298;/;
 }
 1;
 

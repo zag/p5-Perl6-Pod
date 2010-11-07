@@ -47,12 +47,20 @@ sub start_document {
     if ( my $out = $_[0]->out_parser ) {
         $out->start_document;
         $out->on_start_prefix_mapping( pod => POD_URI );
+        if ( $_[0]->{header} ) {
+            my $out_elem = $out->mk_element('pod6');
+            $out->start_element($out_elem);
+        }
     }
 }
 
 sub end_document {
     if ( my $out = $_[0]->out_parser ) {
         $out->end_document;
+        if ( $_[0]->{header} ) {
+            my $out_elem = $out->mk_element('pod6');
+            $out->end_element($out_elem);
+        }
     }
 }
 
@@ -154,7 +162,10 @@ sub _make_events {
     my @in   = $self->__expand_array_ref(@_);
     my @out  = ();
     foreach my $elem (@in) {
-        push @out, ref($elem) ? $elem : $self->mk_characters($self->_html_escape($elem));
+        push @out,
+          ref($elem)
+          ? $elem
+          : $self->mk_characters( $self->_html_escape($elem) );
     }
     return @out;
 }
@@ -179,8 +190,9 @@ sub _html_escape {
     $txt =~ s/&/&amp;/g;
     $txt =~ s/</&lt;/g;
     $txt =~ s/>/&gt;/g;
-#    $txt =~ s/"/&quot;/g;
-#    $txt =~ s/'/&apos;/g;
+
+    #    $txt =~ s/"/&quot;/g;
+    #    $txt =~ s/'/&apos;/g;
     $txt;
 }
 

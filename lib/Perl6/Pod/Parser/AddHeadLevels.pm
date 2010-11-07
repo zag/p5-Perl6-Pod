@@ -50,7 +50,8 @@ sub current_level {
 sub switch_to_level {
     my ( $self, $to_level, $lname ) = @_;
     my $current_level = $self->current_level;
-    my $hl = $self->mk_block( 'headlevel', qq!:level($to_level) :child<$lname>)! );
+    my $hl =
+      $self->mk_block( 'headlevel', qq!:level($to_level) :child<$lname>)! );
     $hl->attrs_by_name->{hlevel} = $to_level;
     if ( $current_level < $to_level ) {
 
@@ -93,13 +94,17 @@ sub switch_to_level {
 sub on_start_element {
     my ( $self, $el ) = @_;
     my $lname = $el->local_name;
+
     #ALL SEMANTIC BLOCKS HAVE level 1
     # all sem blocks is UPPER CASE ( AND FORMATTING CODES!!!!)
-    my $is_block = ! $el->isa('Perl6::Pod::FormattingCode');
-    my $is_semantic = $is_block &&  ( $lname eq uc($lname) );
-    return $el unless ($is_semantic or $lname =~ /^head(\d+)/ );
+    my $is_block = !$el->isa('Perl6::Pod::FormattingCode');
+
+    #skip special BLOCKS _SPECIAL_
+    my $is_semantic =
+      $is_block && ( $lname eq uc($lname) ) && ( $lname !~ /^_/ );
+    return $el unless ( $is_semantic or $lname =~ /^head(\d+)/ );
     my $to_level = $is_semantic ? 1 : $1;
-    my @comms    = $self->switch_to_level($to_level, $lname);
+    my @comms = $self->switch_to_level( $to_level, $lname );
     return [ @comms, $el ];
 }
 

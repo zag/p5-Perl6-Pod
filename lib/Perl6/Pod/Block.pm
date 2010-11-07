@@ -127,7 +127,6 @@ sub on_para {
     my ( $self, $parser, $txt ) = @_;
     #process formating codes by default
     return $self->parse_para($txt);
-#    return $parser->parse_para($txt);
 }
 
 sub on_child {

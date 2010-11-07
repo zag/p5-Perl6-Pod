@@ -55,27 +55,6 @@ T
 #    diag "a".$x; exit;    
 
 }
-sub x2_acodes : Test {
-    my $t = shift;
-    my $x= $t->parse_to_xml( <<TXT);
-=begin pod
-=use Test::Tag test2
-=config test1 :we1
-=begin para
-N<erC<ds>>this is a para
-=end para
-=for test1 :w1
-test
-=for test2 
-Heelo
-=end pod
-TXT
-    $t->is_deeply_xml( $x, q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><N pod:type='code'>er<C pod:type='code'>ds</C></N>this is a para
-</para><test1 pod:type='block' we1='1' w1='1'>test
-</test1><p>Heelo
- </p></pod>#);
-
-}
 
 sub x3_test_like :Test {
     my $t= shift;

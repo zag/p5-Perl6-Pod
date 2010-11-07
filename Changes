@@ -3,6 +3,10 @@ TODO:
     - Formatting codes
     - Items
 
+
+0.26_2 7 Nov 2010
+    + implement N<> (to xhtml);
+
 0.26_1 4 Nov 2010
     + fix parsing formatcodes from text;
     + clean deprecated code
