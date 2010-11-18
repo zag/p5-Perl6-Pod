@@ -37,11 +37,6 @@ use Test::More;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
-sub on_para {
-    my ($self, $p, $t) = @_;
-    return $t;
-}
-
 sub to_xml { 
     my $self = shift;
     my $parser = shift;
