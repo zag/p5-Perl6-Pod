@@ -3,6 +3,8 @@ TODO:
     - Formatting codes
     - Items
 
+0.26_3 18 Nov 2010
+    + reimplement allow (codeblock  and C format code);
 
 0.26_2 7 Nov 2010
     + implement N<> (to xhtml);
