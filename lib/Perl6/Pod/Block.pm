@@ -22,13 +22,13 @@ use warnings;
 use Data::Dumper;
 use XML::ExtOn::Element;
 use XML::ExtOn::Context;
-use Pod::Parser; #for process format codes
+use Pod::Parser;    #for process format codes
 use base 'XML::ExtOn::Element';
 use Perl6::Pod::FormattingCode;
 
 sub new {
     my ( $class, %args ) = @_;
-    
+
     my $doc_context = new XML::ExtOn::Context::;
     my $self =
       $class->SUPER::new( context => $doc_context, name => $args{name} );
@@ -36,6 +36,7 @@ sub new {
     #save orig context
     $self->{__context}    = $args{context} || die 'need context !';
     $self->{_pod_options} = $args{options} || '';
+
     #handle class options, if defined when Module load ( =use )
     $self->{_class_options} = $args{class_options};
     $self;
@@ -46,12 +47,12 @@ sub context {
 }
 
 sub get_class_options {
-    my $self  = shift;
+    my $self       = shift;
     my $_class_opt = $self->{_class_options} || return {};
-    my $hash =  $self->context->_opt2hash($_class_opt);
+    my $hash       = $self->context->_opt2hash($_class_opt);
     my %res;
     while ( my ( $key, $val ) = each %$hash ) {
-       $res{$key} = $val->{value};
+        $res{$key} = $val->{value};
     }
     \%res
 
@@ -70,10 +71,10 @@ sub mk_block {
       || 'Perl6::Pod::Block'; # or die "Unknown block_type $name. Try =use ...";
                               #get prop
     my $block = $mod_name->new(
-        name    => $name,
-        context => $self->context,
-        options => $pod_opt,
-        class_options => $self->context->class_opts->{ $name }
+        name          => $name,
+        context       => $self->context,
+        options       => $pod_opt,
+        class_options => $self->context->class_opts->{$name}
 
     );
     return $block;
@@ -89,20 +90,20 @@ Create block element.
 sub mk_fcode {
     my $self = shift;
     my ( $name, $pod_opt ) = @_;
-    unless (defined $name) { 
+    unless ( defined $name ) {
+        warn "make $name $pod_opt";
         warn "empty" . Dumper( [ map { [ caller($_) ] } ( 0 .. 6 ) ] );
         exit;
-    warn "make $name $pod_opt"; exit;  
-    };
+    }
     my $mod_name = $self->context->use->{ $name . "<>" }
       || 'Perl6::Pod::FormattingCode'
       ;    # or die "Unknown block_type $name. Try =use ...";
            #get prop
     my $block = $mod_name->new(
-        name    => $name,
-        context => $self->context,
-        options => $pod_opt,
-        class_options => $self->context->class_opts->{ $name . "<>"}
+        name          => $name,
+        context       => $self->context,
+        options       => $pod_opt,
+        class_options => $self->context->class_opts->{ $name . "<>" }
 
     );
     return $block;
@@ -125,6 +126,7 @@ Process content of block.
 
 sub on_para {
     my ( $self, $parser, $txt ) = @_;
+
     #process formating codes by default
     return $self->parse_para($txt);
 }
@@ -195,12 +197,12 @@ sub to_sax2 {
 }
 
 sub _to_string_ {
-   my $self = shift;
-   my $elem = shift;
+    my $self = shift;
+    my $elem = shift;
     if ( ref($elem) ) {
         if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
-            return join "", map { ref($_) ? $self->_to_string_($_) : $_ }
-                  $elem->children ;
+            return join "",
+              map { ref($_) ? $self->_to_string_($_) : $_ } $elem->children;
         }
         elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
             return $elem->raw_text();
@@ -208,30 +210,50 @@ sub _to_string_ {
     }
 }
 
+# vearbatims blocks for :allow attribute
+use constant VERBATIMS=>{
+        C=>1,
+        code=>1
+};
 sub _parse_tree2_ {
     my $self = shift;
     my $elem = shift;
-    if ( ref($elem) ) {
-        if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
-            return [ map { ref($_) ? $self->_parse_tree2_($_) : $_ }
-                  $elem->children ];
-        }
-        elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
-            my %attr = ( name => $elem->cmd_name );
-            if ( my $ptree = $elem->parse_tree ) {
-                $attr{childs} = $self->_to_string_($ptree);
+    return unless ref($elem);
+    if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
+        my @res = ();
+        for ( $elem->children ) {
+            unless ( ref($_) ) {
+                push @res, $_;
+                next;
             }
-            return \%attr;
+            if (exists VERBATIMS->{$self->local_name} ) {
+                my $allow = $self->get_attr->{allow} || [];
+                my %hash;
+                @hash{ ref($allow) ? @$allow : ($allow) } = ();
+
+                if ( !exists( $hash{ $_->cmd_name } ) ) {
+                    push @res, $self->_to_string_($_);
+                    next;
+                }
+            }
+            push @res, $self->_parse_tree2_($_);
         }
+        return \@res;
     }
-    
+    elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
+        my %attr = ( name => $elem->cmd_name );
+        if ( my $ptree = $elem->parse_tree ) {
+            $attr{childs} = $self->_to_string_($ptree);
+        }
+        return \%attr;
+    }
 }
 
 sub parse_str {
     my $self = shift;
     my $str  = shift;
     my $p    = new Pod::Parser::;
-    my $res  = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str, 123 ) );
+    my $res = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str, 123 ) );
     return $res;
 }
 
@@ -258,7 +280,6 @@ sub parse_para {
     }
     return \@out;
 }
-
 
 1;
 __END__
