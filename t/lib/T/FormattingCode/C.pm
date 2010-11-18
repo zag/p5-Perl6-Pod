@@ -68,16 +68,21 @@ sub t05_extra : Test {
     my $x = $t->parse_to_xhtml( <<T);
 =para
 C<< test > & E<nbsp> >>
-sdssd C<E<>>
 T
-
     ok $x =~ /E&lt;nbsp&gt;/;
-#    diag $x;
-#    $t->is_deeply_xml( $x,
-#q#<chapter><para><code>test &gt; &amp;</code>
-#</para></chapter>#
-#   );
 }
+
+
+sub t06_allow_for_C : Test {
+    my $t = shift;
+    my $x = $t->parse_to_xhtml( <<T);
+=config C<> :allow<I E>
+=para
+sdssd C<E<nbsp>>
+T
+    ok $x =~ m{<code>&nbsp;</code>};
+}
+
 
 
 1;
