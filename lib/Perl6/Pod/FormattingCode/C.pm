@@ -52,22 +52,6 @@ use base 'Perl6::Pod::FormattingCode';
 use strict;
 use warnings;
 
-sub on_para {
-    my ($self, $p ,$t )= @_;
-    #no process format codes
-    return $t;
-}
-
-sub _html_escape {
-    my ( $txt ) =@_;
-    $txt   =~ s/&/&amp;/g;
-    $txt   =~ s/</&lt;/g;
-    $txt   =~ s/>/&gt;/g;
-#    $txt   =~ s/"/&quot;/g;
-#    $txt   =~ s/'/&apos;/g;
-    $txt
-}
-
 sub to_xhtml {
     my $self   = shift;
     my $parser = shift;
