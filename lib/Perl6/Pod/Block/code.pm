@@ -102,8 +102,8 @@ sub _html_escape {
     $txt   =~ s/&/&amp;/g;
     $txt   =~ s/</&lt;/g;
     $txt   =~ s/>/&gt;/g;
-    $txt   =~ s/"/&quot;/g;
-    $txt   =~ s/'/&apos;/g;
+#    $txt   =~ s/"/&quot;/g;
+#    $txt   =~ s/'/&apos;/g;
     $txt
 }
 1;
