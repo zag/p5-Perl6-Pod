@@ -56,13 +56,40 @@ sub to_xhtml {
     my $self   = shift;
     my $parser = shift;
     my $el =
-      $parser->mk_element('code')->add_content( $parser->_make_elements(@_) );
+#      $parser->mk_element('code')->add_content( $parser->_make_elements(@_) );
+      $parser->mk_element('code')->add_content( $self->_make_elements($parser,@_) );
     return $el;
 }
 
 sub to_docbook {
     my $self   = shift;
     return $self->to_xhtml(@_)
+}
+
+#add escaping
+sub _make_elements {
+    my $self = shift;
+    my $parser = shift;
+    my @res  = ();
+    for (@_) {
+        push @res, ref($_)
+          ? ref($_) eq 'ARRAY'
+              ? $parser->_make_elements(@$_)
+              : $_
+          : $parser->mk_characters(_html_escape($_));
+    }
+    return @res;
+}
+
+
+sub _html_escape {
+    my ( $txt ) =@_;
+    $txt   =~ s/&/&amp;/g;
+    $txt   =~ s/</&lt;/g;
+    $txt   =~ s/>/&gt;/g;
+    $txt   =~ s/"/&quot;/g;
+    $txt   =~ s/'/&apos;/g;
+    $txt
 }
 
 1;
