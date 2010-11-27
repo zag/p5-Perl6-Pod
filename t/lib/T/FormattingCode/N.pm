@@ -24,7 +24,7 @@ q#<pod6 xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>Tex
     );
 }
 
-sub t01_as_xhtml : Test {
+sub t02_as_xhtml : Test {
     my $t = shift;
     my $x = $t->parse_to_xhtml( <<T);
 =begin pod
@@ -36,6 +36,22 @@ T
     #    diag $x;
     $t->is_deeply_xml( $x,
 q|<xhtml xmlns='http://www.w3.org/1999/xhtml'><p>Text  <sup><a href='#ftn.nid1' name='nid1'>[1]</a></sup>.</p><div class='footnote'><p>NOTES</p><p><a href='#nid1' name='ftn.nid1'><sup>1.</sup></a>Same <strong>note</strong></p></div></xhtml>|
+    );
+}
+
+sub t03_as_bocbook : Test {
+    my $t = shift;
+    my $x = $t->parse_to_docbook( <<T);
+=begin pod
+=para
+Text  N<Same B<note>>.
+=end pod
+T
+
+    $t->is_deeply_xml(
+        $x,
+q|<chapter><para>Text  <footnote><para>Same <emphasis role='bold'>note</emphasis></para></footnote>.
+</para></chapter>|
     );
 }
 

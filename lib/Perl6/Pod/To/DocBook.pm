@@ -12,7 +12,9 @@ sub on_start_element {
     }
     return $el;
 }
+
 1;
+
 
 package Perl6::Pod::To::DocBook;
 
@@ -254,6 +256,15 @@ sub export_block_NAME {
     my ( $self, $el, @in ) = @_;
     return $self->mk_element('title')
       ->add_content( $self->_make_events(@in) ) ;
+}
+
+#for N clean any extra tags
+sub export_block__NOTES_ {
+    return;
+}
+
+sub export_block__NOTE_ {
+    return ;
 }
 
 1;

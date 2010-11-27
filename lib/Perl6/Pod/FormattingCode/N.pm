@@ -73,6 +73,7 @@ You can change the formatting of the footnote paragraph using CSS. Use the div.f
 =cut
 
 #FOR REAL processing SEE Perl6::Pod::To::*
+
 sub to_xhtml {
     my ( $self, $p, @in ) = @_;
 
@@ -101,15 +102,20 @@ sub on_para {
 
 =head2 to_docbook
 
-#todo
+This element is a wrapper around the contents of a footnote. 
+
+ <footnote><para> Some text </para></footnote>
+
+L<http://www.docbook.org/tdg/en/html/footnote.html>
 
 =cut
 
 sub to_docbook {
     my ( $self, $parser, @in ) = @_;
     my @content = $parser->_make_events(@in);
-    my $emp     = $parser->mk_element('emphasis')->add_content(@content);
-    $emp->attrs_by_name->{role} = 'italic';
+    my $emp     = $parser->mk_element('footnote')->add_content(
+        $parser->mk_element('para')->add_content(@content)
+        );
     return $emp;
 }
 
