@@ -75,6 +75,7 @@ sub new {
         _encoding   => 'UTF-8',
         _custom     => {},
         _class_opts => {},
+        _allow_context => {},
         @_
     );
 
