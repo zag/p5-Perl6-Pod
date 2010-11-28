@@ -39,6 +39,11 @@ use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 use Data::Dumper;
 
+sub new {
+      my ( $class, %args ) = @_;
+      my $self = $class->SUPER::new(%args, parent_context=>1);
+}
+
 sub start {
     my $self = shift;
     my ( $parser, $attr ) = @_;
