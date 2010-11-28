@@ -37,20 +37,9 @@ use Data::Dumper;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
-sub start {
-    my $self = shift;
-
-    #    warn "start";
-    #$self->delete_element->skip_content;
-}
-
-sub _to_xml {
-    my ( $self, $parser, @out ) = @_;
-
-#    my $res = $parser->mk_cdata( \@out);
-#    "<pod>".@_."</pod>"
-#    my $el = $parser->mk_element('pod')->add_content( map {ref( $_ ) ? } @out );
-#    $el;
+sub new {
+      my ( $class, %args ) = @_;
+      my $self = $class->SUPER::new(%args, parent_context=>1);
 }
 
 sub on_para {
