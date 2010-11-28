@@ -22,9 +22,16 @@ use warnings;
 use Data::Dumper;
 use XML::ExtOn::Element;
 use XML::ExtOn::Context;
+use Perl6::Pod::Parser::Context;
 use Pod::Parser;    #for process format codes
 use base 'XML::ExtOn::Element';
 use Perl6::Pod::FormattingCode;
+
+# vearbatims blocks for :allow attribute
+use constant VERBATIMS => {
+    C    => 1,
+    code => 1
+};
 
 sub new {
     my ( $class, %args ) = @_;
@@ -39,6 +46,14 @@ sub new {
 
     #handle class options, if defined when Module load ( =use )
     $self->{_class_options} = $args{class_options};
+
+    #make local context
+
+    $self->{__context} =
+      new Perl6::Pod::Parser::Context:: %{ $self->{__context} }
+      unless exists $args{parent_context};
+    $self->context->custom->{_check_allow_parent_on_} = 1
+      if exists VERBATIMS->{ $args{name} };
     $self;
 }
 
@@ -210,11 +225,6 @@ sub _to_string_ {
     }
 }
 
-# vearbatims blocks for :allow attribute
-use constant VERBATIMS=>{
-        C=>1,
-        code=>1
-};
 sub _parse_tree2_ {
     my $self = shift;
     my $elem = shift;
@@ -226,8 +236,17 @@ sub _parse_tree2_ {
                 push @res, $_;
                 next;
             }
-            if (exists VERBATIMS->{$self->local_name} ) {
-                my $allow = $self->get_attr->{allow} || [];
+            if (
+                exists VERBATIMS->{ $self->local_name }
+
+                # check parent context vars
+                || $self->context->custom->{_check_allow_parent_on_}
+               )
+            {
+                my $allow = [
+                    @{ $self->get_attr->{allow} || [] },
+                    keys %{ $self->context->{_allow_context} }
+                ];
                 my %hash;
                 @hash{ ref($allow) ? @$allow : ($allow) } = ();
 
@@ -254,7 +273,23 @@ sub parse_str {
     my $str  = shift;
     my $p    = new Pod::Parser::;
     my $res = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str, 123 ) );
-    return $res;
+    #join strings
+    my @res = ();
+    my $prev;
+    for my $item (@$res) {
+        if ( ref($item) ) {
+            if ( defined($prev) ) {
+                push @res, $prev;
+                $prev = undef;
+            }
+            push @res, $item;
+        }
+        else {
+            $prev = defined($prev) ? $prev . $item : $item;
+        }
+    }
+    if ( defined($prev) ) { push @res, $prev }
+    return \@res;
 }
 
 sub parse_para {
@@ -278,7 +313,7 @@ sub parse_para {
             }
         }
     }
-    return \@out;
+    \@out;
 }
 
 1;
