@@ -48,6 +48,7 @@ sub c02_deny_format_codes : Test {
 tets B<asdasd>
 =end pod
 T
+#    diag $x;exit;
     $t->is_deeply_xml(
         $x,
 q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><code pod:type='block'><![CDATA[    test B<some>
