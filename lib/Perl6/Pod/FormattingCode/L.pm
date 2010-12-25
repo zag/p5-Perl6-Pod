@@ -67,25 +67,27 @@ sub on_para {
             $attr->{section} = $1
         }
     }
-    $txt;
+    #parse nested formattings, i.e. L<B<name>|http://example.com>
+    $self->SUPER::on_para($parser,$lname)
 }
 
 sub to_xhtml {
     my ( $self, $parser, @in ) = @_;
     my $attr = $self->attrs_by_name();
-
     for ( $attr->{scheme} ) {
         ( /^https?/ || $attr->{section} ) && do {
             my $a   = $parser->mk_element('a');
             my $url = $attr->{address};
             $url .= "#" . $attr->{section} if $attr->{section};
             $url = $_ . "://" . $url if $attr->{is_external};
-            my $name = $attr->{name} || $attr->{address};
+            my $name = $attr->{name} || $url;
             $a->attrs_by_name()->{href} = $url;
-            $a->add_content( $parser->mk_characters($name) );
+             $a->add_content( $parser->_make_events( scalar(@in) ? @in : $name ) );
             return $a;
           }
-          || do { return $parser->mk_characters( $in[0] ) }
+          || do { 
+            return [ $parser->_make_events(@in) ];
+            }
     }
 }
 

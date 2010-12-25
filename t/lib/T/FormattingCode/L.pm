@@ -202,4 +202,37 @@ T
 </title></chapter>#)
 }
 
+
+sub l14_tags_inside_text : Test {
+    return "TODO : implement doc scheme";
+    my $t  = shift;
+    my $x = $t->parse_to_xhtml( <<'T');
+=begin pod
+=NAME test0 
+
+L<B<test1>|http://example.com> test
+L<I<Plain Ol' Documentation>|doc:perlpod>
+=end pod
+T
+    $t->is_deeply_xml( $x,
+   q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test0
+</title></head><p><a href='http://example.com'><strong>test1</strong></a> test
+</p></xhtml>#)
+}
+
+sub l15_empty_text : Test {
+    my $t  = shift;
+    my $x = $t->parse_to_xhtml( <<'T');
+=begin pod
+=NAME test0 
+
+L<http://example.com> test
+=end pod
+T
+    $t->is_deeply_xml( $x,
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test0
+</title></head><p><a href='http://example.com'>http://example.com</a> test
+</p></xhtml>#)
+}
+
 1;
