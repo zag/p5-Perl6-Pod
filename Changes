@@ -2,6 +2,10 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+
+0.26_6 25 Dec 2010
+    - L<>: add support nested codes
+
 0.26_6 29 Nov 2010
     - add :allow context for childs formatting codes
 
