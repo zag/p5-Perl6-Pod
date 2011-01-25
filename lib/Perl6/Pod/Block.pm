@@ -272,7 +272,8 @@ sub parse_str {
     my $self = shift;
     my $str  = shift;
     my $p    = new Pod::Parser::;
-    my $res = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str, 123 ) );
+    my $res = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str,  $self->context->custom->{_line_num_}
+ ) );
     #join strings
     my @res = ();
     my $prev;

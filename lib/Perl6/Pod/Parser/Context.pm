@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use Perl6::Pod::Directive::use;
 use Perl6::Pod::Directive::config;
+use Perl6::Pod::Directive::alias;
 use Perl6::Pod::Block::comment;
 use Perl6::Pod::Block::code;
 use Perl6::Pod::Block::pod;
@@ -11,6 +12,7 @@ use Perl6::Pod::Block::table;
 use Perl6::Pod::Block::output;
 use Perl6::Pod::Block::input;
 use Perl6::Pod::Parser::NOTES;
+use Perl6::Pod::FormattingCode::A;
 use Perl6::Pod::FormattingCode::C;
 use Perl6::Pod::FormattingCode::M;
 use Perl6::Pod::FormattingCode::L;
@@ -39,6 +41,7 @@ use constant {
         use     => 'Perl6::Pod::Directive::use',
         config  => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
+        alias   => 'Perl6::Pod::Directive::alias',
         code    => 'Perl6::Pod::Block::code',
         pod     => 'Perl6::Pod::Block::pod',
         para    => 'Perl6::Pod::Block::para',
@@ -56,6 +59,7 @@ use constant {
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
         'E<>' => 'Perl6::Pod::FormattingCode::E',
         'N<>' => 'Perl6::Pod::FormattingCode::N',
+        'A<>' => 'Perl6::Pod::FormattingCode::A',
     }
 };
 
@@ -70,6 +74,7 @@ sub new {
     #set default contexts
     my %args = (
         _usef       => {},
+        _alias       => {},
         _use        => DEFAULT_USE,
         _config     => {},
         _encoding   => 'UTF-8',

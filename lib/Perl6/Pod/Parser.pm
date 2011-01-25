@@ -216,8 +216,14 @@ sub end_input {
 
 sub start_block {
     my $self = shift;
-    my ( $name, $opt, $str_num ) = @_;
+    my ( $name, $opt, $str_num, $pelem ) = @_;
     my $elem = ref($name) ? $name : $self->mk_block( $name, $opt );
+    #save line num 
+    $elem->context->custom->{_line_num_} = $str_num;
+    #save RAW header
+    if ( $pelem ) {
+     $elem->context->custom->{_RAW_} = $pelem->{RAW};
+    }
     $self->start_element($elem);
 }
 

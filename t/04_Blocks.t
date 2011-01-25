@@ -13,6 +13,7 @@ use T::Block::para;
 use T::Block::table;
 use T::Block::output;
 use T::Block::input;
+use T::Directive::alias;
 Test::Class->runtests;
 
 

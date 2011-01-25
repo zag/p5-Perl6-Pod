@@ -12,8 +12,8 @@ use base qw/ XML::ExtOn /;
 
 use constant {
     NEW_LINE  => qr/^ \s* $/xms,
-    DIRECTIVE => qr/^(begin|config|encoding|end|for|use)$/xms,
-    BLOCK_NULL_CONTENT => qr/^(config|encoding|use)$/xms,
+    DIRECTIVE => qr/^(begin|config|encoding|end|for|use|alias)$/xms,
+    BLOCK_NULL_CONTENT => qr/^(config|encoding|use|alias)$/xms,
 };
 
 =head2 parse_config_str
@@ -70,7 +70,7 @@ sub stop_config {
     $elem->{NAME} = $name;
     $elem->{OPT} = join " ", @block_opt;
     my $parser = $self->{parser} || die '$self->{parser} - > undef !';
-    $parser->start_block( $elem->{NAME}, $elem->{OPT}, $elem->{LINE_NUM} );
+    $parser->start_block( $elem->{NAME}, $elem->{OPT}, $elem->{LINE_NUM}, $elem );
 }
 
 sub on_characters {
@@ -199,6 +199,8 @@ sub parse {
                     my $block = $self->mk_element($name);
                     $block->{PARA}     = $_;
                     $block->{LINE_NUM} = $str_num;
+                    #save RAW sting of line
+                    $block->{RAW} .= $_;
 
                     #start element
                     $self->start_element($block);
@@ -230,6 +232,8 @@ sub parse {
 
                         #get config string
                         my $conf = $_;
+                        #save RAW sting of config part
+                        $current->{RAW} .= $conf;
                         $conf =~ s/^=\s+(.*)?/$1/;
                         $self->parse_config_str( $current, $conf );
                     }

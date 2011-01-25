@@ -2,6 +2,10 @@ Revision history for Perl extension Perl6::Pod.
 TODO:
     - Formatting codes
     - Items
+    - Contextual aliases
+
+0.26_8 25 Jan 2011
+   - =alias, A<> - aliases
 
 0.26_6 25 Dec 2010
     - L<>: add support nested codes
