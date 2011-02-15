@@ -4,6 +4,9 @@ TODO:
     - Items
     - Contextual aliases
 
+0.26_9 15 Feb 2011
+   - =nested, :nested - nested
+
 0.26_8 25 Jan 2011
    - =alias, A<> - aliases
 
