@@ -15,7 +15,6 @@ sub on_start_element {
 
 1;
 
-
 package Perl6::Pod::To::DocBook;
 
 #$Id$
@@ -79,11 +78,9 @@ sub new {
     $self->{out_put} =
       create_pipe( 'Perl6::Pod::To::DocBook::ProcessHeads', $self->{out_put} );
     return create_pipe(
-        'Perl6::Pod::Parser::NestedAttr',
-        'Perl6::Pod::Parser::Doformatted',
-        'Perl6::Pod::Parser::ListLevels',
-        'Perl6::Pod::Parser::AddHeadLevels',
-        'Test::FilterDocBook', $self
+        'Perl6::Pod::Parser::NestedAttr', 'Perl6::Pod::Parser::Doformatted',
+        'Perl6::Pod::Parser::ListLevels', 'Perl6::Pod::Parser::AddHeadLevels',
+        'Test::FilterDocBook',            $self
     );
 }
 
@@ -197,22 +194,12 @@ sub on_end_block {
     return $el;
 }
 
-sub export_block_item {
+sub export_block__DEFN_TERM_ {
     my ( $self, $el, @p ) = @_;
-    my $elem =
-      $self->mk_element('listitem')
-      ->add_content(
-         $self->mk_element('para')->add_content( $self->_make_events(@p) ) );
-#        $self->mk_element('para')->add_content( $self->mk_characters(@p) ) );
-
-
-    #add PDO attr for use in export_block_itemlist
-    #for varlistentry
-    $elem->{POD} = $el->get_attr;
-    return $elem;
+    return $self->mk_element('term')->add_content( $self->_make_events(@p) );
 }
 
-sub export_block_itemlist {
+sub export_block__ITEM_ENTRY_ {
     my ( $self, $el, @p ) = @_;
     my $attr = $el->attrs_by_name;
     my ( $list_name, $items_name ) = @{
@@ -222,42 +209,57 @@ sub export_block_itemlist {
             definition => [ 'variablelist', 'listitem' ]
         }->{ $attr->{listtype} }
       };
-    my $list = $self->mk_element($list_name);
-    foreach (@p) {
-        next unless ref $_;
-        my $lname = $_->local_name;
-        if ( $lname eq 'listitem' ) {
-            $_->local_name($items_name);
+    unless ( $attr->{is_multi_para} ) {
+        @p =
+          ( $self->mk_element('para')->add_content( $self->_make_events(@p) ) );
+    }
+    my $res =
+      $self->mk_element($items_name)->add_content( $self->_make_events(@p) );
+    return $res;
 
-            #if variable list, then add varlistentry
-            if ( $list->local_name eq 'variablelist' ) {
-                my ($term) =
-                  ref( $_->{POD}->{term} )
-                  ? @{ $_->{POD}->{term} }
-                  : ( $_->{POD}->{term} );
+}
 
-                my $var_entry =
-                  $self->mk_element('varlistentry')
-                  ->add_content( $self->mk_element('term')
-                      ->add_content( $self->mk_characters($term) ) );
-                $var_entry->add_content($_);
-                $list->add_content($var_entry);
-
-            }
-            else {
-                $list->add_content($_);
-            }
-
+sub export_block__LIST_ITEM_ {
+    my ( $self, $el, @p ) = @_;
+    
+    #check type of list
+    my $attr = $el->attrs_by_name;
+    my ( $list_name, $items_name ) = @{
+        {
+            ordered    => [ 'orderedlist',  'listitem' ],
+            unordered  => [ 'itemizedlist', 'listitem' ],
+            definition => [ 'variablelist', 'listitem' ]
+        }->{ $attr->{listtype} }
+      };
+    my $res =
+      $self->mk_element($list_name)->add_content( $self->_make_events(@p) );
+    #do nesting
+    my $item_level = $el->attrs_by_name->{item_level} || 1;
+    #add level marker
+    if ( $list_name eq 'itemizedlist' and $item_level > 1) {
+     #get list from http://www.sagehill.net/docbookxsl/Itemizedlists.html
+     my @markers= qw/bullet opencircle box /;
+     $res->attrs_by_name->{mark} = $markers[ ($item_level-1) % 3  ];
+    } elsif ( $list_name eq 'orderedlist'){
+            #set continuation -> continues
+        if ( $attr->{number_start} != 1 ) {
+            #set continuation -> continues
+#            warn Dumper {$el->local_name => $attr};
+           $res->attrs_by_name->{continuation} = 'continues'; 
         }
     }
-
-    return $list;
+    if ( my $count = $item_level -1 ) {
+        for (1..$count) {
+            my $nest =  $self->mk_element('blockquote');
+            $res = $nest->add_content( $res);
+        }
+    }
+    return $res;
 }
 
 sub export_block_NAME {
     my ( $self, $el, @in ) = @_;
-    return $self->mk_element('title')
-      ->add_content( $self->_make_events(@in) ) ;
+    return $self->mk_element('title')->add_content( $self->_make_events(@in) );
 }
 
 #for N clean any extra tags
@@ -266,7 +268,7 @@ sub export_block__NOTES_ {
 }
 
 sub export_block__NOTE_ {
-    return ;
+    return;
 }
 
 1;

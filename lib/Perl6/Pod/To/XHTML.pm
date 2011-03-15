@@ -100,12 +100,9 @@ sub new {
     $self->{out_put} =
       create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put} );
     return create_pipe(
-        'Perl6::Pod::Parser::NestedAttr',
-        'Perl6::Pod::Parser::Doformatted',
-        'Perl6::Pod::Parser::ListLevels',
-        'Perl6::Pod::Parser::AddHeadLevels',
-        'Test::Filter',
-        $self
+        'Perl6::Pod::Parser::NestedAttr', 'Perl6::Pod::Parser::Doformatted',
+        'Perl6::Pod::Parser::ListLevels', 'Perl6::Pod::Parser::AddHeadLevels',
+        'Test::Filter',                   $self
     );
 }
 
@@ -228,26 +225,26 @@ sub _make_events {
     my @in   = $self->__expand_array_ref(@_);
     my @out  = ();
     foreach my $elem (@in) {
-        push @out,
-          ref($elem)
+        push @out, ref($elem)
           ? $elem
           : $self->mk_characters( $self->_html_escape($elem) );
     }
     return @out;
 }
 
-sub export_block_item {
+sub export_block__DEFN_TERM_ {
     my ( $self, $el, @p ) = @_;
-    my $elem =
-      $self->mk_element('listitem')->add_content( $self->_make_events(@p) );
 
-    #add POD attr for use in export_block_itemlist
-    #for varlistentry
-    $elem->{POD} = $el->get_attr;
-    return $elem;
+    return $self->mk_element('strong')->add_content( $self->_make_events(@p) )
+      ->insert_to( $self->mk_element('dt') );
 }
 
-sub export_block_itemlist {
+# <item> - $self->current_root_element
+#  <_ITEM_ENTRY_>
+#       ...
+#  </_ITEM_ENTRY_>
+# </item>
+sub export_block__ITEM_ENTRY_ {
     my ( $self, $el, @p ) = @_;
     my $attr = $el->attrs_by_name;
     my ( $list_name, $items_name ) = @{
@@ -257,36 +254,42 @@ sub export_block_itemlist {
             definition => [ 'dl', 'dd' ]
         }->{ $attr->{listtype} }
       };
-    my $list = $self->mk_element($list_name);
-    foreach (@p) {
-        next unless ref $_;
-        my $lname = $_->local_name;
-        if ( $lname eq 'listitem' ) {
-            $_->local_name($items_name);
+    my $list =
+      $self->mk_element($items_name)->add_content( $self->_make_events(@p) );
+    #check if numbered item
+    my $item_attr = $el->attrs_by_name;
+    if ( my $number =  $item_attr->{number_value}) {
+        my $value = $item_attr->{number_value};
+       $list->attrs_by_name->{value} = $value; 
+    }
+    return $list;
 
-            #if variable list, then add varlistentry
-            if ( $list->local_name eq 'dl' ) {
-                my $term = $_->{POD}->{term};
-                if ( ref($term) ) {
-                    $term = join " ", @$term;
-                }
+}
 
-                my $var_entry =
-                  $self->mk_element('dt')
-                  ->add_content( $self->mk_element('strong')
-                      ->add_content( $self->mk_characters($term) ) );
-                $var_entry->add_content($_);
-                $list->add_content($var_entry);
+sub export_block__LIST_ITEM_ {
+    my ( $self, $el, @p ) = @_;
 
-            }
-            else {
-                $list->add_content($_);
-            }
-
+    #check type of list
+    my $attr = $el->attrs_by_name;
+    my ( $list_name, $items_name ) = @{
+        {
+            ordered    => [ 'ol', 'li' ],
+            unordered  => [ 'ul', 'li' ],
+            definition => [ 'dl', 'dd' ]
+        }->{ $attr->{listtype} }
+      };
+    my $res =
+      $self->mk_element($list_name)->add_content( $self->_make_events(@p) );
+    #do nesting
+    my $item_level = $el->attrs_by_name->{item_level} || 1;
+    if ( my $count = $item_level -1 ) {
+        for (1..$count) {
+            my $nest =  $self->mk_element('blockquote');
+            $res = $nest->add_content( $res);
         }
     }
 
-    return $list;
+    return $res;
 }
 
 sub export_block_NAME {
@@ -322,10 +325,10 @@ sub export_block__NOTE_ {
     $a->add_content(
         $self->mk_element('sup')->add_content( $self->mk_characters("$nid.") )
     );
-    return $self->mk_element('p')->add_content( $a, $self->_make_events(" ",@p) );
+    return $self->mk_element('p')
+      ->add_content( $a, $self->_make_events( " ", @p ) );
 
 }
-
 
 1;
 __END__

@@ -22,14 +22,26 @@ sub t1_test_groping : Test(1) {
 T1
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>i1
-</item><item pod:type='block'>i2
-</item></itemlist></pod>#, 'group list'
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">i1
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">i2
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+</pod>
+#, 'group list'
     );
 }
 
 sub t2_two_interrupted_items_blocks : Test {
-    my $t = shift;
+
+my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 =begin pod
 =item i1
@@ -40,12 +52,32 @@ sub t2_two_interrupted_items_blocks : Test {
 =end pod
 T1
 $t->is_deeply_xml ($x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>i1
-</item><item pod:type='block'>i2
-</item></itemlist><head1 pod:type='block'>test
-</head1><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>a1
-</item><item pod:type='block'>a2
-</item></itemlist></pod>#)
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">i1
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">i2
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <head1 pod:type="block">test
+</head1>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">a1
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">a2
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+</pod>
+#)
 
 }
 
@@ -59,77 +91,183 @@ entry1
 entry2
 =end pod
 T1
-
     $t->is_deeply_xml(
         $x,
-        q#
-<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='ordered'><item pod:type='block' numbered='1'>entry1
-</item><item pod:type='block' numbered='1'>entry2
-</item></itemlist></pod>#
-    );
+        q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="ordered" pod:item_level="1">
+    <item pod:type="block" pod:number_value="1" numbered="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="1" pod:listtype="ordered">entry1
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block" pod:number_value="2" numbered="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="2" pod:listtype="ordered">entry2
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+</pod>
+#    );
 }
 
-sub t4_list_type_unrdered : Test(1) {
+sub t5_change_type_of_lists : Test(1) {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 =begin pod
-=item test
-=item test
-=item test
-=end pod
-T1
-    $t->is_deeply_xml(
-        $x, q# 
-<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>test
-</item><item pod:type='block'>test
-</item><item pod:type='block'>test
-</item></itemlist></pod>#
-      )
-
-}
-
-sub t5_definitions_list : Test(1) {
-    my $t = shift;
-    my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
-=begin pod
-=para test
-=for item :term<Term1>
-=for item :term<Term2>
-=for item :term<Term3>
+=for item 
+entry1
+=for defn
+entry2
 =end pod
 T1
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>test
-</para><itemlist pod:type='block' pod:listtype='definition'><item pod:type='block' term='Term1' /><item pod:type='block' term='Term2' /><item pod:type='block' term='Term3' /></itemlist></pod>#
+        q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">entry1
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="definition" pod:item_level="1">
+    <defn pod:type="block">
+      <_DEFN_TERM_ pod:type="block">entry2</_DEFN_TERM_>
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="definition">
+</_ITEM_ENTRY_>
+    </defn>
+  </_LIST_ITEM_>
+</pod>
+#
     );
 }
 
-sub t06_test_formatting_codes_in_lists : Test {
+
+sub t06_old_style_defenitions_list : Test {
+
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
 =begin pod
-=for item term:<TE>
-sds L<dsd>
-=for item term:<TT>
+=for item :term('TE')
+sds
+=for item :term('TT')
 * sd sds
 =head1 sd
 =end pod
 T1
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><itemlist pod:type='block' pod:listtype='unordered'><item pod:type='block'>sds <L pod:section='' pod:type='code' pod:scheme='' pod:is_external='' pod:name='' pod:address=''>dsd</L>
-</item><item pod:type='block'>* sd sds
-</item></itemlist><head1 pod:type='block'>sd
-</head1></pod>#);
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="definition" pod:item_level="1">
+    <item pod:type="block" term="TE">
+      <_DEFN_TERM_ pod:type="block">TE</_DEFN_TERM_>
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="definition">sds
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block" term="TT">
+      <_DEFN_TERM_ pod:type="block">TT</_DEFN_TERM_>
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="definition">* sd sds
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <head1 pod:type="block">sd
+</head1>
+</pod>
+#);
 }
 
-sub t6_docbook : Test {
+sub t6_unordered_lists : Test {
     my $t = shift;
-    my $x = $t->parse_to_xml( <<T1, 'Perl6::Pod::Parser::ListLevels' );
-T1
+    my $x = $t->parse_to_xml( <<T1,'Perl6::Pod::Parser::ListLevels');
+=begin pod
+=item1 aaitem
+dsdsd
+=item2 bbb
+sd
 
-    "last";
+=begin item1
+aaa
+=end item1
+
+=end pod
+T1
+    $t->is_deeply_xml(
+        $x,
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block" pod:level="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">aaitem
+dsdsd
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="2">
+    <item pod:type="block" pod:level="2">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">bbb
+sd
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="unordered" pod:item_level="1">
+    <item pod:type="block" pod:level="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:listtype="unordered">aaa
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+</pod>
+#)
 }
+
+sub t7_ordered_lists : Test {
+
+    my $t = shift;
+    my $x = $t->parse_to_xml( <<T1,'Perl6::Pod::Parser::ListLevels');
+=begin pod
+=item1 # aaitem
+=item1 # aaitem
+=item2 # bbb
+=item2 # cc
+=para
+asdasd
+=for item1 :continuedd
+# bbitem
+=end pod
+T1
+    $t->is_deeply_xml(
+        $x,q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <_LIST_ITEM_ pod:type="block" pod:listtype="ordered" pod:item_level="1">
+    <item pod:type="block" pod:number_value="1" pod:numbered="1" pod:level="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="1" pod:listtype="ordered">aaitem
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block" pod:number_value="2" pod:numbered="1" pod:level="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="2" pod:listtype="ordered">aaitem
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="ordered" pod:item_level="2">
+    <item pod:type="block" pod:number_value="1" pod:numbered="1" pod:level="2">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="1" pod:listtype="ordered">bbb
+</_ITEM_ENTRY_>
+    </item>
+    <item pod:type="block" pod:number_value="2" pod:numbered="1" pod:level="2">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="2" pod:listtype="ordered">cc
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+  <para pod:type="block">asdasd
+</para>
+  <_LIST_ITEM_ pod:type="block" pod:listtype="ordered" pod:item_level="1">
+    <item continuedd="1" pod:type="block" pod:number_value="1" pod:numbered="1" pod:level="1">
+      <_ITEM_ENTRY_ pod:type="block" pod:number_value="1" pod:listtype="ordered">bbitem
+</_ITEM_ENTRY_>
+    </item>
+  </_LIST_ITEM_>
+</pod>
+#)
+}
+
 1;
 

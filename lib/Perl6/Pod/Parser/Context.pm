@@ -12,6 +12,7 @@ use Perl6::Pod::Block::table;
 use Perl6::Pod::Block::output;
 use Perl6::Pod::Block::input;
 use Perl6::Pod::Block::nested;
+use Perl6::Pod::Block::item;
 use Perl6::Pod::Parser::NOTES;
 use Perl6::Pod::FormattingCode::A;
 use Perl6::Pod::FormattingCode::C;
@@ -50,6 +51,8 @@ use constant {
         output  => 'Perl6::Pod::Block::output',
         input   => 'Perl6::Pod::Block::input',
         nested  => 'Perl6::Pod::Block::nested',
+        item    => 'Perl6::Pod::Block::item',
+        defn    => 'Perl6::Pod::Block::item',
         '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
         'C<>'   => 'Perl6::Pod::FormattingCode::C',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',

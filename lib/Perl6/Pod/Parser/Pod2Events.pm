@@ -47,6 +47,7 @@ sub in_ambient_mode {
 sub stop_config {
     my $self = shift;
     my $elem = shift;
+    my $first_line = shift; #for numbering via #
     return if $elem->{STOP_CONFIG};    #skip already stopped
     $elem->{STOP_CONFIG} = 1;
     $elem->{OPT}         = '';
@@ -70,7 +71,7 @@ sub stop_config {
     $elem->{NAME} = $name;
     $elem->{OPT} = join " ", @block_opt;
     my $parser = $self->{parser} || die '$self->{parser} - > undef !';
-    $parser->start_block( $elem->{NAME}, $elem->{OPT}, $elem->{LINE_NUM}, $elem );
+    $parser->start_block( $elem->{NAME}, $elem->{OPT}, $elem->{LINE_NUM}, $elem , $first_line);
 }
 
 sub on_characters {
@@ -208,7 +209,8 @@ sub parse {
 
                         #for Abbreviated blocks
                         $block->{Abbr} = 1;
-                        $self->stop_config($block);
+                        #add para for detect numbering
+                        $self->stop_config($block, $data); 
 
                         #set BLOCK_DATA for Abbreviated blocks
                         $data .= "\n" if defined $data;
@@ -249,7 +251,7 @@ sub parse {
           # close stop
            my $current = $self->current_element;
            unless ( $current->{STOP_CONFIG} ) {
-             $self->stop_config($current);
+             $self->stop_config($current, $_);
             }
            my $lname = $self->current_element->local_name;
            #check if new line

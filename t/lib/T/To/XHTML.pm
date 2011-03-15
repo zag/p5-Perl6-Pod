@@ -107,8 +107,8 @@ T1
 
     $t->is_deeply_xml(
         $t->parse_to_xhtml($pod),
-        q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><ol><li>entry 
-</li><li>entry2
+        q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><ol><li value='1'>entry 
+</li><li value='2'>entry2
 </li></ol></xhtml>#
       )
 
@@ -145,9 +145,9 @@ entry2
 T1
     $t->is_deeply_xml(
         $t->parse_to_xhtml($pod),
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><dl><dt><strong>TEST</strong><dd>entry 
-</dd></dt><dt><strong>TEST2</strong><dd>entry2
-</dd></dt></dl></xhtml>#
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><dl><dt><strong>TEST</strong></dt><dd>entry 
+</dd><dt><strong>TEST2</strong></dt><dd>entry2
+</dd></dl></xhtml>#
     );
 }
 
@@ -235,7 +235,7 @@ q#<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml1
     );
 }
 
-sub a001_add_custom_heads_and_NAME : Test {
+sub z001_add_custom_heads_and_NAME : Test {
     my $t         = shift;
     my $x         = '';
     my $to_parser = new Perl6::Pod::To::XHTML::
@@ -259,11 +259,115 @@ T
     $t->is_deeply_xml(
         $x,
         q#<html xmlns='http://www.w3.org/1999/xhtml'><h1>asd
- </h1><dl><dt><strong>Term1</strong><dd><strong>1</strong>
- </dd></dt></dl><h2>sdsd
- </h2><dl><dt><strong>Term2</strong><dd>2
- </dd></dt></dl></html>#
+ </h1><dl><dt><strong>Term1</strong></dt><dd><strong>1</strong>
+ </dd></dl><h2>sdsd
+ </h2><dl><dt><strong>Term2</strong></dt><dd>2
+ </dd></dl></html>#
     );
 }
+
+sub z002_item_levels : Test {
+    my $t         = shift;
+    my $x         = '';
+    my $to_parser = new Perl6::Pod::To::XHTML::
+      out_put => \$x,
+      header  => 0,
+      body    => 0,
+      ;
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    my $str = <<T;
+=begin pod
+=item1 Term1
+=item2 sdsd
+=item1 
+2
+=end pod
+T
+    $p->parse( \$str );
+    $t->is_deeply_xml(
+        $x,
+        q#<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <ul>
+    <li>Term1
+    </li>
+  </ul>
+  <blockquote>
+    <ul>
+      <li>sdsd
+      </li>
+    </ul>
+  </blockquote>
+  <ul>
+    <li>2
+    </li>
+  </ul>
+</html>
+#
+    );
+}
+
+sub z003_ordered_levels : Test {
+    my $t         = shift;
+    my $x         = '';
+    my $to_parser = new Perl6::Pod::To::XHTML::
+      out_put => \$x,
+      header  => 0,
+      body    => 0,
+      ;
+    my ( $p, $f ) = $t->make_parser($to_parser);
+    my $str = <<T;
+=begin pod
+=item1 # Term1
+=item2 # sdsd
+=item1 # one level
+=item2 # sdsd
+=item2 # sdsd
+
+Test
+=item1 # one level
+
+
+=end pod
+T
+    $p->parse( \$str );
+    $t->is_deeply_xml(
+        $x,
+        q#<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <ol>
+    <li value="1">Term1
+</li>
+  </ol>
+  <blockquote>
+    <ol>
+      <li value="1">sdsd
+</li>
+    </ol>
+  </blockquote>
+  <ol>
+    <li value="2">one level
+</li>
+  </ol>
+  <blockquote>
+    <ol>
+      <li value="1">sdsd
+</li>
+      <li value="2">sdsd
+</li>
+    </ol>
+  </blockquote>
+  <p>Test
+</p>
+  <ol>
+    <li value="1">one level
+ </li>
+  </ol>
+</html>
+
+#
+    );
+}
+
 1;
 

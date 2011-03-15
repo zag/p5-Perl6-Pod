@@ -4,6 +4,10 @@ TODO:
     - Items
     - Contextual aliases
 
+0.26_10 15 Mar 2011
+   - lists (ordered, unordered, =defn, multi-paragraph, 
+      :!numbered, :continued, levels for items)
+
 0.26_9 15 Feb 2011
    - =nested, :nested - nested
 

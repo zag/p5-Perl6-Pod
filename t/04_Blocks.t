@@ -15,6 +15,7 @@ use T::Block::output;
 use T::Block::input;
 use T::Block::nested;
 use T::Directive::alias;
+use T::Block::item;
 Test::Class->runtests;
 
 

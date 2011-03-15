@@ -107,17 +107,57 @@ sub pl01_test_ordered : Test {
     my $pod = <<T1;
 
 =begin pod
-=for item :numbered
-entry 
-=for item :numbered
-entry2
+=for item1 :numberedd
+# entry 
+=for item1 :numberedd
+# entry2
+=for item2 
+entry l21
+=for item2 
+entry l21
+=para
+sdfsdfsdf
+
+=for item1 :numbered :continued
+asdasd
 =end pod
 T1
     $t->is_deeply_xml(
         $t->parse_to_doc($pod),
-        q#<chapter><orderedlist><listitem><para>entry 
-</para></listitem><listitem><para>entry2
-</para></listitem></orderedlist></chapter>#
+        q#<?xml version="1.0"?>
+<chapter>
+  <orderedlist>
+    <listitem>
+      <para>entry 
+</para>
+    </listitem>
+    <listitem>
+      <para>entry2
+</para>
+    </listitem>
+  </orderedlist>
+  <blockquote>
+    <itemizedlist mark="opencircle">
+      <listitem>
+        <para>entry l21
+</para>
+      </listitem>
+      <listitem>
+        <para>entry l21
+</para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <para>sdfsdfsdf
+</para>
+  <orderedlist continuation="continues">
+    <listitem>
+      <para>asdasd
+</para>
+    </listitem>
+  </orderedlist>
+</chapter>
+#
       )
 
 }
@@ -125,7 +165,6 @@ T1
 sub pl01_test_itemized : Test {
     my $t   = shift;
     my $pod = <<T1;
-
 =begin pod
 =for item 
 entry 
@@ -133,7 +172,6 @@ entry
 entry2
 =end pod
 T1
-
     $t->is_deeply_xml(
         $t->parse_to_doc($pod),
         q#<chapter><itemizedlist><listitem><para>entry 
@@ -147,13 +185,13 @@ sub pl01_test_variable : Test {
     my $pod = <<T1;
 
 =begin pod
-=for item :term<TEST> 
+=for item :term('TEST')
 entry 
-=for item :term<TEST2> 
+=for item :term('TEST2')
 entry2
 =end pod
 T1
-
+#    diag $t->parse_to_doc($pod); exit;
     $t->is_deeply_xml(
         $t->parse_to_doc($pod),
 q#<chapter><variablelist><varlistentry><term>TEST</term><listitem><para>entry 
@@ -180,6 +218,56 @@ T1
 q#<chapter><variablelist><varlistentry><term>TEST + AAA</term><listitem><para>entry1 
 </para></listitem></varlistentry><varlistentry><term>TEST2</term><listitem><para>entry2
 </para></listitem></varlistentry></variablelist></chapter>#)
+}
+
+sub z002_item_levels : Test {
+    my $t         = shift;
+    my $pod = <<T;
+=begin pod
+=item1 Term1
+=item2 sdsd
+=item3 sdsd
+=item1 
+2
+=end pod
+T
+    $t->is_deeply_xml(
+        $t->parse_to_doc($pod),
+        q#<?xml version="1.0"?>
+<chapter>
+  <itemizedlist>
+    <listitem>
+      <para>Term1
+ </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <itemizedlist mark="opencircle">
+      <listitem>
+        <para>sdsd
+ </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <blockquote>
+    <blockquote>
+      <itemizedlist mark="box">
+        <listitem>
+          <para>sdsd
+ </para>
+        </listitem>
+      </itemizedlist>
+    </blockquote>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>2
+ </para>
+    </listitem>
+  </itemizedlist>
+</chapter>
+#
+    );
 }
 
 1;

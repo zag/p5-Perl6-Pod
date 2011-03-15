@@ -100,9 +100,9 @@ sub mk_fcode {
     #      or die "Unknown block_type $name. Try =use ...";
     #get prop
     my $block = $mod_name->new(
-        name    => $name,
-        context => $self->current_context,
-        options => $pod_opt,
+        name          => $name,
+        context       => $self->current_context,
+        options       => $pod_opt,
         class_options => $self->current_context->class_opts->{ $name . "<>" }
     );
 
@@ -176,6 +176,7 @@ sub on_end_element {
 sub on_end_block {
     my $self = shift;
     my $blk  = shift;
+
     $blk->end( $self, $blk->get_attr() );
     return $blk;
 
@@ -202,27 +203,50 @@ sub begin_input {
 sub end_input {
     my $self = shift;
     #begin flush for footers
-    if ( my $f = $self->{CODE_N_HASH}) {
+    if ( my $f = $self->{CODE_N_HASH} ) {
         my $pod = "=begin _NOTES_\n";
-        foreach my $num ( sort keys %$f) {
+        foreach my $num ( sort keys %$f ) {
             my $note = $f->{$num};
-            $pod.="$num\t$note->{text}\n";
+            $pod .= "$num\t$note->{text}\n";
         }
         $pod .= "=end _NOTES_\n";
-        $self->_parse_chunk(\$pod);
+        $self->_parse_chunk( \$pod );
     }
     $self->end_document;
 }
 
 sub start_block {
     my $self = shift;
-    my ( $name, $opt, $str_num, $pelem ) = @_;
+    my ( $name, $opt, $str_num, $pelem, $first_line ) = @_;
+
+    #use item1 as item with attibute level
+    my $list_level;
+    if ( $name =~ /^item(\d+)/ ) {
+
+        #save level
+        $list_level = $1;
+
+        #rename block item123 to item
+        $name = 'item';
+    }
     my $elem = ref($name) ? $name : $self->mk_block( $name, $opt );
-    #save line num 
+
+    #set lists level in attributes
+    if ( defined $list_level ) {
+        $elem->attrs_by_name->{level} = $list_level;
+    }
+
+    #save line num
     $elem->context->custom->{_line_num_} = $str_num;
+
     #save RAW header
-    if ( $pelem ) {
-     $elem->context->custom->{_RAW_} = $pelem->{RAW};
+    if ($pelem) {
+        $elem->context->custom->{_RAW_} = $pelem->{RAW};
+    }
+    #save first_line of para ( if exists)
+    if ($first_line) {
+        $elem->context->custom->{_FIRST_PARA_LINE_} = $first_line;
+
     }
     $self->start_element($elem);
 }
@@ -239,6 +263,7 @@ sub __expand_array_ref {
 sub para {
     my $self = shift;
     my $txt  = shift;
+
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
         $txt = $elem->on_para( $self, $txt );
@@ -256,8 +281,12 @@ sub para {
 sub end_block {
     my $self = shift;
     my ( $name, $opt, $str_num ) = @_;
-    my $elem = $self->current_element;    #mk_block($name, $opt);
+    my $elem       = $self->current_element;    #mk_block($name, $opt);
+    my $last_block = $elem->local_name;
     $self->end_element($elem);
+
+    #save last processed block name
+    $self->current_context->custom->{_last_block_} = $last_block;
 }
 
 sub run_para {
@@ -301,7 +330,8 @@ sub __make_events {
                 type => 'start_fcode',
                 data => $name
               },
-              $self->__make_events( ref($el->{childs}) ? @{ $el->{childs} } : $el->{childs}),
+              $self->__make_events(
+                ref( $el->{childs} ) ? @{ $el->{childs} } : $el->{childs} ),
               {
                 type => 'end_fcode',
                 data => $name
