@@ -248,7 +248,6 @@ sub export_block__LIST_ITEM_ {
             #set continuation -> continues
         if ( $attr->{number_start} != 1 ) {
             #set continuation -> continues
-#            warn Dumper {$el->local_name => $attr};
            $res->attrs_by_name->{continuation} = 'continues'; 
         }
     }

@@ -4,6 +4,9 @@ TODO:
     - Items
     - Contextual aliases
 
+0.26_12 26 Mar 2011
+    - fix Test.pm
+
 0.26_11 26 Mar 2011
     - use para for content of =nested
     - multi_paragraph for =para

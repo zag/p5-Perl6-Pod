@@ -23,7 +23,7 @@ use Perl6::Pod::To::DocBook;
 use Perl6::Pod::To::XHTML;
 use XML::ExtOn::Writer;
 use XML::Flow;
-use XML::ExtOn ('create_pipe');
+use XML::ExtOn qw( create_pipe split_pipe);
 
 sub new {
     my $class = shift;
@@ -133,6 +133,7 @@ sub make_parser {
     }
     my $out_formatter = $_[-1];
     my $p = create_pipe( 'Perl6::Pod::Parser', @_ );
+    $out_formatter =  split_pipe($p)->[-1]; 
     return wantarray ? ( $p, $out_formatter ) : $p;
 
 }
