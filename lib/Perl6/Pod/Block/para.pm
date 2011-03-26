@@ -37,13 +37,43 @@ use base 'Perl6::Pod::Block';
 use Test::More;
 use Data::Dumper;
 
-sub to_xhtml { 
-    my $self = shift;
+sub on_para {
+    my $self   = shift;
     my $parser = shift;
-    my $el = $parser->mk_element('p')->add_content( $parser->_make_elements( @_));
-    return $el;
+    my $txt    = shift;
+    return unless defined $txt;
+    my $line_num = $self->context->custom->{_line_num_};
+
+    #process multi paragraph blocks
+    if ( ( my @paras = split( /[\n\r]\s*[\n\r]/, $txt ) ) > 1 ) {
+
+        # convert paragrapths to para
+        #skip tag
+        $self->local_name('_PARA_CONTAINER_');
+        for (@paras) {
+
+            $parser->start_block( 'para', '', $line_num );
+            $parser->para($_);
+            $parser->end_block( 'para', '', $line_num );
+
+        }
+        return;
+
+    }
+
+    #process single para
+    return $self->SUPER::on_para( $parser, $txt );
 }
 
+sub to_xhtml {
+    my $self   = shift;
+    my $parser = shift;
+    return [ $parser->_make_elements(@_) ]
+      if $self->local_name eq '_PARA_CONTAINER_';
+    my $el =
+      $parser->mk_element('p')->add_content( $parser->_make_elements(@_) );
+    return $el;
+}
 
 1;
 

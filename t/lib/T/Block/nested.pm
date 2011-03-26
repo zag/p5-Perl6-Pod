@@ -28,8 +28,16 @@ Test B<er>
 T
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><nested pod:type='block'><nested pod:type='block'>Test <B pod:type='code'>er</B>
-</nested></nested></pod>#
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <nested pod:type="block">
+    <nested pod:type="block">
+      <para pod:type="block">Test <B pod:type="code">er</B>
+</para>
+    </nested>
+  </nested>
+</pod>
+#
     );
 }
 
@@ -46,8 +54,16 @@ Test B<er>
 T
     $t->is_deeply_xml(
         $x,
-q#<chapter><blockquote><blockquote>Test <emphasis role='bold'>er</emphasis>
-</blockquote></blockquote></chapter>#
+q#<?xml version="1.0"?>
+<chapter>
+  <blockquote>
+    <blockquote>
+      <para>Test <emphasis role="bold">er</emphasis>
+</para>
+    </blockquote>
+  </blockquote>
+</chapter>
+#
     );
 }
 
@@ -64,10 +80,50 @@ Test B<er>
 T
     $t->is_deeply_xml(
         $x,
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><blockquote><blockquote>Test <strong>er</strong></blockquote></blockquote></xhtml>#
+q#<?xml version="1.0"?>
+<xhtml xmlns="http://www.w3.org/1999/xhtml">
+  <blockquote>
+    <blockquote>
+      <p>Test <strong>er</strong>
+</p>
+    </blockquote>
+  </blockquote>
+</xhtml>
+#
     );
 }
 
+
+sub c03_implicit_code : Test {
+    my $t = shift;
+    my $x = $t->parse_to_xml(<<T);
+=begin pod
+=begin nested
+para1
+
+ apara1
+ wawe
+
+  para2 asd asd
+asdad
+=end nested
+=end pod
+T
+    $t->is_deeply_xml(
+        $x,
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <nested pod:type="block">
+    <para pod:type="block">para1</para>
+    <code pod:type="block"><![CDATA[ apara1
+  wawe]]></code>
+    <para pod:type="block">  para2 asd asd
+ asdad
+ </para>
+  </nested>
+</pod>
+#);
+}
 
 
 1;

@@ -53,7 +53,6 @@ i2
 =item # i2
 =end pod
 T1
-#    diag $x;exit;
     $t->is_deeply_xml(
         $x,
 q#<?xml version="1.0"?>
@@ -80,7 +79,6 @@ i2
 =defn item1
 =end pod
 T1
-#   diag $x; exit;
     $t->is_deeply_xml(
         $x,
 q#<?xml version="1.0"?>
@@ -158,6 +156,54 @@ T1
   </item>
 </pod>
 #)
+}
+
+sub t4_implicit_code_blocks : Test(1) {
+    my $t = shift;
+    my $x = $t->parse_to_xml( <<T1, );
+=begin pod
+=begin defn
+i1
+
+text
+
+  code data
+  data text
+
+=end defn
+=begin item
+test
+
+ code
+ code
+
+
+=end item
+=end pod
+T1
+    $t->is_deeply_xml(
+        $x,
+q#<?xml version="1.0"?>
+<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
+  <defn pod:type="block">
+    <_DEFN_TERM_ pod:type="block">i1</_DEFN_TERM_>
+    <_ITEM_ENTRY_ pod:is_multi_para="1" pod:type="block" pod:listtype="definition">
+      <para pod:type="block">
+text</para>
+      <code pod:type="block"><![CDATA[  code data
+  data text]]></code>
+    </_ITEM_ENTRY_>
+  </defn>
+  <item pod:type="block">
+    <_ITEM_ENTRY_ pod:is_multi_para="1" pod:type="block" pod:listtype="unordered">
+      <para pod:type="block">test</para>
+      <code pod:type="block"><![CDATA[ code
+ code]]></code>
+    </_ITEM_ENTRY_>
+  </item>
+</pod>
+#
+    );
 }
 
 1;

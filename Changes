@@ -4,6 +4,12 @@ TODO:
     - Items
     - Contextual aliases
 
+0.26_11 26 Mar 2011
+    - use para for content of =nested
+    - multi_paragraph for =para
+    - skip  blocks _UPPER_CASE_BLOCKS_ when rendering
+    - implicit code blocks in =nested, =item, =defn blocks
+
 0.26_10 15 Mar 2011
    - lists (ordered, unordered, =defn, multi-paragraph, 
       :!numbered, :continued, levels for items)

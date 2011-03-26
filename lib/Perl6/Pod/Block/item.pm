@@ -170,12 +170,12 @@ use base 'Perl6::Pod::Block';
 
 # set type of item
 sub start {
-    my ($self, $parser,  $attr ) = @_;
+    my ( $self, $parser, $attr ) = @_;
     if ( my $txt = $self->context->custom->{_FIRST_PARA_LINE_} ) {
-     if ( $txt =~ m/^\s*#\s+/ ) {
-        $self->attrs_by_name->{numbered} = 1;
+        if ( $txt =~ m/^\s*#\s+/ ) {
+            $self->attrs_by_name->{numbered} = 1;
 
-     }
+        }
     }
     return $self;
 }
@@ -192,8 +192,9 @@ sub item_type {
           or exists $pod_attr->{term};
 
     my $type = 'unordered';
-    if ( $self->is_numbered) {
-#    if ( exists $pod_attr->{numbered} || $self->attrs_by_name->{numbered} ) {
+    if ( $self->is_numbered ) {
+
+  #    if ( exists $pod_attr->{numbered} || $self->attrs_by_name->{numbered} ) {
         $type = 'ordered';
     }
     $type;
@@ -202,8 +203,8 @@ sub item_type {
 sub is_numbered {
     my $self     = shift;
     my $pod_attr = $self->get_attr;
-    return  $pod_attr->{numbered} if exists $pod_attr->{numbered};
-    $self->attrs_by_name->{numbered} || 0 ;
+    return $pod_attr->{numbered} if exists $pod_attr->{numbered};
+    $self->attrs_by_name->{numbered} || 0;
 }
 
 sub item_level {
@@ -215,6 +216,7 @@ sub on_para {
     my $self   = shift;
     my $parser = shift;
     my $txt    = shift;
+
     #clean #
     if ( $txt =~ s/^\s*#\s+// ) {
         $self->attrs_by_name->{numbered} = 1;
@@ -258,24 +260,33 @@ sub on_para {
     #support multi paragrapth contents
     if ( ( my @paras = split( /[\n\r]\s*[\n\r]/, $txt ) ) > 1 ) {
 
-        my $item_entry =
-          $self->mk_block( '_ITEM_ENTRY_' );
+        my $item_entry = $self->mk_block('_ITEM_ENTRY_');
         $item_entry->attrs_by_name->{is_multi_para} = 1;
         $item_entry->attrs_by_name->{listtype}      = $self->item_type;
         $parser->start_block($item_entry);
 
         # convert paragrapths to para
         for (@paras) {
-            $parser->start_block( 'para', '', $line_num );
+
+       # check if block code
+       #detect type of para
+       #from S26
+       #A code block may be implicitly specified as one or more lines of text,
+       #each of which starts with a whitespace character at the block's virtual
+       #left margin. The implicit code block is then terminated by a blank line.
+            my $lines                 = scalar @{ [m/^/mg] };
+            my $lines_with_whitespace = scalar @{ [m/^(\s+)\S+/mg] };
+            my $block_type =
+              ( $lines == $lines_with_whitespace ) ? 'code' : 'para';
+            $parser->start_block( $block_type, '', $line_num );
             $parser->para($_);
-            $parser->end_block( 'para', '', $line_num );
+            $parser->end_block( $block_type, '', $line_num );
         }
         $parser->end_block($item_entry);
         undef $txt;
         return;
     }
-    my $item_entry =
-      $self->mk_block( '_ITEM_ENTRY_' );
+    my $item_entry = $self->mk_block('_ITEM_ENTRY_');
     $item_entry->attrs_by_name->{listtype} = $self->item_type;
     $parser->start_block($item_entry);
     $parser->run_para( $self->SUPER::on_para( $parser, $txt ) );
@@ -343,6 +354,7 @@ L<http://www.tizag.com/htmlT/lists.php>
 sub to_xhtml {
     my $self = shift;
     my ( $parser, @p ) = @_;
+
     #skip item element tagname
     return [ $parser->_make_events(@p) ];
 }
@@ -354,13 +366,15 @@ sub to_docbook {
         return $parser->mk_element('varlistentry')
           ->add_content( $parser->_make_events(@p) );
     }
+
     #setup type of _LIST_ITEM_
     if ( my $_LIST_ITEM_ = $parser->current_root_element ) {
-         my $rattr = $_LIST_ITEM_->attrs_by_name;
-         my $attr = $self->attrs_by_name;
-         #setup first number for ordered lists
-         # 'continuation' docbook attribute
-         # http://www.docbook.org/tdg/en/html/orderedlist.html
+        my $rattr = $_LIST_ITEM_->attrs_by_name;
+        my $attr  = $self->attrs_by_name;
+
+        #setup first number for ordered lists
+        # 'continuation' docbook attribute
+        # http://www.docbook.org/tdg/en/html/orderedlist.html
         if ( exists $attr->{number_value} ) {
             unless ( exists $rattr->{number_start} ) {
                 $rattr->{number_start} = $attr->{number_value};

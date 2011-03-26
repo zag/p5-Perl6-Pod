@@ -72,6 +72,33 @@ use Test::More;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
+sub on_para {
+    my $self   = shift;
+    my $parser = shift;
+    my $txt    = shift;
+    return unless defined $txt;
+    my $line_num = $self->context->custom->{_line_num_};
+
+    # convert paragrapths to para
+    # skip tag
+    for ( split( /[\n\r]\s*[\n\r]/, $txt ) ) {
+
+       # check if block code
+       #detect type of para
+       #from S26
+       #A code block may be implicitly specified as one or more lines of text,
+       #each of which starts with a whitespace character at the block's virtual
+       #left margin. The implicit code block is then terminated by a blank line.
+        my $lines                 = scalar @{ [m/^/mg] };
+        my $lines_with_whitespace = scalar @{ [m/^(\s+)\S+/mg] };
+        my $block_type = ( $lines == $lines_with_whitespace ) ? 'code' : 'para';
+        $parser->start_block( $block_type, '', $line_num );
+        $parser->para($_);
+        $parser->end_block( $block_type, '', $line_num );
+    }
+    return;
+}
+
 =head2 to_xhtml
 
     =nested

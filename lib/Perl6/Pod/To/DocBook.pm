@@ -139,7 +139,11 @@ sub process_element {
         }
     }
     else {
-
+        #skip all _UPPER_CASE_SPESIAL_ tags
+        my $lname = $elem->local_name();
+        if (  $lname eq uc($lname) and $lname=~ /^_+.*_$/ ) {
+            return [ $self->_make_elements(@_) ]
+        }
         #make characters from unhandled texts
         my @out_content = ();
         for (@_) {
