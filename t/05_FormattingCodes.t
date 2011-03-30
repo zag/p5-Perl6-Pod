@@ -14,6 +14,7 @@ use T::FormattingCode::X;
 use T::FormattingCode::E;
 use T::FormattingCode::N;
 use T::FormattingCode::L;
+use T::FormattingCode::U;
 Test::Class->runtests;
 
 

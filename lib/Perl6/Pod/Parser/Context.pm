@@ -21,6 +21,7 @@ use Perl6::Pod::FormattingCode::L;
 use Perl6::Pod::FormattingCode::P;
 use Perl6::Pod::FormattingCode::B;
 use Perl6::Pod::FormattingCode::I;
+use Perl6::Pod::FormattingCode::U;
 use Perl6::Pod::FormattingCode::X;
 use Perl6::Pod::FormattingCode::E;
 use Perl6::Pod::FormattingCode::N;
@@ -62,6 +63,7 @@ use constant {
         'X<>'   => 'Perl6::Pod::FormattingCode::X',
 
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
+        'U<>' => 'Perl6::Pod::FormattingCode::U',
         'E<>' => 'Perl6::Pod::FormattingCode::E',
         'N<>' => 'Perl6::Pod::FormattingCode::N',
         'A<>' => 'Perl6::Pod::FormattingCode::A',
