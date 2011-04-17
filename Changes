@@ -1,8 +1,11 @@
 Revision history for Perl extension Perl6::Pod.
 TODO:
-    - Formatting codes
-    - Items
+    - Formatting codes S<>, Z<>, V<>
     - Contextual aliases
+    - Standard configuration options: :margin 
+
+0.27 17 Apr 2011
+   - S<>, D<>, R<>, K<>, T<>, D<>, Z<>
 
 0.26_13 30 Mar 2011
     - U<> code

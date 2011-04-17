@@ -64,21 +64,24 @@ Render to
    &lt;
     
 =cut
+my %line_break = (NEL=>1);
 
 sub to_xhtml {
     my ( $self, $parser, $line ) = @_;
-
     #split by ;
     [
         map {
             s/^\s+//;
             s/\s+$//;
+            if ( exists $line_break{$_} ) {
+                $parser->mk_element('br');
+            } else {
             $parser->mk_characters( _to_xhtml_entity($_) )
+            }
           }
           split( /\s*;\s*/, $line )
     ];
 }
-
 sub _to_xhtml_entity {
     my $str = shift;
     if ( $str !~ /^\d/ ) {
@@ -99,7 +102,7 @@ sub _to_xhtml_entity {
         return sprintf '&#%d;', eval $str;
     }
 
-    die "Unsupported identity in E<>";
+    die "Unsupported identity $_ in E<>";
 }
 
 =head2 to_docbook
@@ -113,8 +116,18 @@ Render to
 =cut
 
 sub to_docbook {
-    my ( $self, $parser, @in ) = @_;
-    return $self->to_xhtml( $parser, @in );
+    my ( $self, $parser, $line ) = @_;
+    #split by ;
+    [
+        map {
+            s/^\s+//;
+            s/\s+$//;
+            if (exists $line_break{$_} ) {()} else {
+            # <br/> not exists in docbook
+            $parser->mk_characters( _to_xhtml_entity($_) )}
+            }
+          split( /\s*;\s*/, $line )
+    ];
 }
 
 1;
