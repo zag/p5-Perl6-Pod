@@ -127,7 +127,9 @@ sub parse {
     my $src        = shift;
     my $need_close = 0;
     unless ( ref $src ) {
-        $src = new IO::File:: $src , 'r' or die "Eror open file: $!";
+        # set current file
+        my $filepath = ( $self->current_context->custom->{src} = $src ) || '';
+        $src = new IO::File:: $src , 'r' or die "Eror open file:$filepath $!";
         $need_close = 1;
     }
     if ( ref $src eq 'SCALAR' ) {

@@ -1,8 +1,12 @@
 Revision history for Perl extension Perl6::Pod.
 TODO:
-    - Formatting codes S<>, Z<>, V<>
+    - Declarator blocks
+    - Formatting code: P<>
     - Contextual aliases
     - Standard configuration options: :margin 
+
+0.28 25 Apr 2011
+    - track Pod filepath
 
 0.27 17 Apr 2011
    - S<>, D<>, R<>, K<>, T<>, D<>, Z<>
