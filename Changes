@@ -5,6 +5,8 @@ TODO:
     - Contextual aliases
     - Standard configuration options: :margin 
 
+0.29 13 May 2011
+    - fix defn, R<>
 0.28 25 Apr 2011
     - track Pod filepath
 

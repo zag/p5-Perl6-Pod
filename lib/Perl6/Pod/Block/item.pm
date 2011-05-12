@@ -243,7 +243,7 @@ sub on_para {
 
         }
         else {
-            if ( $txt =~ s/[\s\n]*([^\s\n]+)(?:\Z|\n)// ) {
+            if ( $txt =~ s/^(.*)(?:\Z|\n)// ) {
                 $term = $1;
             }
         }

@@ -27,6 +27,7 @@ use Perl6::Pod::FormattingCode::S;
 use Perl6::Pod::FormattingCode::U;
 use Perl6::Pod::FormattingCode::X;
 use Perl6::Pod::FormattingCode::E;
+use Perl6::Pod::FormattingCode::R;
 use Perl6::Pod::FormattingCode::T;
 use Perl6::Pod::FormattingCode::N;
 use Perl6::Pod::FormattingCode::Z;
