@@ -43,8 +43,18 @@ use_ok 'Perl6::Pod::Block';
 use_ok 'XML::ExtOn', 'create_pipe';
 use_ok 'XML::ExtOn::Writer';
 use_ok 'Perl6::Pod::Parser::Pod2Events';
-
 sub parse_pod {
+    my $t1    = shift;
+    my $class = shift || 'Perl6::Pod::Parser::DUMMY';
+    my $ev    = ${class}->new;
+    my $ev1 = new Perl6::Pod::Parser::Pod2Events:: parser => $ev;
+    my $buf;
+    open( my $f1, "<", \$t1 );
+    $ev1->parse($f1);
+    close $f1;
+    return $ev;
+}
+sub parse_pod_ {
     my $t1    = shift;
     my $class = shift || 'Perl6::Pod::Parser::DUMMY';
     my $ev    = ${class}->new;

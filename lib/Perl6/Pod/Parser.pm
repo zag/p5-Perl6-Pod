@@ -27,7 +27,7 @@ use IO::File;
 use Test::More;
 use Data::Dumper;
 use Perl6::Pod::Parser::Pod2Events;
-use XML::ExtOn;
+use XML::ExtOn('create_pipe');
 use Pod::Parser;
 use Perl6::Pod::Parser::Context;
 use Perl6::Pod::FormattingCode;
@@ -40,7 +40,7 @@ sub new {
     unless ( exists $self->{__DEFAULT_CONTEXT} ) {
 
         #create default context
-        my $context =
+        my $context = $self->{MAIN_PARSER} ? $self->{MAIN_PARSER}->{__DEFAULT_CONTEXT} : 
           new Perl6::Pod::Parser::Context:: vars => { root => $self };
 
         #setup defaults
@@ -116,7 +116,10 @@ sub _parse_chunk {
         $need_close = 1;
         $src        = $fh;
     }
-    my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $self;
+    my $p = new Perl6::Pod::Parser:: {MAIN_PARSER=>$self};
+    my $pipe = create_pipe($p,$self);
+    my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $pipe;
+#    my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $self;
     $ev->parse($src);
     $ev->new_line;
     $src->close if $need_close;
@@ -166,7 +169,7 @@ sub on_start_block {
 #    warn "on child!" .$elem->local_name ." -> on_child( ". $blk->local_name.")";;
 #        $elem->on_child( $blk)
     }
-    $blk->start( $self, $blk->get_attr() );
+    $blk->start( $self->{MAIN_PARSER} || $self, $blk->get_attr() );
     return $blk;
 }
 
@@ -179,7 +182,7 @@ sub on_end_block {
     my $self = shift;
     my $blk  = shift;
 
-    $blk->end( $self, $blk->get_attr() );
+    $blk->end( $self->{MAIN_PARSER} ||$self, $blk->get_attr() );
     return $blk;
 
 }
@@ -268,7 +271,7 @@ sub para {
 
     #hadnle block on_para
     if ( my $elem = $self->current_element ) {
-        $txt = $elem->on_para( $self, $txt );
+        $txt = $elem->on_para( $self->{MAIN_PARSER} ||$self, $txt );
         return unless defined $txt;
         if ( ref($txt) ) {
             $self->run_para($txt);

@@ -368,6 +368,31 @@ T
 #
     );
 }
+sub z005_ordered_levelz : Test {
+    my $t         = shift;
+    my $str = <<T;
+=begin pod
+=item1 # Term1
+=for item1 :numbered
+# sdsd
+=end pod
+T
+    my $content='';
+    my $p1 = new Perl6::Pod::To::XHTML::
+      header  => 0,
+      body => 0,
+      out_put => \$content;
+    $p1->parse( \$str );
+    $t->is_deeply_xml(
+        $content,
+
+        q#<?xml version="1.0"?>
+ <html xmlns='http://www.w3.org/1999/xhtml'><ol><li value='1'>Term1
+ </li><li value='2'>sdsd
+ </li></ol></html>
+#
+    );
+}
 
 1;
 

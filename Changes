@@ -4,6 +4,8 @@ TODO:
     - Formatting code: P<>
     - Contextual aliases
     - Standard configuration options: :margin 
+0.30 19 May 2011
+    - fix invoke start() for TO::XHTML 
 
 0.29 13 May 2011
     - fix defn, R<>

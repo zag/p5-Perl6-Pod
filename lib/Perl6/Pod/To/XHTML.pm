@@ -100,6 +100,7 @@ sub new {
     $self->{out_put} =
       create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put} );
     return create_pipe(
+    #    'Perl6::Pod::Parser',
         'Perl6::Pod::Parser::NestedAttr', 'Perl6::Pod::Parser::Doformatted',
         'Perl6::Pod::Parser::ListLevels', 'Perl6::Pod::Parser::AddHeadLevels',
         'Test::Filter',                   $self
