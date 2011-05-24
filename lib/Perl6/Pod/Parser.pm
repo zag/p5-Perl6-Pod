@@ -38,7 +38,6 @@ sub new {
     my $self = XML::ExtOn::new(@_);
 
     unless ( exists $self->{__DEFAULT_CONTEXT} ) {
-
         #create default context
         my $context = $self->{MAIN_PARSER} ? $self->{MAIN_PARSER}->{__DEFAULT_CONTEXT} : 
           new Perl6::Pod::Parser::Context:: vars => { root => $self };
@@ -116,7 +115,7 @@ sub _parse_chunk {
         $need_close = 1;
         $src        = $fh;
     }
-    my $p = new Perl6::Pod::Parser:: {MAIN_PARSER=>$self};
+    my $p = new Perl6::Pod::Parser:: {MAIN_PARSER=>$self,__DEFAULT_CONTEXT=>$self->current_context};
     my $pipe = create_pipe($p,$self);
     my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $pipe;
 #    my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $self;
