@@ -209,7 +209,7 @@ sub end_input {
     #begin flush for footers
     if ( my $f = $self->{CODE_N_HASH} ) {
         my $pod = "=begin _NOTES_\n";
-        foreach my $num ( sort keys %$f ) {
+        foreach my $num ( sort { $a <=> $b } keys %$f ) {
             my $note = $f->{$num};
             $pod .= "$num\t$note->{text}\n";
         }
