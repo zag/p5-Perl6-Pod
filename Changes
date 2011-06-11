@@ -4,6 +4,9 @@ TODO:
     - Formatting code: P<>
     - Contextual aliases
     - Standard configuration options: :margin 
+
+
+   - fix sorting for notes (<sup>)
 0.31 24 May 2011
     - fix context for parse_chank()
 0.30 19 May 2011
