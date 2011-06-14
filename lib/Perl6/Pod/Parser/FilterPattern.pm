@@ -44,15 +44,7 @@ sub on_start_element {
 
         my $pname = $pelem->local_name;
         unless ( $pelem->attrs_by_name->{no_name} ) {
-
-            #check name
-            # analize attr !
-            if ( $pname =~ s/^!// ) {
-                next if $lname eq $pname;
-            }
-            else {
                 next unless $lname eq $pname;
-            }
         }
 
         #skip if empty attributes in pattern

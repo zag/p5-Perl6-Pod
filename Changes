@@ -5,6 +5,8 @@ TODO:
     - Contextual aliases
     - Standard configuration options: :margin 
 
+0.33 14 Jun 2011
+   - dix exclude
 0.32 14 Jun 2011
    - exclude rule for FilterPattern.pm
    - fix sorting for notes (<sup>)
