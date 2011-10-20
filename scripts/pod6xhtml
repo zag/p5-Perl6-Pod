@@ -3,7 +3,7 @@
 #
 #         FILE: pod6xhtml
 #
-#  DESCRIPTION:  save Perl pod as pod6xhtml
+#  DESCRIPTION:  save Perl 6 pod as pod6xhtml
 #       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
 #===============================================================================
 #$Id: pod6docbook 573 2009-07-11 12:54:28Z zag $
@@ -13,18 +13,23 @@ use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
 use Perl6::Pod::To::XHTML;
-my ( $help, $man, $doctype, $add_head, $css_file );
+my ( $help, $man, $doctype, $add_head, $css_file, $no_body, @libs, $command );
+$no_body = 0;
 my %opt = ( help => \$help, man => \$man, );
 GetOptions(
     \%opt, 'help|?', 'man',
     'doctype|t=s' => \$doctype,
     'add_head|ah' => \$add_head,
-    'css|t=s' => \$css_file
+    'no_body|nb' => \$no_body,
+    'css=s' => \$css_file,
+    'module|M=s' =>\@libs,
+    'command|c=s' => \$command
 ) or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
-my %args = ( header => $add_head, doctype => $doctype, body=>1 );
+#my %args = ( header => $add_head, doctype => $doctype, body=>1 );
+my %args = ( header => $add_head, doctype => $doctype, body=> ! $no_body);
 
 if ($css_file) {
     $args{head} = [
@@ -39,13 +44,23 @@ my $infile = shift;
 my $in_fd;
 if ($infile) {
     $in_fd = new IO::File:: "< $infile" or die "$infile: $!";
+} elsif ( $command ) {
+    $in_fd = \"=begin pod \n$command\n=end pod";
 }
 else {
     $in_fd = \*STDIN;
 }
 
 my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XHTML', \*STDOUT, %args );
-$p->parse($in_fd);
+$p->begin_input;
+#include libs ( see $Perl6::Pod::Lib::PERL6POD )
+if (@libs) {
+    my $use  = join "\n" => map { "=use $_" } @libs;
+    $use .= "\n";
+    $p->_parse_chunk(\$use);
+}
+$p->_parse_chunk($in_fd);
+$p->end_input;
 
 exit;
 
@@ -58,12 +73,15 @@ exit;
   pod6xhtml < somefile.pod > somefile.xhtml
   pod6xhtml somefile.pod  > somefile.xhtml
   pod6xhtml -css main.css somefile.pod  > somefile.xhtml
-
+  pod6xhtml -M Perl6::Pod::Lib somefile.pod  > somefile.xhtml
 
    options:
     -doctype|t - set doc type . Default html;
     -add_head|ah - If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output.
+    -no_body|nb - skip <body> tag
     -css <css_file> - add stylesheet link to head of xhtml file.
+    -module|M - add extensions for Pod ( could use multiple )
+    -command|c - set one line Pod text for processing (instead from STDIN)
     -help  - print help message
     -man   - print man page
 
@@ -91,6 +109,21 @@ If this option is set , pod6xhtml will emit a DOCTYPE as the first line of outpu
 
 Add stylesheet link to head of xhtml file
 
+=item B<-no_body>, B<-nb> 
+
+Skip "body" tag
+
+=item B<-M> package name 
+
+Add Perl6::Pod plugins
+
+=item B<-command>, B<-c>
+
+Set one line Pod text for processing (instead from STDIN).
+For example:
+
+  pod6xhtml -nb -t div -M Perl6::Pod::Lib -c '=Include test.pod' > out.xhtm
+
 =back
 
 =head1 DESCRIPTION
@@ -108,7 +141,7 @@ Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2010 by Zahatski Aliaksandr
+Copyright 2009-2011 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

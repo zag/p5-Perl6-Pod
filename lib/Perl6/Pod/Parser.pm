@@ -118,7 +118,6 @@ sub _parse_chunk {
     my $p = new Perl6::Pod::Parser:: {MAIN_PARSER=>$self,__DEFAULT_CONTEXT=>$self->current_context};
     my $pipe = create_pipe($p,$self);
     my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $pipe;
-#    my $ev = new Perl6::Pod::Parser::Pod2Events:: parser => $self;
     $ev->parse($src);
     $ev->new_line;
     $src->close if $need_close;
