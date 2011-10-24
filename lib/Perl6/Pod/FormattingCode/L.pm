@@ -30,6 +30,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Perl6::Pod::FormattingCode;
+use Perl6::Pod::Parser::Utils qw(parse_URI );
 use base 'Perl6::Pod::FormattingCode';
 
 sub on_para {
@@ -37,13 +38,13 @@ sub on_para {
 
     #extract linkname and content
     my ( $lname, $lcontent ) = ( '', defined $txt ? $txt : '' );
+    my $attr = $self->attrs_by_name;
+#=pod
     if ( $lcontent =~ /\|/ ) {
         my @all;
         ( $lname, @all ) = split( /\s*\|\s*/, $lcontent );
         $lcontent = join "", @all;
     }
-    my $attr = $self->attrs_by_name;
-
     #clean whitespaces
     $lname =~ s/^\s+//;
     $lname =~ s/\s+$//;
@@ -52,7 +53,7 @@ sub on_para {
       $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
     $attr->{scheme} = $scheme||'';
     $address = '' unless defined $address;
-    $attr->{is_external} = $address =~ s/^\/\///;
+    $attr->{is_external} = $address =~ s/^\/\/// || $scheme && $scheme !~ /^file/;
 
     #clean whitespaces
     $address =~ s/^\s+//;
@@ -67,6 +68,8 @@ sub on_para {
             $attr->{section} = $1
         }
     }
+# =cut
+#    %{$attr} = %{parse_URI($txt)};
     #parse nested formattings, i.e. L<B<name>|http://example.com>
     $self->SUPER::on_para($parser,$lname)
 }
@@ -75,11 +78,11 @@ sub to_xhtml {
     my ( $self, $parser, @in ) = @_;
     my $attr = $self->attrs_by_name();
     for ( $attr->{scheme} ) {
-        ( /^https?/ || $attr->{section} ) && do {
+        ( /^https?|.*$/ || $attr->{section} ) && do {
             my $a   = $parser->mk_element('a');
             my $url = $attr->{address};
             $url .= "#" . $attr->{section} if $attr->{section};
-            $url = $_ . "://" . $url if $attr->{is_external};
+            $url = $_ . ":". (/^https?/ ? '//' : '') . $url if $attr->{is_external};
             my $name = $attr->{name} || $url;
             $a->attrs_by_name()->{href} = $url;
              $a->add_content( $parser->_make_events( scalar(@in) ? @in : $name ) );

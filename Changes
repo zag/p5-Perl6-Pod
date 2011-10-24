@@ -5,6 +5,8 @@ TODO:
     - Contextual aliases
     - Standard configuration options: :margin 
 
+0.35 24 Oct 2011
+   - fix schemes for L<>
 0.34 20 Oct 2011
    - add -c, -M, -nb options for pod6xhtml
 0.33 14 Jun 2011

@@ -107,7 +107,7 @@ sub parse_URI {
     }
     $attr->{scheme} = $scheme;
     $address = '' unless defined $address;
-    $attr->{is_external} = $address =~ s/^\/\///;
+    $attr->{is_external} = $address =~ s/^\/\/// || $scheme =~ /mailto|skype/;
 
     #clean whitespaces
     $address =~ s/^\s+//;

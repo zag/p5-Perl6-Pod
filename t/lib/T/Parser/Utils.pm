@@ -13,7 +13,7 @@ use Data::Dumper;
 use Perl6::Pod::To::XHTML;
 use Perl6::Pod::Parser::Utils qw(parse_URI );
 use base 'TBase';
-sub p00_http_file : Test(5) {
+sub p00_http_file : Test(6) {
     my $t = shift;
     my $u1 = 'Name|http://example.com/index.html#txt';
     is_deeply parse_URI($u1),
@@ -61,6 +61,16 @@ sub p00_http_file : Test(5) {
         'address'     => '../data/test.pod',
         'scheme'      => 'file'
       }, $u5;
+    my $u6 ='mailto:zag@rrru';
+    is_deeply parse_URI($u6),
+     {
+           'is_external' => 1,
+           'name' => '',
+           'section' => '',
+           'address' => 'zag@rrru',
+           'scheme' => 'mailto'
+        }, $u6 ;
+#        diag Dumper parse_URI('L<#id>');
 }
 
 sub p01_include_rules  : Test(3){

@@ -26,7 +26,7 @@ T
     $t->is_deeply_xml(
         $x,
 q% <pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>test <L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='1' pod:name='' pod:address='perl.org'>  http://perl.org  </L>
-test <L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='' pod:name='haname' pod:address='perl.html'> haname | http:perl.html  </L>
+test <L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='1' pod:name='haname' pod:address='perl.html'> haname | http:perl.html  </L>
  </para></pod>%
     );
 }
@@ -45,7 +45,7 @@ T
  <para pod:type='block'>test 
 <L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='1' pod:name='' pod:address='perl.org'>http://perl.org</L>
 test 
-<L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='' pod:name='' pod:address='perl.html'>http:perl.html</L>
+<L pod:section='' pod:type='code' pod:scheme='http' pod:is_external='1' pod:name='' pod:address='perl.html'>http:perl.html</L>
 </para></pod>#
     );
 }
@@ -120,7 +120,7 @@ L<mailto:devnull@rt.cpan.org>
 T
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><L pod:section='' pod:type='code' pod:scheme='mailto' pod:is_external='' pod:name='' pod:address='devnull@rt.cpan.org'>mailto:devnull@rt.cpan.org</L>
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><L pod:section='' pod:type='code' pod:scheme='mailto' pod:is_external='1' pod:name='' pod:address='devnull@rt.cpan.org'>mailto:devnull@rt.cpan.org</L>
 </para></pod>#
     );
 }
@@ -137,9 +137,9 @@ T
     $t->is_deeply_xml(
         $x,
 q%<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>
-<L pod:section='' pod:type='code' pod:scheme='doc' pod:is_external='' pod:name='' pod:address='Data::Dumper'>doc:Data::Dumper</L>
-<L pod:section='' pod:type='code' pod:scheme='doc' pod:is_external='' pod:name='' pod:address='perldata'>doc:perldata</L>
-<L pod:section='Special Features' pod:type='code' pod:scheme='doc' pod:is_external='' pod:name='' pod:address=''>doc:#Special Features</L>
+<L pod:section='' pod:type='code' pod:scheme='doc' pod:is_external='1' pod:name='' pod:address='Data::Dumper'>doc:Data::Dumper</L>
+<L pod:section='' pod:type='code' pod:scheme='doc' pod:is_external='1' pod:name='' pod:address='perldata'>doc:perldata</L>
+<L pod:section='Special Features' pod:type='code' pod:scheme='doc' pod:is_external='1' pod:name='' pod:address=''>doc:#Special Features</L>
 </para></pod>%
     );
 }
@@ -154,8 +154,8 @@ L<issn:1087-903X>
 T
     $t->is_deeply_xml(
         $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><L pod:section='' pod:type='code' pod:scheme='defn' pod:is_external='' pod:name='' pod:address='lexiphania'>defn:lexiphania</L>
-<L pod:section='' pod:type='code' pod:scheme='issn' pod:is_external='' pod:name='' pod:address='1087-903X'>issn:1087-903X</L>
+q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'><L pod:section='' pod:type='code' pod:scheme='defn' pod:is_external='1' pod:name='' pod:address='lexiphania'>defn:lexiphania</L>
+<L pod:section='' pod:type='code' pod:scheme='issn' pod:is_external='1' pod:name='' pod:address='1087-903X'>issn:1087-903X</L>
 </para></pod>#
     );
 
@@ -172,8 +172,8 @@ T
     $t->is_deeply_xml(
         $x,
 q%<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>
-<L pod:section='' pod:type='code' pod:scheme='man' pod:is_external='' pod:name='' pod:address='find(1)'>man:find(1)</L>
-<L pod:section='Compound Commands' pod:type='code' pod:scheme='man' pod:is_external='' pod:name='' pod:address='bash(1)'>man:bash(1)#Compound Commands</L>
+<L pod:section='' pod:type='code' pod:scheme='man' pod:is_external='1' pod:name='' pod:address='find(1)'>man:find(1)</L>
+<L pod:section='Compound Commands' pod:type='code' pod:scheme='man' pod:is_external='1' pod:name='' pod:address='bash(1)'>man:bash(1)#Compound Commands</L>
  </para></pod>%
       )
 
@@ -234,5 +234,21 @@ q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test0
 </title></head><p><a href='http://example.com'>http://example.com</a> test
 </p></xhtml>#)
 }
+sub l15_mailto_xhtml : Test {
+    my $t  = shift;
+    my $x = $t->parse_to_xhtml( <<'T');
+=begin pod
+=NAME test0 
+
+L<mailto:example.com> test
+=end pod
+T
+    $t->is_deeply_xml( $x,
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><head><title>test0
+</title></head><p><a href='mailto:example.com'>mailto:example.com</a> test
+</p></xhtml>
+#)
+}
+
 
 1;
