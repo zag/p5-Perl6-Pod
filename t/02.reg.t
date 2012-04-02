@@ -6,7 +6,29 @@ use strict;
 use warnings;
 1;
 
+package Perl6::Pod6::Block;
+use strict;
+use warnings;
+1;
+package Perl6::Pod6::Autoactions;
+use strict;
+use warnings;
+use Data::Dumper;
+use vars qw($AUTOLOAD);
 
+sub new {
+    my $class = shift;
+    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    $self;
+}
+sub delimblock {
+    my $self =shift;
+    my $ref = shift;
+    warn Dumper {"delimblock"=>$ref};
+    return {'block_content'=>1}
+}
+
+1;
 package main;
 use strict;
 use warnings;
@@ -44,14 +66,14 @@ TXT
     <token: newline> <hs> \n
     <token: emptyline> <hs> \n
 
-    <rule: Pod::File><block=delimblock>
+    <rule: File><block=delimblock>
     <rule: directives> begin | for | END | end | config
-    <rule: block_content>  <block=delimblock> | <block=text_content> 
+    <rule: block_content>  <MATCH=delimblock> | <MATCH=text_content> 
     <rule: text_content> <emptyline> | (?{ $MATCH{type} = "text"}) <line=([^\n]+)>  \n
-    <rule:  pair> \:<name=(\w+)>
+    <rule: pair> \:<name=(\w+)>
     <rule: pod_block> =begin pod
                       =end pod
-    <token: delimblock>
+    <token: delimblock> <matchpos><matchline>
     ^ <spaces=hs>? =begin <.hs> (?! directives ) <.hs> <name=(\w+)>
                         ( ( <.newline> <.hs> = )? <.hs>  <[attr=pair]>+ % <.hs> )*
 #                        (?{ ($MATCH{name} eq 'pod') 
@@ -67,7 +89,7 @@ TXT
 #                          && ( say "pod off" ); 1;})
 
     }xms;
-    if ( $ref =~ $r ) {
+    if ( $ref =~ $r->with_actions(Perl6::Pod6::Autoactions->new) ) {
        say Dumper  {%/}->{File};
     }
     else  { }
