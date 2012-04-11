@@ -1,15 +1,73 @@
 #########################
 # Test pod blocks
 #
-package Perl6::Pod::Grammars1;
+package Perl6::Pod6::To::Dump;
+use base 'Perl6::Pod::Utl::AbstractVisiter';
 use strict;
 use warnings;
+sub new {
+    my $class = shift;
+    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    $self;
+}
+
+sub _dump_ {
+    my $self = shift;
+    my $el = shift;
+    (my $type  = ref($el) ) =~ s/.*:://;
+    my %dump = (class=> $type);
+    $dump{name} = $el->{name} if exists $el->{name};
+    unless (UNIVERSAL::can($el, 'content')) {
+        use Data::Dumper;
+        die 'bad element: ' .Dumper($el);
+    }
+    ;
+    if  ( my $content = $el->content )  {
+       $dump{content}  = [ map { $self->_dump_($_) } @{ $el->content } ];
+    }
+    \%dump;
+}
+ 
+sub __default_method {
+    my $self =shift;
+    my $n = shift;
+    return $self->_dump_($n);
+#    my $method = ref($n);
+#    $method =~ s/.*:://;
+#    die ref($self) . ": Method '$method' for class " . ref($n) . " not implemented at ";
+}
+
 1;
+
 
 package Perl6::Pod6::Block;
 use strict;
 use warnings;
+
+sub new {
+    my $class = shift;
+    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    $self;
+}
+
+sub content {
+    my $self = shift;
+    $self->{content}
+}
+
 1;
+package Perl6::Pod6::File;
+use base 'Perl6::Pod6::Block';
+use strict;
+use warnings;
+1;
+
+package Perl6::Pod6::Text;
+use base 'Perl6::Pod6::Block';
+use strict;
+use warnings;
+1;
+
 package Perl6::Pod6::Autoactions;
 use strict;
 use warnings;
@@ -21,14 +79,26 @@ sub new {
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
     $self;
 }
+
+sub File {
+    my $self =shift;
+    my $ref = shift;
+    return Perl6::Pod6::File->new( %$ref );
+}
+
 sub delimblock {
     my $self =shift;
     my $ref = shift;
-    warn Dumper {"delimblock"=>$ref};
-    return {'block_content'=>1}
+    return Perl6::Pod6::Block->new( %$ref, srctype=>'delim');
 }
-
+sub text_content {
+    my ($self, $ref ) = @_;
+#    die Dumper $ref;
+#    return undef;
+    return Perl6::Pod6::Text->new($ref);
+}
 1;
+
 package main;
 use strict;
 use warnings;
@@ -43,13 +113,6 @@ use Data::Dumper;
 
 my $ref = <<TXT;
 =begin pod
-
-=begin para :23
-=begin code
-asd
-=end code
-=end para
-
 =end pod
 TXT
 #    <rule: block_content> <block=text_content>
@@ -66,31 +129,163 @@ TXT
     <token: newline> <hs> \n
     <token: emptyline> <hs> \n
 
-    <rule: File><block=delimblock>
+    <rule: File><[content=delimblock]>+
     <rule: directives> begin | for | END | end | config
     <rule: block_content>  <MATCH=delimblock> | <MATCH=text_content> 
-    <rule: text_content> <emptyline> | (?{ $MATCH{type} = "text"}) <line=([^\n]+)>  \n
+    <rule: text_content> 
+#                         <emptyline> 
+#                         (?{ $MATCH{type} = "empty"})
+#                | 
+                        (?! <hs>? \=begin ) # not start with directive
+                         <line=([^\n]+)>  \n 
+                         (?{ $MATCH{type} = "text" }) 
+    <rule: varbatim_content>
     <rule: pair> \:<name=(\w+)>
     <rule: pod_block> =begin pod
                       =end pod
     <token: delimblock> <matchpos><matchline>
     ^ <spaces=hs>? =begin <.hs> (?! directives ) <.hs> <name=(\w+)>
                         ( ( <.newline> <.hs> = )? <.hs>  <[attr=pair]>+ % <.hs> )*
+                        <.newline>
 #                        (?{ ($MATCH{name} eq 'pod') 
 #                            &&  ($IN_POD = 1)
-#                            && (  say "pod On :VMARGIN ".length($MATCH{spaces} )) ; 1; 
+#                            && ( say "pod On :VMARGIN ".length( $MATCH{spaces} ) ) ; 1; 
 #                        })
 
-                        <[content=block_content]>+
+                        <[content=block_content]>*
                        
-                       =end <.hs> <\name> <.hs> <.newline>
+     ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>
 #                       (?{ ( $MATCH{name} eq 'pod' ) 
-#                          &&  !($IN_POD = 0) 
+#                          && !( $IN_POD = 0 ) 
 #                          && ( say "pod off" ); 1;})
 
     }xms;
+=pod
     if ( $ref =~ $r->with_actions(Perl6::Pod6::Autoactions->new) ) {
-       say Dumper  {%/}->{File};
+#       my $out;
+       my $todump = Perl6::Pod6::To::Dump->new->visit( {%/}->{File} );
+       say Dumper $todump;
+#       say Dumper  {%/}->{File}
     }
     else  { }
+=cut
+my @t;
+my $STOP_TREE = 1;
+
+@t = (
+'=begin pod :name
+testline codeblock
+  sdsdsd
+
+=end pod
+'
+);
+
+my @t2 = (
+);
+$STOP_TREE = 2;
+
+my @grammars = ('=begin pod
+d
+=end pod
+', {
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'class' => 'Text'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'class' => 'File'
+        }, '=pod + text',
+
+
+'=begin pod
+=begin para
+=end para
+=end pod
+',{
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'Text'
+                                                           }
+                                                         ],
+                                            'name' => 'para',
+                                            'class' => 'Block'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'class' => 'File'
+        }, 'para insite =pod',
+
+
+'=begin pod
+=begin para
+=begin para
+text
+=end para
+=end para
+=end pod
+',{
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'content' => [
+                                                                            {
+                                                                              'class' => 'Text'
+                                                                            }
+                                                                          ],
+                                                             'name' => 'para',
+                                                             'class' => 'Block'
+                                                           }
+                                                         ],
+                                            'name' => 'para',
+                                            'class' => 'Block'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'class' => 'File'
+        }, 'para inside para',
+
+);
+
+@grammars = @t if scalar(@t);
+while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
+    $name //= $src;
+    my $dump;
+    if ( $src =~ $r->with_actions(Perl6::Pod6::Autoactions->new) ) {
+       $dump = Perl6::Pod6::To::Dump->new->visit( {%/}->{File} ) 
+    }
+    else  { 
+    fail($name);
+    die "Can't parse: \n" . $src;
+
+    }
+#       say Dumper $dump;
+#       say Dumper  {%/}->{File}
+    if ($STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
+    if ($STOP_TREE == 1 ) { say Dumper( $dump ); exit; }
+
+    is_deeply( $dump, $extree, $name )
+      || do { say "fail Deeeple" . Dumper( $dump, $extree, ); exit; };
+
+}
+
 exit;
