@@ -23,6 +23,8 @@ sub _dump_ {
         die 'bad element: ' . Dumper($el);
     }
     if ( my $content = $el->content ) {
+        warn Dumper($el) unless ref($content) eq 'ARRAY';
+#        warn "CONENET".Dumper ($el->content );
         $dump{content} = [ map { $self->_dump_($_) } @{ $el->content } ];
     }
     \%dump;
@@ -55,6 +57,12 @@ sub new {
 
 sub content {
     my $self = shift;
+#    if ( my $cnt = $self->{content} ) {
+#      if (ref($cnt) eq 'ARRAY') {
+#        my @ref = grep {ref($_)} @$cnt;
+#        return scalar(@ref) ? @ref : undef
+#      }
+#    }
     $self->{content};
 }
 
@@ -115,18 +123,32 @@ sub delimblock {
     return Perl6::Pod6::Block->new( %$ref, srctype => 'delim' );
 }
 
+
 sub delimblock_raw {
     my $self = shift;
     my $ref  = shift;
     return Perl6::Pod6::Block->new( %$ref, srctype => 'delimraw' );
 }
 
+sub paragraph_block {
+    my $self = shift;
+    my $ref  = shift;
+    return Perl6::Pod6::Block->new( %$ref, srctype => 'paragraph' );
+}
+
+sub abbr_block {
+    my $self = shift;
+    my $ref  = shift;
+    return Perl6::Pod6::Block->new( %$ref, srctype => 'abbr' );
+}
 sub text_content {
     my ( $self, $ref ) = @_;
-
-    #    die Dumper $ref;
+   #     die Dumper $ref;
     #    return undef;
-    return Perl6::Pod6::Text->new($ref);
+    if ( my $type = $ref->{type} ) {
+       return $self->raw_content($ref) if  $type eq 'raw'
+    }        
+    return Perl6::Pod6::Text->new($ref)
 }
 
 sub raw_content {
@@ -135,6 +157,14 @@ sub raw_content {
     #        die Dumper $ref;
     #        return undef;
     return Perl6::Pod6::RawText->new($ref);
+}
+sub AAUTOLOAD {
+    my $self = shift;
+    my $method = $AUTOLOAD;
+#    $method =~ s/.*:://;
+    return if $method eq 'DESTROY';
+    warn $method . Dumper(\@_);
+    return $_[0];
 }
 1;
 
@@ -187,45 +217,50 @@ my $r               = qr{
     <rule: raw_content> 
                         .*?
     <rule: block_content> 
-         <MATCH=delimblock_raw>
+         <MATCH=paragraph_block>
+        | <MATCH=delimblock_raw>
         | <MATCH=delimblock> 
-       |  <MATCH=text_content> 
+        | <MATCH=abbr_block>
+        | <MATCH=text_content> 
     <rule: text_content> 
-#                         <emptyline> 
-#                         (?{ $MATCH{type} = "empty"})
-#                | 
-                       ( (?! <hs>? \=\w+ ) # not start with directive
-                         <line=([^\n]+)>  \n 
-                         (?{ $MATCH{type} = "text"; say "Text:" . $MATCH{line} . "CURRENT_VMARGIN" . $CURRENT_VMARGIN }) )+
+          ( (?! <hs>? \=\w+ ) # not start with directive
+            <line=([^\n]+)>  \n 
+           (?{ $MATCH{type} = $ARG{content_type} // "text"}) )+
+
     <rule: varbatim_content>
     <rule: pair> \:<name=(\w+)>
     <rule: pod_block> =begin pod
                       =end pod
 
-    <token: delimblock_raw>         <matchpos><matchline>
+    <token: delimblock_raw>             <matchpos><matchline>
     ^ <spaces=hs>? =begin <.hs> <!directives> <name=raw_content_blocks>
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
 
-            <content=raw_content>?
+            <[content=raw_content]>?
 
      ^ <spacesend=hs>?  =end <.hsp> <\name> <.hs> <.newline>
 
-    <token: delimblock>             <matchpos><matchline>
+    <token: delimblock>                 <matchpos><matchline>
     ^ <spaces=hsp>? =begin <.hs> <!directives>  <name=(\w+)>
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
-#                        (?{ ($MATCH{name} eq 'pod') 
-#                            &&  ($IN_POD = 1) ; $CURRENT_VMARGIN = length($MATCH{spaces}) ;
-#                            && ( say "pod On :VMARGIN ".length( $MATCH{spaces} ) ) ; 1; 
-#                        })
-#        <[content=block_content(?{ parentblock=>$MATCH{name} })]>*
-
-                    <[content=block_content]>*
-                       
+                   <[content=block_content]>*
      ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>
-#                       (?{ ( $MATCH{name} eq 'pod' ) 
-#                          && !( $IN_POD = 0 ) 
-#                          && ( say "pod off" ); 1;})
 
+    <token: paragraph_block>             <matchpos><matchline>
+    ^ <spaces=hsp>? =for <.hs> <!directives>   
+            (  <name=raw_content_blocks>
+               (?{ $MATCH{content_type} = "raw"})
+              | <name=(\w+)>  )
+     ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
+                    <[content=text_content(:content_type)]>*
+      <.newline>?
+
+     <token: abbr_block>                 <matchpos><matchline>
+    ^ <spaces=hsp>? =<!directives> (  <name=raw_content_blocks>
+               (?{ $MATCH{content_type} = "raw"})
+              | <name=(\w+)>  )
+                    <[content=text_content(:content_type)]>*
+         <.emptyline>?
     }xms;
 
 
@@ -233,25 +268,20 @@ my @t;
 my $STOP_TREE = 1;
 
 @t = (
-    '=begin pod
-        =begin Sode
-                asd
-        =end Sode
-    =begin para
-      asd
-    =end para
-
+'=begin pod
+=code
 asdasd
+=para
+asd
 
-  =begin code
-        =begin para
-         =end para
-  =end code
+e
 =end pod
-');
+'
+);
 
 my @t2 = ();
 $STOP_TREE = 2;
+#$STOP_TREE = 1;
 
 my @grammars = (
     '=begin pod
@@ -280,7 +310,6 @@ d
             {
                 'content' => [
                     {
-                        'content' => [ { 'class' => 'Text' } ],
                         'name'    => 'para',
                         'class'   => 'Block'
                     }
@@ -324,6 +353,97 @@ text
         'class' => 'File'
     },
     'para inside para',
+
+    '=begin pod
+        =begin Sode
+                asd
+        =end Sode
+    =begin code
+      asd
+    =end code
+
+asdasd
+=end pod
+',
+ {
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'RawText'
+                                                           }
+                                                         ],
+                                            'name' => 'Sode',
+                                            'class' => 'Block'
+                                          },
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'RawText'
+                                                           }
+                                                         ],
+                                            'name' => 'code',
+                                            'class' => 'Block'
+                                          },
+                                          {
+                                            'class' => 'Text'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'class' => 'File'
+        }, 'raw content',
+'=begin pod
+=for Para
+asd
+   =for code
+   sd
+=for para
+re
+=end pod
+',
+{
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'RawText'
+                                                           }
+                                                         ],
+                                            'name' => 'Para',
+                                            'class' => 'Block'
+                                          },
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'RawText'
+                                                           }
+                                                         ],
+                                            'name' => 'code',
+                                            'class' => 'Block'
+                                          },
+                                          {
+                                            'content' => [
+                                                           {
+                                                             'class' => 'Text'
+                                                           }
+                                                         ],
+                                            'name' => 'para',
+                                            'class' => 'Block'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'class' => 'File'
+        }, 'paragraph_block (with text and raw)',
 
 );
 
