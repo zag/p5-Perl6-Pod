@@ -1,4 +1,4 @@
-package Perl6::Pod::Block;
+package Perl6::Pod::Block1;
 
 #$Id$
 

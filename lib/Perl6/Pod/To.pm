@@ -1,4 +1,4 @@
-package Perl6::Pod::To;
+package Perl6::Pod::To1;
 
 #$Id$
 

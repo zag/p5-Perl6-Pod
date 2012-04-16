@@ -8,6 +8,7 @@ package Perl6::Pod::Utl::AbstractVisiter;
 use strict;
 use warnings;
 use vars qw($AUTOLOAD);
+use Carp;
 
 sub new {
     my $class = shift;
@@ -21,30 +22,42 @@ sub visit {
 
     #get type of file
     my $ref = ref($n);
-    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod6::Block' )
-        || UNIVERSAL::isa( $n, 'Plo::File' )
-        || UNIVERSAL::isa( $n, 'Plo::template' ) )
+    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
+#        || UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
+#        || UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) 
+        )
     {
         if ( ref($n) eq 'ARRAY' ) {
             $self->visit($_) for @$n;
         }
         else {
-            die "Unknown node type $n (not isa Soy::base)";
+            die "Unknown node type $n (not isa Perl6::Pod::Block)";
         }
     }
 
-    my $method = ref($n);
-    $method =~ s/.*:://;
-
+    my $method = $self->__get_method_name($n);
     #make method name
     $self->$method($n);
+}
+
+=head2 __get_method_name $ref
+
+make mathod name from object ref
+
+=cut
+sub __get_method_name {
+    my $self = shift;
+    my $el = shift || croak "wait object !";
+    my $method = ref($el);
+    $method =~ s/.*:://;
+    return $method;
 }
 
 sub visit_childs {
     my $self = shift;
     foreach my $n (@_) {
-        die "Unknow type $n (not isa Soy::base)"
-          unless UNIVERSAL::isa( $n, 'Soy::base' );
+        die "Unknow type $n (not isa Perl6::Pod::Block)"
+          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' );
         foreach my $ch ( @{ $n->childs } ) {
             $self->visit($ch);
         }
