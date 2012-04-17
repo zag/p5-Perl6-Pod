@@ -13,6 +13,48 @@ use Carp;
 use Perl6::Pod::Autoactions;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
+=pod
+        use     => 'Perl6::Pod::Directive::use',
+        config  => 'Perl6::Pod::Directive::config',
+        comment => 'Perl6::Pod::Block::comment',
+        alias   => 'Perl6::Pod::Directive::alias',
+        code    => 'Perl6::Pod::Block::code',
+        pod     => 'Perl6::Pod::Block::pod',
+        para    => 'Perl6::Pod::Block::para',
+        table   => 'Perl6::Pod::Block::table',
+        output  => 'Perl6::Pod::Block::output',
+        input   => 'Perl6::Pod::Block::input',
+        nested  => 'Perl6::Pod::Block::nested',
+        item    => 'Perl6::Pod::Block::item',
+        defn    => 'Perl6::Pod::Block::item',
+        '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
+        'C<>'   => 'Perl6::Pod::FormattingCode::C',
+        'D<>'   => 'Perl6::Pod::FormattingCode::D',
+        'K<>'   => 'Perl6::Pod::FormattingCode::K',
+        'M<>'   => 'Perl6::Pod::FormattingCode::M',
+        'L<>'   => 'Perl6::Pod::FormattingCode::L',
+        'B<>'   => 'Perl6::Pod::FormattingCode::B',
+        'I<>'   => 'Perl6::Pod::FormattingCode::I',
+        'X<>'   => 'Perl6::Pod::FormattingCode::X',
+
+        #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
+        'U<>' => 'Perl6::Pod::FormattingCode::U',
+        'E<>' => 'Perl6::Pod::FormattingCode::E',
+        'N<>' => 'Perl6::Pod::FormattingCode::N',
+        'A<>' => 'Perl6::Pod::FormattingCode::A',
+        'R<>' => 'Perl6::Pod::FormattingCode::R',
+        'S<>' => 'Perl6::Pod::FormattingCode::S',
+        'T<>' => 'Perl6::Pod::FormattingCode::T',
+        'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
+        'Z<>' => 'Perl6::Pod::FormattingCode::Z',
+=cut
+use constant {
+    DEFAULT_USE => {
+        'File'  => '-',
+        '*'     => 'Perl6::Pod::Block',
+        '*<>'   => 'Perl6::Pod::FormattingCode',
+    }
+};
 
 sub new {
     my $class = shift;
@@ -26,12 +68,62 @@ sub w  {
     return $_[0]->writer
 }
 
+#TODO then visit to child -> create new context !
+sub visit_childs {
+    my $self = shift;
+    foreach my $n (@_) {
+        die "Unknow type $n (not isa Perl6::Pod::Block)"
+          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) || 
+          UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
+        foreach my $ch ( @{ $n->childs } ) {
+            $self->visit($ch);
+        }
+    }
+}
+
+sub visit {
+    my $self = shift;
+    my $n    = shift;
+
+    #get type of file
+    my $ref = ref($n);
+    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
+        )
+    {
+        if ( ref($n) eq 'ARRAY' ) {
+            $self->visit($_) for @$n;
+        }
+        else {
+            die "Unknown node type $n (not isa Perl6::Pod::Block)";
+        }
+    }
+    # here convert lexer base block to 
+    # instance of DOM class
+    my $name = $n->name;
+    my $map = DEFAULT_USE;
+    my  $class;
+    if ( UNIVERSAL::isa( $n, 'Perl6::Pod::FormattingCode' ) ) {
+        $class = $map->{$name.'<>'} || $map->{'*<>'}
+    } else {
+        $class = $map->{$name} || $map->{'*'}
+    }
+    #create instance
+    my $el =  $class eq '-' ? $n : $class->new( %$n ) ;
+    #if no instanse -> skip this element
+    return undef unless ($el);
+
+    my $method = $self->__get_method_name($el);
+
+    #make method name
+    $self->$method($el);
+}
+
 sub __get_method_name {
     my $self = shift;
     my $el = shift || croak "empty object !";
-    my $method = ref($el);
-    $method =~ s/.*:://;
-    my $name = $el->name;
+    my $method;
+    use Data::Dumper;
+    my $name = $el->name || die "Can't get element name for ".Dumper($el);
     if ( UNIVERSAL::isa($el,'Perl6::Pod::FormattingCode') ) {
         $method = "code_$name";
     } else {
@@ -47,7 +139,7 @@ sub block_File {
 
 sub block_pod { 
     my $self = shift;
-return $self->visit_childs(@_)}
+   return $self->visit_childs(@_)}
 
 sub parse_blocks {
     my $self = shift;
@@ -188,6 +280,8 @@ use Test::More 'no_plan';#tests => 1;                      # last test to print
 my $text = '=begin pod
 
  Para
+
+dr
 
 =end pod
 ';

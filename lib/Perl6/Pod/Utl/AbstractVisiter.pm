@@ -23,8 +23,6 @@ sub visit {
     #get type of file
     my $ref = ref($n);
     unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
-#        || UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
-#        || UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) 
         )
     {
         if ( ref($n) eq 'ARRAY' ) {
@@ -57,7 +55,8 @@ sub visit_childs {
     my $self = shift;
     foreach my $n (@_) {
         die "Unknow type $n (not isa Perl6::Pod::Block)"
-          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' );
+          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) || 
+          UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
         foreach my $ch ( @{ $n->childs } ) {
             $self->visit($ch);
         }
