@@ -13,6 +13,7 @@ use Carp;
 use Perl6::Pod::Autoactions;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
+
 =pod
         use     => 'Perl6::Pod::Directive::use',
         config  => 'Perl6::Pod::Directive::config',
@@ -48,33 +49,50 @@ use base 'Perl6::Pod::Utl::AbstractVisiter';
         'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
         'Z<>' => 'Perl6::Pod::FormattingCode::Z',
 =cut
+
 use constant {
     DEFAULT_USE => {
-        'File'  => '-',
-        '*'     => 'Perl6::Pod::Block',
-        '*<>'   => 'Perl6::Pod::FormattingCode',
+        'File' => '-',
+        'para' => 'Perl6::Pod::Block::para',
+        '*'    => 'Perl6::Pod::Block',
+        '*<>'  => 'Perl6::Pod::FormattingCode',
     }
 };
 
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    # check if exists context
+    # create them instead
+    unless ( $self->context ) {
+        use Perl6::Pod::Utl::Context;
+        $self->context( new Perl6::Pod::Utl::Context:: )
+    }
     $self;
 }
+
 sub writer {
-    return $_[0]->{writer}
-}
-sub w  {
-    return $_[0]->writer
+    return $_[0]->{writer};
 }
 
+sub w {
+    return $_[0]->writer;
+}
+
+sub context {
+    my $self = shift;
+    if ($#_ > 0) {
+        $self->{context} = shift;
+    }
+    return $self->{context}
+}
 #TODO then visit to child -> create new context !
 sub visit_childs {
     my $self = shift;
     foreach my $n (@_) {
         die "Unknow type $n (not isa Perl6::Pod::Block)"
-          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) || 
-          UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
+          unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
+              || UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
         foreach my $ch ( @{ $n->childs } ) {
             $self->visit($ch);
         }
@@ -85,37 +103,63 @@ sub visit {
     my $self = shift;
     my $n    = shift;
 
-    #get type of file
-    my $ref = ref($n);
-    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
-        )
-    {
-        if ( ref($n) eq 'ARRAY' ) {
-            $self->visit($_) for @$n;
-        }
-        else {
-            die "Unknown node type $n (not isa Perl6::Pod::Block)";
-        }
+    if ( ref($n) eq 'ARRAY' ) {
+        $self->visit($_) for @$n;
+        return;
     }
-    # here convert lexer base block to 
+
+    # if string -> paragraph
+    unless ( ref($n) ) { return $self->ordinary_characters($n) }
+
+    die "Unknown node type $n (not isa Perl6::Pod::Lex::Block)"
+      unless UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
+
+    # here convert lexer base block to
     # instance of DOM class
     my $name = $n->name;
-    my $map = DEFAULT_USE;
-    my  $class;
-    if ( UNIVERSAL::isa( $n, 'Perl6::Pod::FormattingCode' ) ) {
-        $class = $map->{$name.'<>'} || $map->{'*<>'}
-    } else {
-        $class = $map->{$name} || $map->{'*'}
-    }
-    #create instance
-    my $el =  $class eq '-' ? $n : $class->new( %$n ) ;
-    #if no instanse -> skip this element
-    return undef unless ($el);
+    my $map  = DEFAULT_USE;
+    my $class;
 
-    my $method = $self->__get_method_name($el);
+    #convert lexer blocks
+    unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
+
+        my %additional_attr = ();
+        if ( UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::FormattingCode' ) ) {
+            $class = $map->{ $name . '<>' } || $map->{'*<>'};
+        }
+
+        # UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' )
+        else {
+
+            # convert item1, head1 -> item, head
+            if ( $name =~ /(item|head)(\d+)/ ) {
+                $name = $1;
+                $additional_attr{level} = $2;
+            }
+            elsif ( $name =~ /(para|code)/ ) {
+
+                # add { name=>$name }
+                # for text and code blocks
+                $additional_attr{name} = $name;
+            }
+
+            $class = $map->{$name} || $map->{'*'};
+        }
+
+        #create instance
+        my $el =
+            $class eq '-'
+          ? $n
+          : $class->new( %$n, %additional_attr, context => $self->context );
+
+        #if no instanse -> skip this element
+        return undef unless ($el);
+        $n = $el;
+    }
+    my $method = $self->__get_method_name($n);
 
     #make method name
-    $self->$method($el);
+    $self->$method($n);
 }
 
 sub __get_method_name {
@@ -123,10 +167,11 @@ sub __get_method_name {
     my $el = shift || croak "empty object !";
     my $method;
     use Data::Dumper;
-    my $name = $el->name || die "Can't get element name for ".Dumper($el);
-    if ( UNIVERSAL::isa($el,'Perl6::Pod::FormattingCode') ) {
+    my $name = $el->name || die "Can't get element name for " . Dumper($el);
+    if ( UNIVERSAL::isa( $el, 'Perl6::Pod::FormattingCode' ) ) {
         $method = "code_$name";
-    } else {
+    }
+    else {
         $method = "block_$name";
     }
     return $method;
@@ -134,62 +179,70 @@ sub __get_method_name {
 
 sub block_File {
     my $self = shift;
-    return $self->visit_childs(@_)
+    return $self->visit_childs(@_);
 }
 
-sub block_pod { 
+sub block_pod {
     my $self = shift;
-   return $self->visit_childs(@_)}
+    return $self->visit_childs(@_);
+}
 
 sub parse_blocks {
     my $self = shift;
     my $text = shift;
-    my $r               = do {
-    use Regexp::Grammars;
-    use Perl6::Pod::Grammars;
-    qr{
+    my $r    = do {
+        use Regexp::Grammars;
+        use Perl6::Pod::Grammars;
+        qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
         \A <File> \Z
     }xms;
     };
-   if ( $text =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
-        return  {%/}->{File}
-   } else {
-#    die "Can't parse";
-    undef;
-   }
+    if ( $text =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
+        return {%/}->{File};
+    }
+    else {
+
+        #    die "Can't parse";
+        undef;
+    }
 }
 
 sub __default_method {
-    my $self =shift;
-    my $n = shift;
+    my $self   = shift;
+    my $n      = shift;
     my $method = $self->__get_method_name($n);
-    die ref($self) . ": Method '$method' for class " . ref($n) . " not implemented at ";
+    die ref($self)
+      . ": Method '$method' for class "
+      . ref($n)
+      . " not implemented at ";
 }
 
 1;
+
 package Perl6::Pod::Writer::DocBook;
 use strict;
 use warnings;
+
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
     $self;
 }
 
-sub o  {
-    return $_[0]->{out}
+sub o {
+    return $_[0]->{out};
 }
 
 sub print {
     my $fh = shift->o;
-    print $fh  @_;
+    print $fh @_;
 }
 
 sub say {
     my $fh = shift->o;
-    print $fh  @_;
+    print $fh @_;
     print $fh "\n";
 }
 1;
@@ -239,35 +292,38 @@ use warnings;
 use base 'Perl6::Pod::To';
 
 sub block_para {
-   my $self = shift; 
-   my $el = shift;
-   $self->w->print('<para>'.$el->content.'</para>')
+    my $self = shift;
+    my $el   = shift;
+    $self->w->print( '<para>' . $el->content . '</para>' );
 }
 
 sub block_code {
-   my $self = shift; 
-   my $el = shift;
-   $self->w->print('<programlisting><![CDATA['.$el->content.']]></programlisting>')
+    my $self = shift;
+    my $el   = shift;
+    $self->w->print(
+        '<programlisting><![CDATA[' . $el->content . ']]></programlisting>' );
 }
 
 sub start_write {
-    my $self  = shift;
-    my $w  = $self->writer;
-    if ($self->{header}) {
-    $w->say( q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' ></@ );
+    my $self = shift;
+    my $w    = $self->writer;
+    if ( $self->{header} ) {
+        $w->say(
+q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' ></@
+        );
     }
-    $self->w->say('<'.($self->{doctype} || 'chapter'). '>')
+    $self->w->say( '<' . ( $self->{doctype} || 'chapter' ) . '>' );
 }
 
 sub write {
-    my $self  = shift;
+    my $self = shift;
     my $tree = shift;
     $self->visit($tree);
 }
 
 sub end_write {
-    my $self  = shift;
-    $self->w->say('</'.($self->{doctype} || 'chapter'). '>')
+    my $self = shift;
+    $self->w->say( '</' . ( $self->{doctype} || 'chapter' ) . '>' );
 }
 
 1;
@@ -275,30 +331,35 @@ sub end_write {
 package main;
 use strict;
 use warnings;
-use Test::More 'no_plan';#tests => 1;                      # last test to print
+use Test::More 'no_plan'; #tests => 1;                      # last test to print
 
 my $text = '=begin pod
 
- Para
+=begin para
+
+Para
 
 dr
 
+=end para
 =end pod
 ';
 
 my $tree = Perl6::Pod::To::->new()->parse_blocks($text);
 use Data::Dumper;
+
 #die Dumper($tree);
 my $str = '';
-open ( my $fd , ">", \$str);
-my $docbook = new Perl6::Pod::To::DocBook:: 
- writer=> new Perl6::Pod::Writer::DocBook( out=>$fd ),
- header => 1, doctype => 'chapter';
+open( my $fd, ">", \$str );
+my $docbook = new Perl6::Pod::To::DocBook::
+  writer  => new Perl6::Pod::Writer::DocBook( out => $fd ),
+  header  => 1,
+  doctype => 'chapter';
 $docbook->start_write;
-$docbook->write( $tree);
+$docbook->write($tree);
 $docbook->end_write;
-#diag Dumper($tree);
-diag $str;;
-ok "1";
 
+#diag Dumper($tree);
+diag $str;
+ok "1";
 

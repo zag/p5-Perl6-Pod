@@ -4,33 +4,6 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-package Perl6::Pod::Lex::Block;
-use base 'Perl6::Pod::Block';
-use strict;
-use warnings;
-
-sub new {
-    my $class = shift;
-    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
-    $self;
-}
-
-sub content {
-    my $self = shift;
-    $self->{''};
-}
-
-sub childs {
-    my $self = shift;
-    $self->{content};
-}
-
-sub name {
-    my $self = shift;
-    return $self->{name}
-}
-
-1;
 
 package Perl6::Pod::Lex::Attr;
 use base 'Perl6::Pod::Lex::Block';
@@ -116,13 +89,15 @@ sub delimblock {
     # check VMARGIN and convert 
     # Text content to verbatim
     my $vmargin = length($ref->{spaces} //'');
+    my $name = $ref->{name};
+    my $is_allow_code_blocks = $name =~ /(pod|item|defn|nested|finish|\U $name\E )/x;
     if ( my $childs = $ref->{content}) {
      foreach my $node (@$childs)  {
       next unless UNIVERSAL::isa($node, 'Perl6::Pod::Lex::Text');
       #check if margin text > vmargin of parent block
       my $node_margin =  length( $node->{spaces} // '');
       # when it raw block
-       if ( $node_margin > $vmargin ) {
+       if ( ($node_margin > $vmargin) && $is_allow_code_blocks  ) {
          #this is a code block !
          $node = $self->raw_content( %$node );
        }

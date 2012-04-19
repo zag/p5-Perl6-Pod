@@ -48,7 +48,7 @@ package main;
 use strict;
 use warnings;
 
-use Test::More tests => 6;    # last test to print
+use Test::More tests => 8;    # last test to print
 use Regexp::Grammars;
 use Perl6::Pod::Grammars;
 use Perl6::Pod::Autoactions;
@@ -67,10 +67,14 @@ my @t;
 my $STOP_TREE = 1;
 
 @t = (
-
+'=begin pod
+=para
+ asd asd
+=end pod
+'
 );
 
-#@t         = ();
+@t         = ();
 $STOP_TREE = 2;
 
 $STOP_TREE = 0;

@@ -1,4 +1,4 @@
-package Perl6::Pod::Block1;
+package Perl6::Pod::Block;
 
 #$Id$
 
@@ -20,19 +20,10 @@ Perl6::Pod::Block - base class for Perldoc blocks
 use strict;
 use warnings;
 use Data::Dumper;
-use XML::ExtOn::Element;
-use XML::ExtOn::Context;
-use Perl6::Pod::Parser::Context;
-use Pod::Parser;    #for process format codes
-use base 'XML::ExtOn::Element';
-use Perl6::Pod::FormattingCode;
+use base 'Perl6::Pod::Lex::Block';
 
-# vearbatims blocks for :allow attribute
-use constant VERBATIMS => {
-    C    => 1,
-    code => 1
-};
 
+=pod
 sub new {
     my ( $class, %args ) = @_;
 
@@ -57,6 +48,7 @@ sub new {
     $self;
 }
 
+
 sub context {
     $_[0]->{__context};
 }
@@ -73,250 +65,7 @@ sub get_class_options {
 
 }
 
-=head2 mk_block <BLOCK_NAME>, <POD_OPTIONS>
-
-Create block element.
-
 =cut
-
-sub mk_block {
-    my $self = shift;
-    my ( $name, $pod_opt ) = @_;
-    my $mod_name = $self->context->use->{$name}
-      || 'Perl6::Pod::Block'; # or die "Unknown block_type $name. Try =use ...";
-                              #get prop
-    my $block = $mod_name->new(
-        name          => $name,
-        context       => $self->context,
-        options       => $pod_opt,
-        class_options => $self->context->class_opts->{$name}
-
-    );
-    return $block;
-
-}
-
-=head2 mk_fcode <BLOCK_NAME>, <POD_OPTIONS>
-
-Create block element.
-
-=cut
-
-sub mk_fcode {
-    my $self = shift;
-    my ( $name, $pod_opt ) = @_;
-    unless ( defined $name ) {
-        warn "make $name $pod_opt";
-        warn "empty" . Dumper( [ map { [ caller($_) ] } ( 0 .. 6 ) ] );
-        exit;
-    }
-    my $mod_name = $self->context->use->{ $name . "<>" }
-      || 'Perl6::Pod::FormattingCode'
-      ;    # or die "Unknown block_type $name. Try =use ...";
-           #get prop
-    my $block = $mod_name->new(
-        name          => $name,
-        context       => $self->context,
-        options       => $pod_opt,
-        class_options => $self->context->class_opts->{ $name . "<>" }
-
-    );
-    return $block;
-
-}
-
-sub start {
-    my ( $self, $attr ) = @_;
-}
-
-sub end {
-    my ( $self, $attr ) = @_;
-}
-
-=head2 on_para
-
-Process content of block.
-
-=cut
-
-sub on_para {
-    my ( $self, $parser, $txt ) = @_;
-
-    #process formating codes by default
-    return $self->parse_para($txt);
-}
-
-sub on_child {
-    my ( $self, $parser, $elem ) = @_;
-    return $elem;
-}
-
-=head2 get_attr [block name]
-
-Return blocks attributes splited with pre-configured via =config.
-Unless provided <block_name> return attributes for current block.
-
-=cut
-
-sub get_attr {
-    my $self    = shift;
-    my $context = $self->context;
-    my $name    = shift || $self->local_name;
-
-    #warn $context->config;
-    my $pre_config_opt = $context->config->{$name} || '';
-    my $opt            = $self->{_pod_options};
-    my $hash           = $context->_opt2hash( $pre_config_opt . " " . $opt );
-    my %res            = ();
-    while ( my ( $key, $val ) = each %$hash ) {
-        $res{$key} = $val->{value};
-    }
-
-    #resolve :like
-    if ( my $like = $res{like} ) {
-        my @like       = ref($like) eq 'ARRAY' ? @$like : ($like);
-        my %block_uniq = ();
-        my %likes_hash = ();
-        while ( my $liked = shift @like ) {
-            next if $block_uniq{$liked}++;
-            %likes_hash = ( %{ $context->get_attr($liked) }, %likes_hash );
-            if ( my $like = $likes_hash{like} ) {
-                push @like, ref($like) eq 'ARRAY' ? @$like : ($like);
-            }
-        }
-        %res = ( %likes_hash, %res );
-    }
-    \%res;
-}
-
-#default export methods
-
-sub to_xml1 {
-    my $self   = shift;
-    my $parser = shift;
-    my $ln     = $self->local_name;
-    my $attr   = $self->get_attr;
-    my $elem   = $parser->mk_element($ln);
-    my $eattr  = $elem->attrs_by_name;
-    %{ $elem->attrs_by_name } = %$attr;
-    my @content = ();
-
-    foreach my $in_param (@_) {
-        push @content, $in_param;
-    }
-    return $elem;
-}
-
-sub to_sax2 {
-    return $_[0];
-}
-
-sub _to_string_ {
-    my $self = shift;
-    my $elem = shift;
-    if ( ref($elem) ) {
-        if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
-            return join "",
-              map { ref($_) ? $self->_to_string_($_) : $_ } $elem->children;
-        }
-        elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
-            return $elem->raw_text();
-        }
-    }
-}
-
-sub _parse_tree2_ {
-    my $self = shift;
-    my $elem = shift;
-    return unless ref($elem);
-    if ( UNIVERSAL::isa( $elem, 'Pod::ParseTree' ) ) {
-        my @res = ();
-        for ( $elem->children ) {
-            unless ( ref($_) ) {
-                push @res, $_;
-                next;
-            }
-            if (
-                exists VERBATIMS->{ $self->local_name }
-
-                # check parent context vars
-                || $self->context->custom->{_check_allow_parent_on_}
-               )
-            {
-                my $allow = [
-                    @{ $self->get_attr->{allow} || [] },
-                    keys %{ $self->context->{_allow_context} }
-                ];
-                my %hash;
-                @hash{ ref($allow) ? @$allow : ($allow) } = ();
-
-                if ( !exists( $hash{ $_->cmd_name } ) ) {
-                    push @res, $self->_to_string_($_);
-                    next;
-                }
-            }
-            push @res, $self->_parse_tree2_($_);
-        }
-        return \@res;
-    }
-    elsif ( UNIVERSAL::isa( $elem, 'Pod::InteriorSequence' ) ) {
-        my %attr = ( name => $elem->cmd_name );
-        if ( my $ptree = $elem->parse_tree ) {
-            $attr{childs} = $self->_to_string_($ptree);
-        }
-        return \%attr;
-    }
-}
-
-sub parse_str {
-    my $self = shift;
-    my $str  = shift;
-    my $p    = new Pod::Parser::;
-    my $res = $self->_parse_tree2_( Pod::Parser->new->parse_text( $str,  $self->context->custom->{_line_num_}
- ) );
-    #join strings
-    my @res = ();
-    my $prev;
-    for my $item (@$res) {
-        if ( ref($item) ) {
-            if ( defined($prev) ) {
-                push @res, $prev;
-                $prev = undef;
-            }
-            push @res, $item;
-        }
-        else {
-            $prev = defined($prev) ? $prev . $item : $item;
-        }
-    }
-    if ( defined($prev) ) { push @res, $prev }
-    return \@res;
-}
-
-sub parse_para {
-    my $self = shift;
-    my @in   = @_;
-    my @out  = ();
-    foreach my $el (@in) {
-        if ( ref $el ) {
-            push @out, $el;
-        }
-        else {
-            my $elems_ref = $self->parse_str($el);
-            foreach my $item (@$elems_ref) {
-                unless ( ref($item) ) {
-
-                    #got characters
-                    $item = { data => $item, type => 'para' };
-                }
-
-                push @out, $item;
-            }
-        }
-    }
-    \@out;
-}
-
 1;
 __END__
 
@@ -332,7 +81,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

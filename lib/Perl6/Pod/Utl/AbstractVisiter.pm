@@ -22,14 +22,14 @@ sub visit {
 
     #get type of file
     my $ref = ref($n);
-    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
+    unless ( ref($n) && UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' )
         )
     {
         if ( ref($n) eq 'ARRAY' ) {
             $self->visit($_) for @$n;
         }
         else {
-            die "Unknown node type $n (not isa Perl6::Pod::Block)";
+            die "Unknown node type $n (not isa Perl6::Pod::Lex::Block)";
         }
     }
 
