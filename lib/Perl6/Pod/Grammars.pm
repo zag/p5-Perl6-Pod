@@ -104,7 +104,7 @@ qr{
                     <[content=text_content(:content_type)]>*
       <.newline>?
 
-    <token: text_content> 
+    <token: text_content>               <matchpos><matchline>
           (^ <spaces=hsp>? (?! <.emptyline> | <hs>? \=\w+ ) # not start with directive
             [^\n]+ <.newline>)+
            (?{ $MATCH{type} = $ARG{content_type} // "text"})
@@ -121,6 +121,10 @@ qr{
               | <name=(\w+)>  ) <.newline>?
                     <[content=text_abbr_content(:content_type)]>*
          <.emptyline>?
+};
+
+qr{
+    <grammar: Perl6::Pod::Grammar::FormattingCodes>
 };
 1;
 
