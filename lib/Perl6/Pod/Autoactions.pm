@@ -82,10 +82,17 @@ sub File {
     return Perl6::Pod::Lex::File->new(%$ref);
 }
 
+#convert content of blocks
+sub make_block {
+    my $self = shift;
+    my $ref = shift;
+    warn Dumper($ref);
+}
 #with non raw content
 sub delimblock {
     my $self = shift;
     my $ref  = shift;
+=pod
     # check VMARGIN and convert 
     # Text content to verbatim
     my $vmargin = length($ref->{spaces} //'');
@@ -103,6 +110,7 @@ sub delimblock {
        }
       }
      }
+=cut
     return Perl6::Pod::Lex::Block->new( %$ref, srctype => 'delim' );
 }
 
@@ -126,6 +134,7 @@ sub abbr_block {
 
 sub text_content {
     my ( $self, $ref ) = @_;
+
     if ( my $type = $ref->{type} ) {
         return $self->raw_content(%$ref) if $type eq 'raw';
     }
@@ -143,6 +152,7 @@ sub text_abbr_content {
 sub raw_content {
     my $self = shift;
     return Perl6::Pod::Lex::RawText->new(@_);
+
 }
 
 sub pair {

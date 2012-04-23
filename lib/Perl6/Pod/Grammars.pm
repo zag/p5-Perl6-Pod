@@ -104,7 +104,7 @@ qr{
                     <[content=text_content(:content_type)]>*
       <.newline>?
 
-    <token: text_content>               <matchpos><matchline>
+    <token: text_content>                <matchpos><matchline>
           (^ <spaces=hsp>? (?! <.emptyline> | <hs>? \=\w+ ) # not start with directive
             [^\n]+ <.newline>)+
            (?{ $MATCH{type} = $ARG{content_type} // "text"})
@@ -118,7 +118,7 @@ qr{
      <token: abbr_block>                 <matchpos><matchline>
     ^ <spaces=hsp>? =<!directives> (  <name=raw_content_blocks>
                (?{ $MATCH{content_type} = "raw" })
-              | <name=(\w+)>  ) <.newline>?
+              | <name=(\w+)>  ) <hs> <.newline>?
                     <[content=text_abbr_content(:content_type)]>*
          <.emptyline>?
 };

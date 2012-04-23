@@ -59,7 +59,7 @@ use Data::Dumper;
 my $r               = qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
-    #   <debug:step>
+#       <debug:step>
         \A <File> \Z
     }xms;
 
@@ -68,8 +68,7 @@ my $STOP_TREE = 1;
 
 @t = (
 '=begin pod
-=para
- asd asd
+d
 =end pod
 '
 );
@@ -77,11 +76,15 @@ my $STOP_TREE = 1;
 @t         = ();
 $STOP_TREE = 2;
 
-$STOP_TREE = 0;
+#$STOP_TREE = 0;
 
 my @grammars = (
     '=begin pod
-d
+=for item
+  dd  d
+sdsdsd
+
+
 =end pod
 ',
     {
@@ -335,7 +338,10 @@ sdsdsds
 while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     $name //= $src;
     my $dump;
+#    if ( $src =~ $r ) {
+#        say Dumper({%/}); exit;
     if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
+#        warn "Dome !";
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
         $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
     }
