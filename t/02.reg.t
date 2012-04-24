@@ -17,7 +17,11 @@ sub _dump_ {
     my $el   = shift;
     ( my $type = ref($el) ) =~ s/.*:://;
     my %dump = ( class => $type );
-    $dump{name} = $el->{name} if exists $el->{name};
+    $dump{name}        = $el->{name}        if exists $el->{name};
+    $dump{block_name}  = $el->{block_name}  if exists $el->{block_name};
+    $dump{encode_name} = $el->{encode_name} if exists $el->{encode_name};
+    $dump{alias_name} = $el->{alias_name} if exists $el->{alias_name};
+
     if ( my $attr = $el->{attr} ) {
         my @attr_dump = map { $_->dump() } @$attr;
         if (@attr_dump) {
@@ -57,24 +61,28 @@ use strict;
 use warnings;
 
 use Test::More tests => 10;    # last test to print
-use Regexp::Grammars;
-use Perl6::Pod::Grammars;
-use Perl6::Pod::Autoactions;
-use v5.10;
+use Perl6::Pod::Utl;
 
+use v5.10;
 use Data::Dumper;
 
-my $r = qr{
+my $r = do {
+    use Regexp::Grammars;
+    use Perl6::Pod::Grammars;
+    use Perl6::Pod::Autoactions;
+    qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
 #       <debug:step>
         \A <File> \Z
     }xms;
+};
 
 my @t;
 my $STOP_TREE = 1;
 
-@t         = ();
+@t = (
+);
 $STOP_TREE = 2;
 $STOP_TREE = 0;
 
@@ -394,6 +402,98 @@ asdasd
         'class' => 'File'
     },
     'ambient text',
+    '=begin pod
+=begin para
+=config name :like<head1>
+= :t
+=end para
+=end pod
+',
+    {
+        'content' => [
+            {
+                'content' => [
+                    {
+                        'content' => [
+                            {
+                                'block_name' => 'name',
+
+                                'name'  => 'config',
+                                'class' => 'Block',
+                                'attr'  => [
+                                    {
+                                        'value' => 'head1',
+                                        'name'  => 'like'
+                                    },
+                                    {
+                                        'value' => 1,
+                                        'name'  => 't'
+                                    }
+                                ]
+                            }
+                        ],
+                        'name'  => 'para',
+                        'class' => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    '=config directive',
+    '=begin pod
+=encoding Macintosh
+=encoding KOI8-R
+=end pod
+',
+    {
+        'content' => [
+            {
+                'content' => [
+                    {
+                        'encode_name' => 'Macintosh',
+                        'name'        => 'encoding',
+                        'class'       => 'Block'
+                    },
+                    {
+                        'encode_name' => 'KOI8-R',
+                        'name'        => 'encoding',
+                        'class'       => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    '=encoding directive',
+'=begin pod
+=alias PROGNAME    Earl Irradiatem Eventually
+=                  =item  Also text
+=end pod
+',{
+          'content' => [
+                         {
+                           'content' => [
+                                          {
+                                            'alias_name' => 'PROGNAME',
+                                            'name' => 'alias',
+                                            'class' => 'Block'
+                                          }
+                                        ],
+                           'name' => 'pod',
+                           'class' => 'Block'
+                         }
+                       ],
+          'name' => 'File',
+          'class' => 'File'
+        }, '=alias directive'
+
 
 );
 
@@ -401,11 +501,14 @@ asdasd
 while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     $name //= $src;
     my $dump;
-
     if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
-
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
         $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
+
+        #    if ( my $tree = Perl6::Pod::Utl::parse_pod($src) ) {
+        #        if ( $STOP_TREE == 2 ) { say Dumper($tree ); exit; }
+        #        $dump = Perl6::Pod::To::Dump->new->visit( $tree );
+
     }
     else {
         fail($name);
@@ -431,14 +534,14 @@ text
     {
         'content' => [
             {
-                'content' => [ 'TEXT' ],
+                'content' => ['TEXT'],
                 'name'    => 'para',
                 'class'   => 'Block'
             },
             {
                 'content' => [
                     {
-                        'content' => [ 'TEXT' ],
+                        'content' => ['TEXT'],
                         'name'    => 'para',
                         'class'   => 'Block'
                     }
@@ -447,7 +550,7 @@ text
                 'class' => 'Block'
             },
             {
-                'content' => [ 'TEXT' ],
+                'content' => ['TEXT'],
                 'name'    => 'code',
                 'class'   => 'Block'
             }
@@ -462,13 +565,16 @@ text
 while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     $name //= $src;
     my $dump;
-
     if ( $src =~
         $r->with_actions( Perl6::Pod::Autoactions->new( default_pod => 1 ) ) )
     {
-
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
         $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
+
+    #    if ( my $tree = Perl6::Pod::Utl::parse_pod($src, default_pod => 1 ) ) {
+    #        if ( $STOP_TREE == 2 ) { say Dumper($tree ); exit; }
+    #        $dump = Perl6::Pod::To::Dump->new->visit( $tree );
+
     }
     else {
         fail($name);

@@ -39,8 +39,21 @@ qr{
          <MATCH=paragraph_block>
         | <MATCH=delimblock_raw>
         | <MATCH=delimblock> 
+        | <MATCH=config_directive>
+        | <MATCH=encoding_directive>
+        | <MATCH=alias_directive>
         | <MATCH=abbr_block>
         | <MATCH=text_content> 
+
+    <rule: config_directive>
+       ^ <spaces=hs>? =<name=(config)>  <block_name=(\w+)>
+     ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
+    <rule: encoding_directive>
+       ^ <spaces=hs>? =<name=(encoding)>  <encode_name=(\S+)>  <.newline>
+
+    <token: alias_directive>
+       ^ <spaces=hs>? =<name=(alias)> <.hsp> <alias_name=(\w+)> 
+     ( ( <.newline>  = )? <.hsp>  <[text=([^\n\r]+)]>  )+ <.newline>
 
     <token: items><MATCH=(\d+)> 
             | \' <MATCH=([^']+)> \' 

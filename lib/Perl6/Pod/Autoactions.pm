@@ -108,35 +108,20 @@ sub make_block {
 
     #is first para if item|defn ?
     my $is_first = 1;
-
+    warn "###do for pod".Dumper (\%ref) if $name eq 'pod';
     #convert paragraph's to blocks
     foreach my $node (@$childs) {
         next
           unless UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::Text' )
               || UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::RawText' );
-
-        #remove virual margin;
-        my $content = delete $node->{''};
-        my $node_margin = length( $node->{spaces} // '' );
-
-        #get min margin of text
-        my $min = $vmargin;
-        foreach ( split( /[\n\r]/, $content ) ) {
-            if (m/(\s+)/) {
-                my $length = length($1);
-                $min = $length if $length < $min;
-            }
+        if ( $node->{matchline} == 21 ) {
+#            warn Dumper( [  map {[caller($_)]} (0..2)]);
+#            warn "*** $name". Dumper (\%ref)
         }
-
-        #remove only if $min > 0
-        if ( $min > 0 ) {
-            my $new_content = '';
-            foreach ( split( /[\n\r]/, $content ) ) {
-                $new_content .= substr( $_, $min ) . "\n";
-            }
-            $content = $new_content;
-        }
-
+        my $content =  delete $node->{''};
+        use Perl6::Pod::Utl;
+        #remove virual margin
+         $content = Perl6::Pod::Utl::strip_vmargin($vmargin, $content);
         #skip first text block for item| defn
         if ( $name =~ 'item|defn' and $is_first ) {
 
@@ -171,10 +156,26 @@ sub make_block {
 
 }
 
+sub alias_directive {
+    my $self = shift;
+    my $ref  = shift;
+    return $self->make_block( %$ref, srctype => 'directive' );
+}
+sub encoding_directive {
+    my $self = shift;
+    my $ref  = shift;
+    return $self->make_block( %$ref, srctype => 'directive' );
+}
+sub config_directive {
+    my $self = shift;
+    my $ref  = shift;
+    return $self->make_block( %$ref, srctype => 'directive' );
+}
 #with non raw content
 sub delimblock {
     my $self = shift;
     my $ref  = shift;
+#    warn Dumper($ref);
     return $self->make_block( %$ref, srctype => 'delim' );
 }
 
@@ -202,7 +203,10 @@ sub text_content {
     if ( my $type = $ref->{type} ) {
         return $self->raw_content(%$ref) if $type eq 'raw';
     }
-    return Perl6::Pod::Lex::Text->new(%$ref);
+    my $obj = Perl6::Pod::Lex::Text->new(%$ref, aa=>1);
+    die "got tin unless" unless exists $ref->{''}; 
+#    warn Dumper($ref);
+    return $obj
 }
 
 sub text_abbr_content {
