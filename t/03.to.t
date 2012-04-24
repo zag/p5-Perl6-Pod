@@ -80,7 +80,7 @@ sub block_para {
     my $self = shift;
     my $el   = shift;
     foreach my $para (@{ $el->childs }) {
-        $self->w->print( '<para>' . $para->content . '</para>' );
+        $self->w->print( '<para>' . $para . '</para>' );
     }
 }
 
@@ -88,7 +88,9 @@ sub block_code {
     my $self = shift;
     my $el   = shift;
     $self->w->print(
-        '<programlisting><![CDATA[' . $el->content . ']]></programlisting>' );
+        '<programlisting><![CDATA[');
+    $self->visit_childs($el);
+    $self->w->print(']]></programlisting>');
 }
 
 sub start_write {
@@ -126,16 +128,16 @@ my $text = '=begin pod
 
 Para
 
-dr
+ dr
 
 =end para
+ sd
 =end pod
 ';
 
 my $tree = Perl6::Pod::To::->new()->parse_blocks($text);
 use Data::Dumper;
 
-#die Dumper($tree);
 my $str = '';
 open( my $fd, ">", \$str );
 my $docbook = new Perl6::Pod::To::DocBook::

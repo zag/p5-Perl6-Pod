@@ -30,7 +30,16 @@ sub _dump_ {
     }
     if ( my $content = $el->childs ) {
         warn Dumper($el) unless ref($content) eq 'ARRAY';
-        $dump{content} = [ map { $self->_dump_($_) } @{ $el->childs } ];
+
+        $dump{content} = [
+            map {
+                    ref($_) ? $self->_dump_($_)
+                  : $_ =~ /^\s+ / ? 'CODE'
+                  : 'TEXT'
+
+              } @{ $el->childs }
+        ];
+
     }
     \%dump;
 }
@@ -43,12 +52,11 @@ sub __default_method {
 
 1;
 
-
 package main;
 use strict;
 use warnings;
 
-use Test::More tests => 8;    # last test to print
+use Test::More tests => 10;    # last test to print
 use Regexp::Grammars;
 use Perl6::Pod::Grammars;
 use Perl6::Pod::Autoactions;
@@ -56,7 +64,7 @@ use v5.10;
 
 use Data::Dumper;
 
-my $r               = qr{
+my $r = qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
 #       <debug:step>
@@ -66,17 +74,9 @@ my $r               = qr{
 my @t;
 my $STOP_TREE = 1;
 
-@t = (
-'=begin pod
-d
-=end pod
-'
-);
-
 @t         = ();
 $STOP_TREE = 2;
-
-#$STOP_TREE = 0;
+$STOP_TREE = 0;
 
 my @grammars = (
     '=begin pod
@@ -90,11 +90,18 @@ sdsdsd
     {
         'content' => [
             {
-                'content' => [ { 'class' => 'Text' } ],
-                'name'    => 'pod',
-                'class'   => 'Block'
+                'content' => [
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'item',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
             }
         ],
+        'name'  => 'File',
         'class' => 'File'
     },
     '=pod + text',
@@ -117,6 +124,7 @@ sdsdsd
                 'class' => 'Block'
             }
         ],
+        'name'  => 'File',
         'class' => 'File'
     },
     'para insite =pod',
@@ -136,7 +144,7 @@ text
                     {
                         'content' => [
                             {
-                                'content' => [ { 'class' => 'Text' } ],
+                                'content' => ['TEXT'],
                                 'name'    => 'para',
                                 'class'   => 'Block'
                             }
@@ -149,7 +157,9 @@ text
                 'class' => 'Block'
             }
         ],
-        'class' => 'File'
+        'class' => 'File',
+        'name'  => 'File',
+
     },
     'para inside para',
 
@@ -169,23 +179,30 @@ asdasd
             {
                 'content' => [
                     {
-                        'content' => [ { 'class' => 'RawText' } ],
+                        'content' => ['CODE'],
                         'name'    => 'Sode',
                         'class'   => 'Block'
                     },
                     {
-                        'content' => [ { 'class' => 'RawText' } ],
+                        'content' => ['CODE'],
                         'name'    => 'code',
                         'class'   => 'Block'
                     },
-                    { 'class' => 'Text' }
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    }
                 ],
                 'name'  => 'pod',
                 'class' => 'Block'
             }
         ],
+        'name'  => 'File',
         'class' => 'File'
-    },
+    }
+
+    ,
     'raw content',
     '=begin pod
 =for Para
@@ -201,17 +218,17 @@ re
             {
                 'content' => [
                     {
-                        'content' => [ { 'class' => 'RawText' } ],
+                        'content' => ['TEXT'],
                         'name'    => 'Para',
                         'class'   => 'Block'
                     },
                     {
-                        'content' => [ { 'class' => 'RawText' } ],
+                        'content' => ['TEXT'],
                         'name'    => 'code',
                         'class'   => 'Block'
                     },
                     {
-                        'content' => [ { 'class' => 'Text' } ],
+                        'content' => ['TEXT'],
                         'name'    => 'para',
                         'class'   => 'Block'
                     }
@@ -220,6 +237,7 @@ re
                 'class' => 'Block'
             }
         ],
+        'name'  => 'File',
         'class' => 'File'
     },
     'paragraph_block (with text and raw)',
@@ -233,10 +251,16 @@ d
     {
         'content' => [
             {
-                'content' => [ { 'class' => 'Text' } ],
-                'name'    => 'pod',
-                'class'   => 'Block',
-                'attr'    => [
+                'content' => [
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block',
+                'attr'  => [
                     {
                         'value' => 1,
                         'name'  => 'test'
@@ -260,41 +284,48 @@ d
                 ]
             }
         ],
+        'name'  => 'File',
         'class' => 'File'
     },
+
     'attributes',
-'=begin pod :r<test> :name{ t=>1, t2=>1}
+    '=begin pod :r<test> :name{ t=>1, t2=>1}
 s
 =end pod
-', {
-          'content' => [
-                         {
-                           'content' => [
-                                          {
-                                            'class' => 'Text'
-                                          }
-                                        ],
-                           'name' => 'pod',
-                           'class' => 'Block',
-                           'attr' => [
-                                       {
-                                         'value' => 'test',
-                                         'name' => 'r'
-                                       },
-                                       {
-                                         'value' => {
-                                                      't2' => '1',
-                                                      't' => '1'
-                                                    },
-                                         'name' => 'name'
-                                       }
-                                     ]
-                         }
-                       ],
-          'class' => 'File'
-        }, 'attrs: hash',
+',
+    {
+        'content' => [
+            {
+                'content' => [
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block',
+                'attr'  => [
+                    {
+                        'value' => 'test',
+                        'name'  => 'r'
+                    },
+                    {
+                        'value' => {
+                            't2' => '1',
+                            't'  => '1'
+                        },
+                        'name' => 'name'
+                    }
+                ]
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    'attrs: hash',
 
-'=begin pod
+    '=begin pod
    =begin OO
      ed
    =end OO
@@ -304,33 +335,65 @@ sdsd
 sdsdsds
 
 =end pod
-',{
-          'content' => [
-                         {
-                           'content' => [
-                                          {
-                                            'content' => [
-                                                           {
-                                                             'class' => 'RawText'
-                                                           }
-                                                         ],
-                                            'name' => 'OO',
-                                            'class' => 'Block'
-                                          },
-                                          {
-                                            'class' => 'Text'
-                                          },
-                                          {
-                                            'class' => 'RawText'
-                                          }
-                                        ],
-                           'name' => 'pod',
-                           'class' => 'Block'
-                         }
-                       ],
-          'class' => 'File'
-        }, 'text and verbatim blocks',
-
+',
+    {
+        'content' => [
+            {
+                'content' => [
+                    {
+                        'content' => [
+                            {
+                                'content' => ['CODE'],
+                                'name'    => 'code',
+                                'class'   => 'Block'
+                            }
+                        ],
+                        'name'  => 'OO',
+                        'class' => 'Block'
+                    },
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    },
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'code',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    'text and verbatim blocks',
+    'some parar
+parapar
+=begin pod
+asdasd
+=end pod
+',
+    {
+        'content' => [
+            {
+                'content' => [
+                    {
+                        'content' => ['TEXT'],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    'ambient text',
 
 );
 
@@ -338,10 +401,9 @@ sdsdsds
 while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     $name //= $src;
     my $dump;
-#    if ( $src =~ $r ) {
-#        say Dumper({%/}); exit;
+
     if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
-#        warn "Dome !";
+
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
         $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
     }
@@ -353,7 +415,70 @@ while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     if ( $STOP_TREE == 1 ) { say Dumper($dump); exit; }
 
     is_deeply( $dump, $extree, $name )
-      || do { say "fail Deeeple" . Dumper( $dump, $extree, ); exit; };
+      || do { say "fail deeply" . Dumper( $dump, $extree, ); exit; };
+
+}
+
+#check not ambient
+@grammars = (
+    'para texxt
+=begin pod
+text
+=end pod
+
+ codesd
+',
+    {
+        'content' => [
+            {
+                'content' => [ 'TEXT' ],
+                'name'    => 'para',
+                'class'   => 'Block'
+            },
+            {
+                'content' => [
+                    {
+                        'content' => [ 'TEXT' ],
+                        'name'    => 'para',
+                        'class'   => 'Block'
+                    }
+                ],
+                'name'  => 'pod',
+                'class' => 'Block'
+            },
+            {
+                'content' => [ 'TEXT' ],
+                'name'    => 'code',
+                'class'   => 'Block'
+            }
+        ],
+        'name'  => 'File',
+        'class' => 'File'
+    },
+    'check default pod content'
+
+);
+
+while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
+    $name //= $src;
+    my $dump;
+
+    if ( $src =~
+        $r->with_actions( Perl6::Pod::Autoactions->new( default_pod => 1 ) ) )
+    {
+
+        if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
+        $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
+    }
+    else {
+        fail($name);
+        die "Can't parse: \n" . $src;
+
+    }
+    if ( $STOP_TREE == 1 ) { say Dumper($dump); exit; }
+
+    is_deeply( $dump, $extree, $name )
+      || do { say "fail deeply" . Dumper( $dump, $extree, ); exit; };
 
 }
 

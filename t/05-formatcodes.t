@@ -113,10 +113,8 @@ while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     my $dump;
     use Perl6::Pod::Autoactions;
     if ( $src =~ $r->with_actions( Perl6::Pod::Codeactions->new ) ) {
-
         #    if ( $src =~ $r ) {
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{Text} ); exit; }
-
         #        $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
     }
     else {

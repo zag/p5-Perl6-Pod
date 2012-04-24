@@ -117,7 +117,9 @@ sub visit {
     }
 
     # if string -> paragraph
-    unless ( ref($n) ) { return $self->ordinary_characters($n) }
+    unless ( ref($n) ) {
+            return $self->w->print($n)
+    }
 
     die "Unknown node type $n (not isa Perl6::Pod::Lex::Block)"
       unless UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
@@ -167,7 +169,6 @@ sub visit {
         $n = $el;
     }
     my $method = $self->__get_method_name($n);
-
     #make method name
     $self->$method($n);
 }
@@ -222,6 +223,7 @@ sub parse_blocks {
 sub __default_method {
     my $self   = shift;
     my $n      = shift;
+    warn "get default name for $n";
     my $method = $self->__get_method_name($n);
     die ref($self)
       . ": Method '$method' for class "
