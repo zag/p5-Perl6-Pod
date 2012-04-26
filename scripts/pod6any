@@ -39,8 +39,8 @@ my $str;
 {local $/;
 $str = <$in_fd>};
 my $tree  = Perl6::Pod::Utl::parse_pod($str);
+#die Dumper ($tree);
 die $tree ? 'OK' : "BAD";
-die Dumper ($tree);
 my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XML', \*STDOUT );
 $p->parse($in_fd);
 

@@ -108,16 +108,16 @@ sub make_block {
 
     #is first para if item|defn ?
     my $is_first = 1;
-    warn "###do for pod".Dumper (\%ref) if $name eq 'pod';
+#    warn "###do for pod".Dumper (\%ref) if $name eq 'pod';
     #convert paragraph's to blocks
     foreach my $node (@$childs) {
         next
           unless UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::Text' )
               || UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::RawText' );
-        if ( $node->{matchline} == 21 ) {
-#            warn Dumper( [  map {[caller($_)]} (0..2)]);
-#            warn "*** $name". Dumper (\%ref)
-        }
+#        if ( $node->{matchline} == 21 ) {
+##            warn Dumper( [  map {[caller($_)]} (0..2)]);
+##            warn "*** $name". Dumper (\%ref)
+#        }
         my $content =  delete $node->{''};
         use Perl6::Pod::Utl;
         #remove virual margin

@@ -32,12 +32,15 @@ sub parse_pod {
         \A <File> \Z
     }xms;
 
-    if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new (%args) ) ) {
-        return {%/}->{File};
+    my $tree ;
+    if ( $src =~ $r  ) {
+#    if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new (%args) ) ) {
+        $tree = {%/}->{File};
     }
     else {
         return undef;
     }
+
 }
 
 =head2 strip_vmargin $vmargin, $txt

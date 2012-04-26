@@ -18,7 +18,7 @@ qr{
     <token: newline> <.hs1>* \n
     <token: emptyline> ^ <.hs> \n 
 
-    <rule: File><[content=block_content]>+
+    <rule: File>(?{$MATCH{type}="file"})<[content=block_content]>+
     <rule: directives> begin | for | END | end | config
     <rule: raw_content_blocks> 
                code 
@@ -36,7 +36,7 @@ qr{
                     (?{ $MATCH{type} = "raw"})
 
     <rule: block_content> 
-         <MATCH=paragraph_block>
+         <MATCH=paragraph_block> 
         | <MATCH=delimblock_raw>
         | <MATCH=delimblock> 
         | <MATCH=config_directive>
@@ -94,6 +94,7 @@ qr{
             })
 
     <token: delimblock_raw>             <matchpos><matchline>
+                                        (?{ $MATCH{type} = "block"})
     ^ <spaces=hs>? =begin <.hs> <!directives> <name=raw_content_blocks>
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
 
@@ -102,6 +103,7 @@ qr{
      ^ <spacesend=hs>?  =end <.hsp> <\name> <.hs> <.newline>
 
     <token: delimblock>                 <matchpos><matchline>
+                                        (?{ $MATCH{type} = "block"})
     ^ <spaces=hsp>? =begin <.hs> <!directives>  <name=(\w+)> 
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
                    <[content=block_content]>*
@@ -109,6 +111,7 @@ qr{
      ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>
 
     <token: paragraph_block>             <matchpos><matchline>
+                                    (?{ $MATCH{type} = "block"})
     ^ <spaces=hsp>? =for <.hs> <!directives>   
             (  <name=raw_content_blocks>
                (?{ $MATCH{content_type} = "raw"})
@@ -129,6 +132,7 @@ qr{
 
 
      <token: abbr_block>                 <matchpos><matchline>
+                                     (?{ $MATCH{type} = "block"})
     ^ <spaces=hsp>? =<!directives> (  <name=raw_content_blocks>
                (?{ $MATCH{content_type} = "raw" })
               | <name=(\w+)>  ) <hs> <.newline>?

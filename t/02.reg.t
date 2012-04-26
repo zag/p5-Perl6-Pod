@@ -17,13 +17,24 @@ sub _dump_ {
     my $el   = shift;
     ( my $type = ref($el) ) =~ s/.*:://;
     my %dump = ( class => $type );
+    unless ( 
+    UNIVERSAL::isa( $el, 'Perl6::Pod::Lex::Block' )
+            ||
+        ref ($el) eq 'HASH' ) {
+        use Data::Dumper;
+        die "NOT VALIDE". Dumper($el);
+    }
     $dump{name}        = $el->{name}        if exists $el->{name};
     $dump{block_name}  = $el->{block_name}  if exists $el->{block_name};
     $dump{encode_name} = $el->{encode_name} if exists $el->{encode_name};
     $dump{alias_name} = $el->{alias_name} if exists $el->{alias_name};
 
     if ( my $attr = $el->{attr} ) {
-        my @attr_dump = map { $_->dump() } @$attr;
+#        my @attr_dump = map { $_->dump() } @$attr;
+        my @attr_dump = map {     {
+        name  => $_->{name},
+        value => $_->{items}
+    } } @$attr;
         if (@attr_dump) {
             $dump{attr} = \@attr_dump;
         }
@@ -51,6 +62,9 @@ sub _dump_ {
 sub __default_method {
     my $self = shift;
     my $n    = shift;
+    if (ref($n) and ( ref($n) eq 'ARRAY' ) ) {
+        return [ map {$self->_dump_($_)} @{$n} ]
+    }
     return $self->_dump_($n);
 }
 
@@ -82,9 +96,119 @@ my @t;
 my $STOP_TREE = 1;
 
 @t = (
+'
+text
+
+=begin pod
+=for Test :1
+bracket sequence. For example:
+=end pod
+'
 );
+package Perl6::Pod::Lex1;
+use Perl6::Pod::Lex;
+use base 'Perl6::Pod::Lex';
+sub make_block {
+    my $self = shift;
+    my %ref  = @_;
+    my $name = $ref{name};
+    my $is_implicit_code_and_para_blocks =
+         $ref{force_implicit_code_and_para_blocks}
+      || $name =~ /(pod|item|defn|nested|finish|\U $name\E )/x
+      ;
+
+    my $childs = $ref{content} || [];
+    my $vmargin = length( $ref{spaces} // '' );
+
+    #is first para if item|defn ?
+    my $is_first = 1;
+    #convert paragraph's to blocks
+    foreach my $node (@$childs) {
+        if ( $node->{type} eq 'block') {
+            $node = $self->make_block(%$node);
+
+        } elsif ($node->{type} =~  /text|raw/ ) {
+            my $type = $node->{type};
+            if ($type eq 'text') {
+                $node =  Perl6::Pod::Lex::Text->new( %$node );
+            } else {
+                $node = Perl6::Pod::Lex::RawText->new ( %$node);
+            }
+
+        } else { die "Unknown". Dumper($node) };
+        next
+          unless UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::Text' )
+              || UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::RawText' );
+        use Perl6::Pod::Utl;
+        my $content =  delete $node->{''};
+        #remove virual margin
+        $content = Perl6::Pod::Utl::strip_vmargin($vmargin, $content);
+        #skip first text block for item| defn
+        if ( $name =~ 'item|defn' and $is_first ) {
+
+            #always ordinary text
+            $content =~ s/^\s+//;
+            $node = $content;
+            next;
+
+        }
+        if ($is_implicit_code_and_para_blocks) {
+            my $block_name = $content =~ /^\s+/ ? 'code' : 'para';
+            $node = Perl6::Pod::Lex::Block->new(
+                %$node,
+                name    => $block_name,
+                srctype => 'implicit',
+                content => [$content]
+            );
+
+        }
+        else {
+            if ( $name eq 'para' ) {
+
+                #para blocks always
+                # ordinary text
+                $content =~ s/^\s+//;
+            }
+            $node = $content;
+        }
+    }
+    return Perl6::Pod::Lex::Block->new(%ref);
+
+}
+sub process_file {
+    my $self = shift;
+    my $ref = shift;
+    #clear all ambient blocks
+    if ( 1 || $self->{default_pod} ) {
+        $ref->{force_implicit_code_and_para_blocks} = 1;
+    } 
+    my $block = $self->make_block(%$ref, name=>'File');
+    return    $block->childs;
+}
+
+
+sub process_block {
+
+}
+
+sub make_tree {
+    use Data::Dumper;
+    my $self = shift;
+    my $tree = shift;
+    my $type  = $tree->{type};
+    my $method = "process_" . $type;
+    return $self->$method($tree);
+};
+1;
+package main;
 $STOP_TREE = 2;
 $STOP_TREE = 0;
+
+@t=();
+#if ( $t[0] =~ $r ) {
+#   die Dumper( Perl6::Pod::Lex1->new->make_tree($/{File}) );
+#}
+#die Dumper Perl6::Pod::Utl::parse_pod($t[0]);
 
 my @grammars = (
     '=begin pod
@@ -501,9 +625,12 @@ asdasd
 while ( my ( $src, $extree, $name ) = splice( @grammars, 0, 3 ) ) {
     $name //= $src;
     my $dump;
-    if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
+#    if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
+    if ( $src =~ $r ) {
+        my $tree = Perl6::Pod::Lex1->new->make_tree($/{File});
         if ( $STOP_TREE == 2 ) { say Dumper( {%/}->{File} ); exit; }
-        $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
+         $dump = Perl6::Pod::To::Dump->new->visit( $tree );
+#        $dump = Perl6::Pod::To::Dump->new->visit( {%/}->{File} );
 
         #    if ( my $tree = Perl6::Pod::Utl::parse_pod($src) ) {
         #        if ( $STOP_TREE == 2 ) { say Dumper($tree ); exit; }
