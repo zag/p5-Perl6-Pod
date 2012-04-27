@@ -22,6 +22,9 @@ sub content {
 
 sub childs {
     my $self = shift;
+    if (scalar @_) {
+        $self->{content} = shift;
+    }
     $self->{content};
 }
 

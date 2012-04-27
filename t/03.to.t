@@ -124,9 +124,10 @@ use Test::More 'no_plan'; #tests => 1;                      # last test to print
 
 my $text = '=begin pod
 
+=head1 test
+Para
 =begin para
 
-Para
 
  dr
 
@@ -134,8 +135,8 @@ Para
  sd
 =end pod
 ';
-
-my $tree = Perl6::Pod::To::->new()->parse_blocks($text);
+use Perl6::Pod::Utl;
+my $tree = Perl6::Pod::Utl::parse_pod($text);
 use Data::Dumper;
 
 my $str = '';

@@ -45,13 +45,16 @@ qr{
         | <MATCH=abbr_block>
         | <MATCH=text_content> 
 
-    <rule: config_directive>
+    <rule: config_directive>             <matchpos><matchline>
+                                        (?{ $MATCH{type} = "directive"})
        ^ <spaces=hs>? =<name=(config)>  <block_name=(\w+)>
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
-    <rule: encoding_directive>
+    <rule: encoding_directive>             <matchpos><matchline>
+                                        (?{ $MATCH{type} = "directive"})
        ^ <spaces=hs>? =<name=(encoding)>  <encode_name=(\S+)>  <.newline>
 
-    <token: alias_directive>
+    <token: alias_directive>             <matchpos><matchline>
+                                        (?{ $MATCH{type} = "directive"})
        ^ <spaces=hs>? =<name=(alias)> <.hsp> <alias_name=(\w+)> 
      ( ( <.newline>  = )? <.hsp>  <[text=([^\n\r]+)]>  )+ <.newline>
 

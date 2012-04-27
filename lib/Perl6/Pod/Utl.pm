@@ -7,14 +7,12 @@
 package Perl6::Pod::Utl;
 use strict;
 use warnings;
-use Perl6::Pod::Autoactions;
 
 =head2  parse_pod [default_pod => 0 ]
 
-=item * default_pod => 0/1 
+=item * default_pod => 0/1 ,
 
 switch on/off ambient mode for para out of =pod blocks. Default 0 (ambient mode)
-
 return ref to tree
 
 =cut
@@ -22,11 +20,11 @@ return ref to tree
 sub parse_pod {
     use Regexp::Grammars;
     use Perl6::Pod::Grammars;
-    use Perl6::Pod::Autoactions;
+    use Perl6::Pod::Lex;
     use v5.10;
     use Data::Dumper;
     my ( $src, %args ) = @_;
-    my $r = qr{
+    my $r =  qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
         \A <File> \Z
@@ -34,13 +32,12 @@ sub parse_pod {
 
     my $tree ;
     if ( $src =~ $r  ) {
-#    if ( $src =~ $r->with_actions( Perl6::Pod::Autoactions->new (%args) ) ) {
-        $tree = {%/}->{File};
+     $tree = Perl6::Pod::Lex->new(%args)->make_tree( $/{File} );
     }
     else {
         return undef;
     }
-
+    $tree
 }
 
 =head2 strip_vmargin $vmargin, $txt

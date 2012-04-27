@@ -18,7 +18,6 @@ Perl6::Pod::To - base class for output formatters
 =cut
 
 use Carp;
-use Perl6::Pod::Autoactions;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
 
@@ -141,12 +140,7 @@ sub visit {
         # UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' )
         else {
 
-            # convert item1, head1 -> item, head
-            if ( $name =~ /(item|head)(\d+)/ ) {
-                $name = $1;
-                $additional_attr{level} = $2;
-            }
-            elsif ( $name =~ /(para|code)/ ) {
+            if ( $name =~ /(para|code)/ ) {
 
                 # add { name=>$name }
                 # for text and code blocks
@@ -196,28 +190,6 @@ sub block_File {
 sub block_pod {
     my $self = shift;
     return $self->visit_childs(@_);
-}
-
-sub parse_blocks {
-    my $self = shift;
-    my $text = shift;
-    my $r    = do {
-        use Regexp::Grammars;
-        use Perl6::Pod::Grammars;
-        qr{
-       <extends: Perl6::Pod::Grammar::Blocks>
-       <matchline>
-        \A <File> \Z
-    }xms;
-    };
-    if ( $text =~ $r->with_actions( Perl6::Pod::Autoactions->new ) ) {
-        return {%/}->{File};
-    }
-    else {
-
-        #    die "Can't parse";
-        undef;
-    }
 }
 
 sub __default_method {
