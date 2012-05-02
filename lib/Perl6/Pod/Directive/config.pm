@@ -37,27 +37,16 @@ use warnings;
 use strict;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
-use Data::Dumper;
 
 sub new {
       my ( $class, %args ) = @_;
-      my $self = $class->SUPER::new(%args, parent_context=>1);
+      my $self = $class->SUPER::new(%args);
+      my $block_name = $self->{block_name};
+      my $attr = $self->get_attr;
+      my $context = $self->context;
+      $context->config->{$block_name} = $attr;
+      return undef;
 }
-
-sub start {
-    my $self = shift;
-    my ( $parser, $attr ) = @_;
-    $self->delete_element->skip_content;
-
-    #handle
-    #=config block_name :config_attr
-    my $opt = $self->{_pod_options};
-    my ( $name, @params ) = split( /\s+/, $opt );
-    my $current_opt = $parser->current_context->config->{$name} || '';
-    $opt = join " ", $current_opt, @params;
-    $parser->current_context->config->{$name} = $opt;
-}
-
 1;
 
 __END__

@@ -46,25 +46,6 @@ term (or any of its specified synonyms) within a hypertext.
 
 =cut
 
-sub split_text_entry {
-    my ( $self, $str ) = @_;
-    my ( $dfn, $synonyms ) = split( /\s*\|\s*/, $str );
-    for ( $dfn, $synonyms ) {
-        next unless defined $_;
-        s/^\s+//;
-        s/\s+$//;
-    }
-    wantarray() ? ( $dfn, $synonyms ) : $dfn;
-}
-
-sub on_para {
-    my ( $self, $parser, $txt ) = @_;
-    my $attr = $self->attrs_by_name;
-    my ($dfn, $synonyms ) =
-      $self->split_text_entry($txt);
-    $attr->{synonyms} = $synonyms;
-    return $dfn;
-}
 
 =head2 to_xhtml
 
@@ -77,9 +58,10 @@ Render xhtml:
 =cut
 
 sub to_xhtml {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- return $parser->mk_element('dfn')->add_content(@content);
+  my ( $self, $to ) = @_;
+  $to->w->raw('<dfn>');
+  $to->w->print($self->{term});
+  $to->w->raw('</dfn>');
 }
 
 =head2 to_docbook
@@ -93,8 +75,8 @@ Render xml:
 =cut
 
 sub to_docbook {
- my ( $self, $parser, @in ) = @_;
- [ $parser->_make_events(@in) ];
+  my ( $self, $to ) = @_;
+  $to->w->print($self->{term})
 }
 
 
@@ -113,7 +95,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

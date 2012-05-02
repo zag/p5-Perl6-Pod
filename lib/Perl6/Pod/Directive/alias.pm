@@ -47,7 +47,12 @@ use base 'Perl6::Pod::Block';
 
 sub new {
     my ( $class, %args ) = @_;
-    my $self = $class->SUPER::new( %args, parent_context => 1 );
+    my $self = $class->SUPER::new( %args );
+    $self->context->{_alias}->{$self->{alias_name} } = $self->{text}->[0];
+#
+#    use Data::Dumper; die Dumper($self);
+#    return $self;
+    return undef;
 }
 
 sub start {

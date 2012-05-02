@@ -35,9 +35,11 @@ Render xhtml:
     
 =cut
 sub to_xhtml {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- return $parser->mk_element('strong')->add_content(@content);
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw("<strong>");
+    $to->visit_childs($self);
+    $w->raw('</strong>');
 }
 
 =head2 to_docbook
@@ -51,11 +53,11 @@ Render to
 =cut
 
 sub to_docbook {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- my $emp = $parser->mk_element('emphasis')->add_content(@content);
- $emp->attrs_by_name->{role} = 'bold';
- return $emp;
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw("<emphasis role='bold'>");
+    $to->visit_childs($self);
+    $w->raw('</emphasis>');
 }
 
 1;

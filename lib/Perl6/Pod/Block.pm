@@ -19,9 +19,25 @@ Perl6::Pod::Block - base class for Perldoc blocks
 
 use strict;
 use warnings;
-use Data::Dumper;
 use base 'Perl6::Pod::Lex::Block';
 
+sub get_attr {
+    my $self = shift;
+    my $attr = $self->SUPER::get_attr;
+    #union attr with =config
+    if (my $ctx = $self->context) {
+        if ( my $config = $ctx->get_config( $self->name ) ) {
+         while ( my ($k, $v) = each %$config ) {
+            $attr->{$k} = $v
+           }
+         }
+    }
+    $attr;
+}
+
+sub context {
+    $_[0]->{context};
+}
 
 =pod
 sub new {
@@ -47,24 +63,6 @@ sub new {
       if exists VERBATIMS->{ $args{name} };
     $self;
 }
-
-
-sub context {
-    $_[0]->{__context};
-}
-
-sub get_class_options {
-    my $self       = shift;
-    my $_class_opt = $self->{_class_options} || return {};
-    my $hash       = $self->context->_opt2hash($_class_opt);
-    my %res;
-    while ( my ( $key, $val ) = each %$hash ) {
-        $res{$key} = $val->{value};
-    }
-    \%res
-
-}
-
 =cut
 1;
 __END__

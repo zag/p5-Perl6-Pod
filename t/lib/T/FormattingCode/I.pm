@@ -14,18 +14,6 @@ use Data::Dumper;
 use Perl6::Pod::To::XHTML;
 use base 'TBase';
 
-sub t01_as_xml : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml( <<T);
-=para
-Italic I<test>
-T
-    $t->is_deeply_xml(
-        $x,
-q#<para pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>Italic <I pod:type='code'>test</I>
-</para>#
-    );
-}
 
 sub t02_as_xhtml : Test {
     my $t = shift;

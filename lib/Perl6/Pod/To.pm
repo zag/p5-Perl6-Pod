@@ -1,7 +1,6 @@
 package Perl6::Pod::To;
-
-#$Id$
-
+use strict;
+use warnings;
 =pod
 
 =head1 NAME
@@ -25,7 +24,6 @@ use base 'Perl6::Pod::Utl::AbstractVisiter';
         use     => 'Perl6::Pod::Directive::use',
         config  => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
-        alias   => 'Perl6::Pod::Directive::alias',
         code    => 'Perl6::Pod::Block::code',
         pod     => 'Perl6::Pod::Block::pod',
         para    => 'Perl6::Pod::Block::para',
@@ -36,20 +34,13 @@ use base 'Perl6::Pod::Utl::AbstractVisiter';
         item    => 'Perl6::Pod::Block::item',
         defn    => 'Perl6::Pod::Block::item',
         '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
-        'C<>'   => 'Perl6::Pod::FormattingCode::C',
-        'D<>'   => 'Perl6::Pod::FormattingCode::D',
-        'K<>'   => 'Perl6::Pod::FormattingCode::K',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
         'L<>'   => 'Perl6::Pod::FormattingCode::L',
-        'B<>'   => 'Perl6::Pod::FormattingCode::B',
-        'I<>'   => 'Perl6::Pod::FormattingCode::I',
         'X<>'   => 'Perl6::Pod::FormattingCode::X',
 
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
         'U<>' => 'Perl6::Pod::FormattingCode::U',
-        'E<>' => 'Perl6::Pod::FormattingCode::E',
         'N<>' => 'Perl6::Pod::FormattingCode::N',
-        'A<>' => 'Perl6::Pod::FormattingCode::A',
         'R<>' => 'Perl6::Pod::FormattingCode::R',
         'S<>' => 'Perl6::Pod::FormattingCode::S',
         'T<>' => 'Perl6::Pod::FormattingCode::T',
@@ -60,7 +51,16 @@ use base 'Perl6::Pod::Utl::AbstractVisiter';
 use constant {
     DEFAULT_USE => {
         'File' => '-',
+        'config'=>'Perl6::Pod::Directive::config',
         'para' => 'Perl6::Pod::Block::para',
+         alias   => 'Perl6::Pod::Directive::alias',
+        'A<>' => 'Perl6::Pod::FormattingCode::A',
+        'B<>'   => 'Perl6::Pod::FormattingCode::B',
+        'C<>'   => 'Perl6::Pod::FormattingCode::C',
+        'D<>'   => 'Perl6::Pod::FormattingCode::D',
+        'E<>' => 'Perl6::Pod::FormattingCode::E',
+        'I<>'   => 'Perl6::Pod::FormattingCode::I',
+        'K<>'   => 'Perl6::Pod::FormattingCode::K',
         '*'    => 'Perl6::Pod::Block',
         '*<>'  => 'Perl6::Pod::FormattingCode',
     }
@@ -73,7 +73,11 @@ sub new {
     # create them instead
     unless ( $self->context ) {
         use Perl6::Pod::Utl::Context;
-        $self->context( new Perl6::Pod::Utl::Context:: )
+        $self->context( new Perl6::Pod::Utl::Context:: );
+    }
+    unless ( $self->writer ) {
+         use Perl6::Pod::Writer;
+        $self->{writer} = new Perl6::Pod::Writer( out => \*STDOUT )
     }
     $self;
 }
@@ -88,11 +92,12 @@ sub w {
 
 sub context {
     my $self = shift;
-    if ($#_ > 0) {
+    if (@_) {
         $self->{context} = shift;
     }
     return $self->{context}
 }
+
 #TODO then visit to child -> create new context !
 sub visit_childs {
     my $self = shift;
@@ -128,7 +133,6 @@ sub visit {
     my $name = $n->name;
     my $map  = DEFAULT_USE;
     my $class;
-
     #convert lexer blocks
     unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
 
@@ -144,8 +148,6 @@ sub visit {
 
                 # add { name=>$name }
                 # for text and code blocks
-#                use Data::Dumper;
-#                warn Dumper $n;
                 $additional_attr{name} = $name;
             }
 
@@ -171,7 +173,6 @@ sub __get_method_name {
     my $self = shift;
     my $el = shift || croak "empty object !";
     my $method;
-    use Data::Dumper;
     my $name = $el->name || die "Can't get element name for " . Dumper($el);
     if ( UNIVERSAL::isa( $el, 'Perl6::Pod::FormattingCode' ) ) {
         $method = "code_$name";
@@ -192,15 +193,45 @@ sub block_pod {
     return $self->visit_childs(@_);
 }
 
+sub write {
+    my $self = shift;
+    my $tree = shift;
+    $self->visit($tree);
+}
+=head2 parse \$TEXT
+
+parse text
+
+=cut
+
+sub parse {
+    my $self = shift;
+    my $text = shift ;
+    use Perl6::Pod::Utl;
+    my $tree = Perl6::Pod::Utl::parse_pod(ref($text) ? $$text : $text, @_) || return "Error";
+    $self->start_write;
+    $self->write($tree);
+    $self->end_write;
+    0;
+}
+
+# unless have export method
+# try element methods for export
 sub __default_method {
     my $self   = shift;
     my $n      = shift;
-    warn "get default name for $n";
+    #detect output format
+    # Perl6::Pod::To::DocBook -> to_docbook
+    ( my $export_method = ref($self) ) =~ s/^.*To::([^:]+)/lc "to_$1"/es;
+    unless ( $export_method && UNIVERSAL::can($n, $export_method) ) {
     my $method = $self->__get_method_name($n);
     die ref($self)
       . ": Method '$method' for class "
       . ref($n)
-      . " not implemented at ";
+      . " not implemented. But also can't found export method in class " . ref($n);
+    }
+    #call method for export
+    $n->$export_method($self)
 }
 
 
@@ -221,7 +252,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

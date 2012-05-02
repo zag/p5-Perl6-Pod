@@ -22,7 +22,6 @@ sub parse_pod {
     use Perl6::Pod::Grammars;
     use Perl6::Pod::Lex;
     use v5.10;
-    use Data::Dumper;
     my ( $src, %args ) = @_;
     my $r =  qr{
        <extends: Perl6::Pod::Grammar::Blocks>
@@ -71,5 +70,75 @@ sub strip_vmargin {
         return $content
 }
 
+=head2  parse_para $text
+
+parse formatting codes
+
+Optrions:
+
+=item * allow=>[ 'A', 'B']
+
+
+=cut
+
+sub parse_para {
+    use Regexp::Grammars;
+    use Perl6::Pod::Grammars;
+    use Perl6::Pod::Lex;
+    use Perl6::Pod::Codeactions;
+    use v5.10;
+    my $text = shift || return [];
+    our %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
+    our %allow = ('*' => 1 );
+
+    my %args =  @_ ;
+    if ( my $allow = $args{allow} ) {
+        my @list = ref($allow) ? @$allow : ($allow);
+        %allow = ();
+        #fill allowed fcodes
+        @allow{ @list} =();
+    }
+    my $r     = qr{
+
+       <extends: Perl6::Pod::Grammar::FormattingCodes>
+       <matchline>
+#      <debug:step>
+       \A  <Text>  \Z
+    <token: Text> <[content]>+
+    <token: text>  .+?
+    <token: content> <MATCH=C_code> 
+                    | <MATCH=D_code> 
+                    | <MATCH=default_formatting_code> 
+                    | <.text>
+    <token: ldelim> <%delim>
+    <token: rdelim> (??{ quotemeta $delim{$ARG{ldelim}} })
+    <token: isValideFCode>
+            <require: (?{ 
+            ( $ARG{name} && ( $ARG{name} eq  uc($ARG{name} ) ) ) 
+                        &&
+            ( exists $allow{'*'} ||  exists $allow{$ARG{name}} )
+            
+            })>
+    <rule: C_code>(?! \s+)
+       <name=([C])><isValideFCode(:name)>
+            <ldelim>     <content=( .* )>   <rdelim(:ldelim)>
+    <rule: D_code>(?! \s+)
+      <name=([D])><isValideFCode(:name)>
+            <ldelim>  <term=([^\|]*?)> (?: \| <[syns=(\S+)]>+ % ;)?  <rdelim(:ldelim)>
+    <token: default_formatting_code> 
+      <name=(\w)><isValideFCode(:name)>
+            <ldelim>  <[content]>*?   <rdelim(:ldelim)>
+}xms;
+
+    my $tree ;
+    if ( $text =~ $r->with_actions( Perl6::Pod::Codeactions->new ) ) {
+     $tree =  $/{Text} ;
+    }
+    else {
+        return undef;
+    }
+    $tree
+
+}
 1;
 

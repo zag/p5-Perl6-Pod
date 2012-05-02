@@ -15,18 +15,6 @@ use Perl6::Pod::To::XHTML;
 use XML::ExtOn('create_pipe');
 use base 'TBase';
 
-sub t01_as_xml : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml( <<T);
-=para
-Bold B<test>
-T
-    $t->is_deeply_xml(
-        $x,
-q#<para pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>Bold <B pod:type='code'>test</B>
-</para>#
-    );
-}
 
 sub t02_as_xhtml : Test {
     my $t = shift;

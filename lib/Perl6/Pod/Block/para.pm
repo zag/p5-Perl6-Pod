@@ -34,14 +34,38 @@ use warnings;
 use strict;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
-use Test::More;
+use Perl6::Pod::Utl;
 use Data::Dumper;
 
-#sub new {
-#    my $self = shift;
-#    diag Dumper({@_});
-#    return $self->SUPER::new(@_)
-#}
+sub to_xhtml {
+    my $self = shift;
+    my $to   = shift;
+    my $w  = $to->w;
+    foreach my $para (@{ $self->childs }) {
+        if(ref($para)) {
+            $to->visit($para);next;
+        }
+        $w->raw( '<p>');
+        my $fc = Perl6::Pod::Utl::parse_para($para);
+        $to->visit($fc);
+        $w->raw('</p>' );
+    }
+}
+sub to_docbook {
+    my $self = shift;
+    my $to   = shift;
+    my $w  = $to->w;
+    foreach my $para (@{ $self->childs }) {
+        if(ref($para)) {
+            $to->visit($para);next;
+        }
+        $w->raw( '<para>');
+        my $fc = Perl6::Pod::Utl::parse_para($para);
+#        die Dumper ($fc);
+        $to->visit($fc);
+        $w->raw('</para>' );
+    }
+}
 
 1;
 

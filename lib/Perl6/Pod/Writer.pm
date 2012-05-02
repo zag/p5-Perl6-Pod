@@ -1,0 +1,77 @@
+#===============================================================================
+#
+#  DESCRIPTION:  Abstract writer
+#
+#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#===============================================================================
+package Perl6::Pod::Writer;
+use strict;
+use warnings;
+sub new {
+    my $class = shift;
+    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    $self;
+}
+
+sub o {
+    return $_[0]->{out};
+}
+
+sub raw {
+    my $self = shift;
+    my $fh = $self->o;
+    print $fh @_;
+    $self
+}
+
+#http://stackoverflow.com/questions/1091945
+
+sub _xml_escape {
+    my ( $txt ) =@_;
+    $txt   =~ s/&/&amp;/g;
+    $txt   =~ s/</&lt;/g;
+    $txt   =~ s/>/&gt;/g;
+    $txt   =~ s/"/&quot;/g;
+    $txt   =~ s/'/&apos;/g;
+    $txt
+}
+
+sub _html_escape {
+    my ( $txt ) =@_;
+    $txt   =~ s/&/&amp;/g;
+    $txt   =~ s/</&lt;/g;
+    $txt   =~ s/>/&gt;/g;
+    $txt   =~ s/"/&quot;/g;
+    $txt   =~ s/'/&apos;/g;
+    $txt
+}
+
+sub raw_print {
+    my $self = shift;
+    my $fh = $self->o;
+    print $fh @_;
+    $self
+}
+
+sub print {
+    my $self = shift;
+    my $fh = $self->o;
+    if (my $type = $self->{escape}) {
+        my $str = join ""=>@_;
+        print $fh ($type eq 'xml') ? _xml_escape($str) : _html_escape($str);
+        return $self
+    }
+    print $fh @_;
+    $self
+}
+
+sub say {
+    my $self = shift;
+    my $fh = $self->o;
+    print $fh @_;
+    print $fh "\n";
+    $self
+}
+1;
+
+

@@ -52,44 +52,32 @@ use base 'Perl6::Pod::FormattingCode';
 use strict;
 use warnings;
 
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    #parse content
+    my $attr = $self->get_attr;
+    if  ( my $allow =  $attr->{allow} ) {
+    my $fc = Perl6::Pod::Utl::parse_para($self->{content}, allow=>$allow);
+    $self->{content} = $fc;
+    } else { $self->{content} = [$self->{content}]}
+    $self
+}
+
 sub to_xhtml {
-    my $self   = shift;
-    my $parser = shift;
-    my $el =
-#      $parser->mk_element('code')->add_content( $parser->_make_elements(@_) );
-      $parser->mk_element('code')->add_content( $self->_make_elements($parser,@_) );
-    return $el;
+    my ($self, $to ) = @_;
+    $to->w->raw('<code>');
+    $to->visit_childs($self);
+    $to->w->raw('</code>');
 }
 
 sub to_docbook {
     my $self   = shift;
-    return $self->to_xhtml(@_)
-}
-
-#add escaping
-sub _make_elements {
-    my $self = shift;
-    my $parser = shift;
-    my @res  = ();
-    for (@_) {
-        push @res, ref($_)
-          ? ref($_) eq 'ARRAY'
-              ? $parser->_make_elements(@$_)
-              : $_
-          : $parser->mk_characters(_html_escape($_));
-    }
-    return @res;
-}
-
-
-sub _html_escape {
-    my ( $txt ) =@_;
-    $txt   =~ s/&/&amp;/g;
-    $txt   =~ s/</&lt;/g;
-    $txt   =~ s/>/&gt;/g;
-#    $txt   =~ s/"/&quot;/g;
-#    $txt   =~ s/'/&apos;/g;
-    $txt
+    my $to = shift;
+    my $w  = $to->w;
+    $w->raw(" <code>");
+    $to->visit_childs($self);
+    $w->raw('</code>');
 }
 
 1;
@@ -107,7 +95,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

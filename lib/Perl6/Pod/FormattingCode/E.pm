@@ -67,16 +67,17 @@ Render to
 my %line_break = (NEL=>1);
 
 sub to_xhtml {
-    my ( $self, $parser, $line ) = @_;
+    my ( $self, $to ) = @_;
+    my $line = $self->childs->[0];
     #split by ;
     [
         map {
             s/^\s+//;
             s/\s+$//;
             if ( exists $line_break{$_} ) {
-                $parser->mk_element('br');
+                $to->w->raw('<br/>')
             } else {
-            $parser->mk_characters( _to_xhtml_entity($_) )
+            $to->w->raw( _to_xhtml_entity($_) )
             }
           }
           split( /\s*;\s*/, $line )
@@ -116,16 +117,18 @@ Render to
 =cut
 
 sub to_docbook {
-    my ( $self, $parser, $line ) = @_;
+    my ( $self, $to ) = @_;
+    my $line = $self->childs->[0];
     #split by ;
     [
         map {
             s/^\s+//;
             s/\s+$//;
-            if (exists $line_break{$_} ) {()} else {
             # <br/> not exists in docbook
-            $parser->mk_characters( _to_xhtml_entity($_) )}
+            if (exists $line_break{$_} ) {()} else {
+            $to->w->raw( _to_xhtml_entity($_) )
             }
+          }
           split( /\s*;\s*/, $line )
     ];
 }

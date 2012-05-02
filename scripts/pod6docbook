@@ -13,6 +13,7 @@ use Getopt::Long;
 use Pod::Usage;
 use Perl6::Pod::To;
 use Perl6::Pod::To::DocBook;
+use Perl6::Pod::Writer;
 my ( $help, $man, $doctype, $add_head, $custom_formatter, %use_block);
 my %opt =
   ( help => \$help, man => \$man, );
@@ -20,7 +21,6 @@ GetOptions( \%opt, 'help|?', 'man', 'doctype|t=s'=> \$doctype, 'add_head|ah'=>\$
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
-my %args = (header=>$add_head, doctype=>$doctype);
 
 my $infile = shift;
 my $in_fd;
@@ -30,16 +30,16 @@ if ($infile) {
 else {
     $in_fd = \*STDIN;
 }
-
-my $p = Perl6::Pod::To::to_abstract( $custom_formatter|| 'Perl6::Pod::To::DocBook', \*STDOUT, %args);
-#setup initial use
-if ( %use_block) {
-    my $use = $p->current_context->use;
-    while ( my ($mod, $block_name) = each %use_block ) {
-        $use->{$block_name} =  $mod;
+    my $text;
+    {
+     local $/;
+     $text = <$in_fd>
     }
-}
-$p->parse($in_fd);
+    my $renderer = new Perl6::Pod::To::DocBook::
+      writer  => new Perl6::Pod::Writer( out => \*STDOUT ),
+      doctype => $doctype,
+      header => $add_head;
+    $renderer->parse( \$text, default_pod=>1 );
 
 
 exit;

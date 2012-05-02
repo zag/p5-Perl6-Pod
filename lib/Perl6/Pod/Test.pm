@@ -17,6 +17,8 @@ use strict;
 use warnings;
 
 use Test::More;
+use Perl6::Pod::Writer;
+
 use Perl6::Pod::To::Mem;
 use Perl6::Pod::To::XML;
 use Perl6::Pod::To::DocBook;
@@ -25,28 +27,41 @@ use XML::ExtOn::Writer;
 use XML::Flow;
 use XML::ExtOn qw( create_pipe split_pipe);
 
+sub parse_to_docbook {
+    shift if ref($_[0]);
+    my ( $text) = @_;
+    my $out    = '';
+    open( my $fd, ">", \$out );
+    my $renderer = new Perl6::Pod::To::DocBook::
+      writer  => new Perl6::Pod::Writer( out => $fd, escape=>'xml' ),
+      out_put => \$out,
+      doctype => 'chapter',
+      header => 0;
+    $renderer->parse( \$text, default_pod=>1 );
+    return wantarray ? (  $out, $renderer  ) : $out;
+
+}
+
+
+sub parse_to_xhtml {
+    shift if ref($_[0]);
+    my ( $text) = @_;
+    my $out    = '';
+    open( my $fd, ">", \$out );
+    my $renderer = new Perl6::Pod::To::XHTML::
+      writer  => new Perl6::Pod::Writer( out => $fd, escape=>'xml' ),
+      out_put => \$out,
+      doctype => 'xhtml',
+      header => 0;
+    $renderer->parse( \$text, default_pod=>1 );
+    return wantarray ? (  $out, $renderer  ) : $out;
+}
+
 sub new {
     my $class = shift;
     $class = ref $class if ref $class;
     my $self = bless( {@_}, $class );
     return $self;
-}
-
-=head2 parse_mem \$pod_str, ['filter1']
-
-return out_put from To::Mem formatter
-
-=cut
-
-sub parse_mem {
-    my $test = shift;
-    my ( $text, @filters ) = @_;
-    my $out = [];
-    my $to_mem = new Perl6::Pod::To::Mem:: out_put => $out;
-    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
-    $p->parse( \$text );
-    return wantarray ? ( $p, $f, $out ) : $out;
-
 }
 
 =head2 parse_to_xml \$pod_str, ['filter1']
@@ -97,46 +112,6 @@ sub make_xhtml_parser {
     return wantarray ? ( $p, $f ) : $p;
 }
 
-sub parse_to_xhtml {
-    my $test = shift;
-    my ( $text, @filters ) = @_;
-    my $out    = '';
-    my $to_mem = new Perl6::Pod::To::XHTML::
-      out_put => \$out,
-      doctype => 'xhtml',
-      headers => 0;
-    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
-    $p->parse( \$text );
-    return wantarray ? ( $p, $f, $out ) : $out;
-}
-
-sub parse_to_docbook {
-    my $test = shift;
-    my ( $text, @filters ) = @_;
-    my $out    = '';
-    my $to_mem = new Perl6::Pod::To::DocBook::
-      out_put => \$out,
-      doctype => 'chapter',
-      headers => 0;
-    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
-    $p->parse( \$text );
-    return wantarray ? ( $p, $f, $out ) : $out;
-}
-
-sub make_parser {
-    my $test = shift;
-    unless (@_) {
-        my $class = $test->testing_class;
-        my @args  = $test->new_args;
-        my $obj   = $class->new(@args);
-        push @_, $obj;
-    }
-    my $out_formatter = $_[-1];
-    my $p = create_pipe( 'Perl6::Pod::Parser', @_ );
-    $out_formatter =  split_pipe($p)->[-1]; 
-    return wantarray ? ( $p, $out_formatter ) : $p;
-
-}
 
 =head2 is_deeply_xml <got_xml>,<expected_xml>,"text"
 

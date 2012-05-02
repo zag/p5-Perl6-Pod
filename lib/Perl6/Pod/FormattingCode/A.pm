@@ -65,18 +65,29 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Perl6::Pod::FormattingCode;
+use Perl6::Pod::Utl;
 use base 'Perl6::Pod::FormattingCode';
 
-sub start {
-    my $self = shift;
-    my ( $parser, $attr ) = @_;
-    $self->delete_element;
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    my $alias_value = $self->context->{_alias}->{$self->{content}->[0]};
+    if (my $tree = Perl6::Pod::Utl::parse_para($alias_value) ) {
+        $self->{content}  = $tree;
+    }
+    return $self;
 }
 
-sub on_para {
+sub to_xhtml {
     my $self = shift;
-    my ( $parser, $txt ) = @_;
-    $self->SUPER::on_para($parser, $parser->current_context->{_alias}->{$txt} );
+    my $to   = shift;
+    $to->visit_childs($self);
+}
+
+sub to_docbook {
+    my $self = shift;
+    my $to   = shift;
+    $to->visit_childs($self);
 }
 
 1;

@@ -68,272 +68,29 @@ Result xml:
 
 use strict;
 use warnings;
-use Perl6::Pod::To::XML;
-use Perl6::Pod::Parser::ListLevels;
-use Perl6::Pod::Parser::AddHeadLevels;
-use Perl6::Pod::To::XHTML::ProcessHeadings;
-use Perl6::Pod::To::XHTML::MakeHead;
-use Perl6::Pod::To::XHTML::MakeBody;
-use Perl6::Pod::Parser::Doformatted;
-use Perl6::Pod::Parser::NestedAttr;
-use XML::ExtOn('create_pipe');
-use base qw/Perl6::Pod::To::XML/;
+use Perl6::Pod::To;
+use base 'Perl6::Pod::To';
+use Perl6::Pod::Utl;
+
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
 use Data::Dumper;
 
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new( body => 0, @_ );
-    if ( my $heads = $self->{head} ) {
-
-        #make head filter
-        my $headfilter = new Perl6::Pod::To::XHTML::MakeHead:: head => $heads;
-        $self->{out_put} = create_pipe( $headfilter, $self->{out_put} );
-
-    }
-    if ( $self->{body} ) {
-
-        #make body
-        my $add_body_filter = new Perl6::Pod::To::XHTML::MakeBody::;
-        $self->{out_put} = create_pipe( $add_body_filter, $self->{out_put} );
-    }
-    $self->{out_put} =
-      create_pipe( 'Perl6::Pod::To::XHTML::ProcessHeadings', $self->{out_put} );
-    return create_pipe(
-    #    'Perl6::Pod::Parser',
-        'Perl6::Pod::Parser::NestedAttr', 'Perl6::Pod::Parser::Doformatted',
-        'Perl6::Pod::Parser::ListLevels', 'Perl6::Pod::Parser::AddHeadLevels',
-        'Test::Filter',                   $self
-    );
-}
-
-sub start_document {
+sub start_write {
     my $self = shift;
-    if ( my $out = $self->out_parser ) {
-        $out->start_document;
-        if ( $self->{header} ) {
-            $out->start_dtd(
-                {
-                    Name => $self->{doctype} || 'html',
-                    PublicId => "-//W3C//DTD XHTML 1.1//EN",
-                    SystemId => "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
-                }
-            );
-            $out->end_dtd;
-        }
-        my $root = $out->mk_element( $self->{doctype} || 'html' );
-        $out->on_start_prefix_mapping( '' => "http://www.w3.org/1999/xhtml" );
-        $out->start_element($root);
+    my $w    = $self->writer;
+    if ( $self->{header} ) {
+        $w->say(
+q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' >@);
     }
+    $self->w->raw_print( '<' . ( $self->{doctype} || 'html' ) . ' xmlns="http://www.w3.org/1999/xhtml">' );
 }
 
-sub end_document {
+
+sub end_write {
     my $self = shift;
-    if ( my $out = $self->out_parser ) {
-        my $root = $out->mk_element( $self->{doctype} || 'html' );
-        $out->end_element($root);
-        $out->end_document;
-    }
+    $self->w->raw_print( '</' . ( $self->{doctype} || 'html' ) . '>' );
 }
 
-sub _make_xml_element {
-    my $self     = shift;
-    my $elem     = shift;
-    my $e_type   = $elem->isa('Perl6::Pod::FormattingCode') ? 'code' : 'block';
-    my $out_elem = $self->out_parser->mk_element( $elem->local_name );
-    my ( $out_attr, $attr ) = ( $out_elem->attrs_by_name, $elem->get_attr );
-    while ( my ( $key, $val ) = each %$attr ) {
-        my $xml_str = $val;
-        if ( ref($val) eq 'ARRAY' ) {
-            $xml_str = join "," => @$val;
-        }
-        $out_attr->{$key} = $xml_str;
-    }
-    return $out_elem;
-}
-
-sub process_element {
-    my $self = shift;
-    my $elem = shift;
-    my $res;
-    if ( $elem->can('to_xhtml') ) {
-        $res = $elem->to_xhtml( $self, @_ );
-        unless ( ref($res) ) {
-            $res = $self->out_parser->mk_from_xml($res);
-        }
-    }
-    else {
-        #skip all _UPPER_CASE_SPESIAL_ tags
-        my $lname = $elem->local_name();
-        if (  $lname eq uc($lname) and $lname=~ /^_+.*_$/ ) {
-            return [ $self->_make_elements(@_) ]
-        }
-        #make characters from unhandled texts
-        my @out_content = ();
-        for (@_) {
-            push @out_content,
-              ref($_) ? $_ : $self->out_parser->mk_characters($_);
-        }
-        $res = $self->_make_xml_element($elem)->add_content(@out_content);
-    }
-    return $res;
-}
-
-sub export_block {
-    my $self = shift;
-    return $self->process_element(@_);
-}
-
-sub export_code {
-    my $self = shift;
-    return $self->process_element(@_);
-}
-
-sub print_export {
-    my $self = shift;
-    for (@_) {
-        my @data = ref($_) eq 'ARRAY' ? @{$_} : $_;
-        foreach my $el (@data) {
-            $el = $self->mk_characters($el) unless ref $el;
-            $self->out_parser->_process_comm($el);
-        }
-    }
-}
-
-sub on_para {
-    my $self = shift;
-    my ( $element, $text ) = @_;
-    push @{ $element->{_CONTENT_} }, $text;
-    return;
-}
-
-sub on_end_block {
-    my $self = shift;
-    my $el   = shift;
-    return $el unless $el->isa('Perl6::Pod::Block');
-    my $content = exists $el->{_CONTENT_} ? $el->{_CONTENT_} : undef;
-    my $data = $self->__handle_export( $el, @$content );
-    my $cel = $self->current_root_element;
-    if ($cel) {
-        push @{ $cel->{_CONTENT_} }, ref($data) eq 'ARRAY' ? @$data : $data;
-        return;
-    }
-    else {
-
-        $self->print_export($data);
-    }
-    return $el;
-}
-
-sub _make_events {
-    my $self = shift;
-    my @in   = $self->__expand_array_ref(@_);
-    my @out  = ();
-    foreach my $elem (@in) {
-        push @out, ref($elem)
-          ? $elem
-          : $self->mk_characters( $self->_html_escape($elem) );
-    }
-    return @out;
-}
-
-sub export_block__DEFN_TERM_ {
-    my ( $self, $el, @p ) = @_;
-
-    return $self->mk_element('strong')->add_content( $self->_make_events(@p) )
-      ->insert_to( $self->mk_element('dt') );
-}
-
-# <item> - $self->current_root_element
-#  <_ITEM_ENTRY_>
-#       ...
-#  </_ITEM_ENTRY_>
-# </item>
-sub export_block__ITEM_ENTRY_ {
-    my ( $self, $el, @p ) = @_;
-    my $attr = $el->attrs_by_name;
-    my ( $list_name, $items_name ) = @{
-        {
-            ordered    => [ 'ol', 'li' ],
-            unordered  => [ 'ul', 'li' ],
-            definition => [ 'dl', 'dd' ]
-        }->{ $attr->{listtype} }
-      };
-    my $list =
-      $self->mk_element($items_name)->add_content( $self->_make_events(@p) );
-    #check if numbered item
-    my $item_attr = $el->attrs_by_name;
-    if ( my $number =  $item_attr->{number_value}) {
-        my $value = $item_attr->{number_value};
-       $list->attrs_by_name->{value} = $value; 
-    }
-    return $list;
-
-}
-
-sub export_block__LIST_ITEM_ {
-    my ( $self, $el, @p ) = @_;
-
-    #check type of list
-    my $attr = $el->attrs_by_name;
-    my ( $list_name, $items_name ) = @{
-        {
-            ordered    => [ 'ol', 'li' ],
-            unordered  => [ 'ul', 'li' ],
-            definition => [ 'dl', 'dd' ]
-        }->{ $attr->{listtype} }
-      };
-    my $res =
-      $self->mk_element($list_name)->add_content( $self->_make_events(@p) );
-    #do nesting
-    my $item_level = $el->attrs_by_name->{item_level} || 1;
-    if ( my $count = $item_level -1 ) {
-        for (1..$count) {
-            my $nest =  $self->mk_element('blockquote');
-            $res = $nest->add_content( $res);
-        }
-    }
-
-    return $res;
-}
-
-sub export_block_NAME {
-    my ( $self, $el, $text ) = @_;
-    my $head =
-      $self->mk_element('head')
-      ->add_content(
-        $self->mk_element('title')->add_content( $self->mk_characters($text) )
-      );
-
-    #mark element as XHTML head
-    $head->{XHTML_HEAD}++;
-    return $head;
-}
-
-#process N footnote
-sub export_block__NOTES_ {
-    my ( $self, $el, @p ) = @_;
-    my $div = $self->mk_element('div');
-    $div->attrs_by_name->{class} = 'footnote';
-    return $div->add_content(
-        $self->mk_element('p')->add_content( $self->mk_characters("NOTES") ),
-        $self->_make_events(@p) );
-
-}
-
-sub export_block__NOTE_ {
-    my ( $self, $el, @p ) = @_;
-    my $nid = $el->attrs_by_name->{note_id};
-    my $a   = $self->mk_element('a');
-    $a->attrs_by_name->{name} = "ftn.nid${nid}";
-    $a->attrs_by_name->{href} = "#nid${nid}";
-    $a->add_content(
-        $self->mk_element('sup')->add_content( $self->mk_characters("$nid.") )
-    );
-    return $self->mk_element('p')
-      ->add_content( $a, $self->_make_events( " ", @p ) );
-
-}
 
 1;
 __END__

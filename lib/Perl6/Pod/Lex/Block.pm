@@ -4,10 +4,29 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-#$Id$
 package Perl6::Pod::Lex::Block;
 use strict;
 use warnings;
+
+sub get_attr {
+    my $self = shift;
+    my $attr = $self->{attr} || return {};
+    my %res;
+    foreach my $a (@{ $attr }) {
+        my $name = $a->{name};
+        my $value = $a->{items};
+        my $type = $a->{type};
+        if ($type eq 'hash') {
+          my %hash = ();
+          for ( @{ $value }) {
+            $hash{$_->{key}} = $_->{value}
+          }
+          $value = \%hash;
+        }
+        $res{$name} = $value
+    }
+    return \%res;
+}
 
 sub new {
     my $class = shift;

@@ -118,24 +118,9 @@ bracket sequence. For example:
 
 package main;
 $STOP_TREE = 2;
-$STOP_TREE = 0;
+#$STOP_TREE = 0;
 
-@t = ('
-=begin pod
-=item test
-=item1 test
-=item2    sad
-
-=begin item
-Test
-
-sdsdsd
-
-=end item
-
-=end pod
-
-');
+@t = ('');
 my @grammars = (
     '=begin pod
 =for item

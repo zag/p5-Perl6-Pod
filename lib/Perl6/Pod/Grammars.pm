@@ -47,7 +47,7 @@ qr{
 
     <rule: config_directive>             <matchpos><matchline>
                                         (?{ $MATCH{type} = "directive"})
-       ^ <spaces=hs>? =<name=(config)>  <block_name=(\w+)>
+       ^ <spaces=hs>? =<name=(config)>  <block_name=(\S+)>
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
     <rule: encoding_directive>             <matchpos><matchline>
                                         (?{ $MATCH{type} = "directive"})

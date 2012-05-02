@@ -43,9 +43,11 @@ Render xhtml:
     
 =cut
 sub to_xhtml {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- return $parser->mk_element('kbd')->add_content(@content);
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw("<kbd>");
+    $to->visit_childs($self);
+    $w->raw('</kbd>');
 }
 
 =head2 to_docbook
@@ -61,9 +63,11 @@ L<http://docbook.ru/doc/dict/fromhtml.html>
 =cut
 
 sub to_docbook {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
-  $parser->mk_element('userinput')->add_content(@content);
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw("<userinput>");
+    $to->visit_childs($self);
+    $w->raw('</userinput>');
 }
 
 
@@ -82,7 +86,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
