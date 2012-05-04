@@ -12,26 +12,6 @@ use warnings;
 use Test::More;
 use base 'TBase';
 
-sub p01_xml : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml(<<T);
-=begin pod
-
-=input
-  1.2.3
-  sdsd sd sd sd
-
-=end pod
-T
-$t->is_deeply_xml(
-        $x,
-q# <pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><input pod:type='block'>  1.2.3
-           sdsd sd sd sd
-</input></pod>#
-    );
-}
-
-
 sub p02_xhtml : Test {
     my $t = shift;
     my $x = $t->parse_to_xhtml(<<T);

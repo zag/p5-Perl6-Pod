@@ -19,20 +19,10 @@ Perl6::Pod::To - base class for output formatters
 use Carp;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
-
 =pod
         use     => 'Perl6::Pod::Directive::use',
-        config  => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
-        code    => 'Perl6::Pod::Block::code',
-        pod     => 'Perl6::Pod::Block::pod',
-        para    => 'Perl6::Pod::Block::para',
         table   => 'Perl6::Pod::Block::table',
-        output  => 'Perl6::Pod::Block::output',
-        input   => 'Perl6::Pod::Block::input',
-        nested  => 'Perl6::Pod::Block::nested',
-        item    => 'Perl6::Pod::Block::item',
-        defn    => 'Perl6::Pod::Block::item',
         '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
         'L<>'   => 'Perl6::Pod::FormattingCode::L',
@@ -52,8 +42,14 @@ use constant {
     DEFAULT_USE => {
         'File' => '-',
         'config'=>'Perl6::Pod::Directive::config',
+        code    => 'Perl6::Pod::Block::code',
         'para' => 'Perl6::Pod::Block::para',
          alias   => 'Perl6::Pod::Directive::alias',
+         nested  => 'Perl6::Pod::Block::nested',
+         output  => 'Perl6::Pod::Block::output',
+         input   => 'Perl6::Pod::Block::input',
+        item    => 'Perl6::Pod::Block::item',
+        defn    => 'Perl6::Pod::Block::item',
         'A<>' => 'Perl6::Pod::FormattingCode::A',
         'B<>'   => 'Perl6::Pod::FormattingCode::B',
         'C<>'   => 'Perl6::Pod::FormattingCode::C',
@@ -164,15 +160,25 @@ sub visit {
         return undef unless ($el);
         $n = $el;
     }
-    my $method = $self->__get_method_name($n);
+    #process nested attr
+    my $nested = $n->get_attr->{nested};
+    if ($nested) {
+        $self->w->start_nesting($nested)
+    }
     #make method name
+    my $method = $self->__get_method_name($n);
     $self->$method($n);
+
+    if ($nested) {
+        $self->w->stop_nesting($nested)
+    }
 }
 
 sub __get_method_name {
     my $self = shift;
     my $el = shift || croak "empty object !";
     my $method;
+    use Data::Dumper;
     my $name = $el->name || die "Can't get element name for " . Dumper($el);
     if ( UNIVERSAL::isa( $el, 'Perl6::Pod::FormattingCode' ) ) {
         $method = "code_$name";
@@ -228,10 +234,19 @@ sub __default_method {
     die ref($self)
       . ": Method '$method' for class "
       . ref($n)
-      . " not implemented. But also can't found export method in class " . ref($n);
+      . " not implemented. But also can't found export method ". ref($n) . "::$export_method";
     }
     #call method for export
     $n->$export_method($self)
+}
+
+sub start_write {
+    my $self = shift;
+}
+
+
+sub end_write {
+    my $self = shift;
 }
 
 

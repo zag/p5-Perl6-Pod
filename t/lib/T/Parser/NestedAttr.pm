@@ -13,22 +13,6 @@ use Test::More;
 use Data::Dumper;
 use XML::ExtOn qw(create_pipe);
 
-sub f01_nested_attr : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml( <<T, 'Perl6::Pod::Parser::NestedAttr' );
-=begin pod
-=for para :nested(2)
-test
-=end pod
-T
-
-    $t->is_deeply_xml(
-        $x,
-q#<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'><blockquote pod:type='block'><blockquote pod:type='block'><para pod:type='block' nested='2'>test
-</para></blockquote></blockquote></pod>#
-      )
-
-}
 
 sub f03_nested_attr_xhtml : Test {
     my $t = shift;
@@ -55,7 +39,7 @@ test
 T
     $t->is_deeply_xml(
         $x,
-        q#<chapter><blockquote><blockquote><para nested='2'>test
+        q#<chapter><blockquote><blockquote><para>test
 </para></blockquote></blockquote></chapter>#
     );
 }

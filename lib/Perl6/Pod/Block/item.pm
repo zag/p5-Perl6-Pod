@@ -168,14 +168,33 @@ use Data::Dumper;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
-# set type of item
-sub start {
-    my ( $self, $parser, $attr ) = @_;
-    if ( my $txt = $self->context->custom->{_FIRST_PARA_LINE_} ) {
-        if ( $txt =~ m/^\s*#\s+/ ) {
-            $self->attrs_by_name->{numbered} = 1;
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
 
-        }
+    #check if item numbered
+    my $content = $self->{content}->[0];
+    if ( $content =~ s/^(\s*\#\s*)// ) {
+
+        #set numbered attr
+        #TODO $self->set_attr;
+        push @{ $self->{attr} },
+          {
+            ''      => ':numbered',
+            'name'  => 'numbered',
+            'type'  => 'bool',
+            'items' => 1
+          };
+    }
+    # for definition get TERM
+    #The first non-blank line of content is treated as a term being defined,
+    #and the remaining content is treated as the definition for the term
+    if ( $self->item_type eq 'definition') {
+       my $first_para = $self->{'content'}->[0];
+#       #clear all first blank lines
+#        $first_para =~ s/^\s*//s;
+#        $first_para
+        $self->{'content'}->[0] = $first_para;
     }
     return $self;
 }
@@ -188,13 +207,10 @@ sub item_type {
 
     #for defn block name
     return 'definition'
-      if $self->local_name eq 'defn'
-          or exists $pod_attr->{term};
+      if $self->name eq 'defn';
 
     my $type = 'unordered';
     if ( $self->is_numbered ) {
-
-  #    if ( exists $pod_attr->{numbered} || $self->attrs_by_name->{numbered} ) {
         $type = 'ordered';
     }
     $type;
@@ -203,13 +219,12 @@ sub item_type {
 sub is_numbered {
     my $self     = shift;
     my $pod_attr = $self->get_attr;
-    return $pod_attr->{numbered} if exists $pod_attr->{numbered};
-    $self->attrs_by_name->{numbered} || 0;
+    return $pod_attr->{numbered} || 0;
 }
 
 sub item_level {
     my $self = shift;
-    $self->attrs_by_name->{level} || 1;    #default 1 level for items
+    $self->{level} || 1;    #default 1 level for items
 }
 
 sub on_para {
@@ -401,7 +416,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

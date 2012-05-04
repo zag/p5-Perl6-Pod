@@ -50,20 +50,21 @@ use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
 sub to_xhtml {
-    my $self   = shift;
-    my $parser = shift;
-    my $el =
-      $parser->mk_element('samp')->add_content( $parser->_make_elements(@_) )
-      ->insert_to( $parser->mk_element('pre') );
-    return $el;
+    my ( $self, $to ) = @_;
+    $to->w->raw('<pre><samp>');
+    $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0] );
+    $to->visit_childs($self);
+    $to->w->raw('</samp></pre>');
 }
 
 sub to_docbook {
-    my $self   = shift;
-    my $parser = shift;
-    my $el =
-      $parser->mk_element('screen')->add_content( $parser->_make_elements(@_) );
-    return $el;
+    my ( $self, $to ) = @_;
+    $to->w->raw('<screen>');
+    $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0] );
+    $to->visit_childs($self);
+    $to->w->raw('</screen>');
 }
 
 1;
@@ -83,7 +84,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

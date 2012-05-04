@@ -36,12 +36,7 @@ use Data::Dumper;
 use Test::More;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
-
-sub to_xml { 
-    my $self = shift;
-    my $parser = shift;
-    return $parser->_make_xml_element($self)->add_content($parser->mk_cdata(@_));
-}
+use Perl6::Pod::Utl;
 
 =head2 to_xhtml
 
@@ -55,11 +50,15 @@ Render to:
     </code></pre>
 =cut
 
-sub to_xhtml { 
-    my $self = shift;
-    my $parser = shift;
-    my $el = $parser->mk_element('code')->insert_to( $parser->mk_element('pre') );
-    $el->add_content( $self->_make_elements($parser,@_) );
+sub to_xhtml {
+    my ( $self, $to ) = @_;
+    $to->w->raw('<code><pre>');
+    if ( my $allow = $self->get_attr->{allow} ) {
+        $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0], allow => $allow );
+    }
+    $to->visit_childs($self);
+    $to->w->raw('</code></pre>');
 }
 
 =head2 to_docbook
@@ -75,36 +74,12 @@ Render to:
 =cut
 
 sub to_docbook {
-    my $self = shift;
-    my $parser = shift;
-    my $el = $parser->mk_element('programlisting');
-    $el->add_content( $self->_make_elements($parser,@_) );
-}
+    my ( $self, $to ) = @_;
+    $to->w->raw(
+        '<programlisting><![CDATA[');
+    $to->visit_childs($self);
+    $to->w->raw(']]></programlisting>');
 
-#add escaping
-sub _make_elements {
-    my $self = shift;
-    my $parser = shift;
-    my @res  = ();
-    for (@_) {
-        push @res, ref($_)
-          ? ref($_) eq 'ARRAY'
-              ? $parser->_make_elements(@$_)
-              : $_
-          : $parser->mk_characters(_html_escape($_));
-    }
-    return @res;
-}
-
-
-sub _html_escape {
-    my ( $txt ) =@_;
-    $txt   =~ s/&/&amp;/g;
-    $txt   =~ s/</&lt;/g;
-    $txt   =~ s/>/&gt;/g;
-#    $txt   =~ s/"/&quot;/g;
-#    $txt   =~ s/'/&apos;/g;
-    $txt
 }
 1;
 __END__
@@ -122,7 +97,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

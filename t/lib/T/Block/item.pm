@@ -15,16 +15,35 @@ use Perl6::Pod::Parser::ListLevels;
 
 sub t1_test_multi_para : Test(1) {
     my $t = shift;
-    my $x = $t->parse_to_xml( <<T1, );
+    my $x = $t->parse_to_test( <<T1, );
 =begin pod
-=item1 i1
-=begin item1
+=item # i1
+=begin item2
 parar1
 
 para2
-=end item1
+=end item2
+=defn TEST
+some para
+=begin defn
+     
+term
+definition for the term.
+
+=end defn
+
 =end pod
 T1
+    my ($i1, $i2, $i3) = @{$x->{item}};
+    ok $i1->is_numbered, ':numbered by # ';
+    is $i1->item_level(),1, 'default level';
+    is $i2->item_level(),2, '=item2 level';
+    is $i1->item_type, 'ordered', 'item_type: ordered';
+    is $i2->item_type, 'unordered', 'item_type: unordered';
+    my ($d1, $d2, $d3) = @{$x->{defn}};
+    is $d1->item_type, 'definition', 'item_type: definition';
+    diag Dumper $d2;
+    exit;
     $t->is_deeply_xml(
         $x,
 q#<?xml version="1.0"?>
@@ -70,7 +89,7 @@ q#<?xml version="1.0"?>
     );
 }
 
-sub t1_multi_line_and_numbered : Test(1) {
+sub t11_multi_line_and_numbered : Test(1) {
     my $t = shift;
     my $x = $t->parse_to_xml( <<T1, );
 =begin pod

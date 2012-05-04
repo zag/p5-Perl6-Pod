@@ -72,6 +72,18 @@ sub say {
     print $fh "\n";
     $self
 }
+
+sub start_nesting {
+    my $self = shift;
+    my $level = shift || 1 ;
+    $self->raw('<blockquote>') for (1..$level);
+}
+sub stop_nesting {
+    my $self = shift;
+    my $level = shift || 1 ;
+    $self->raw('</blockquote>') for (1..$level);
+}
+
 1;
 
 

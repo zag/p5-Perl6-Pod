@@ -1,3 +1,20 @@
+package Perl6::Pod::To::Test;
+use strict;
+use warnings;
+use Perl6::Pod::To;
+use base 'Perl6::Pod::To';
+sub __default_method {
+    my $self   = shift;
+    my $n      = shift;
+    unless (defined $n) {
+    warn "default" . $n;
+    use Data::Dumper;
+    warn Dumper([caller(0)]);
+    }
+#    $self->SUPER::__default_method($n);
+    push @{ $self->{ $n->{name} } }, $n;
+}
+
 package Perl6::Pod::Test;
 #$Id$
 
@@ -57,6 +74,20 @@ sub parse_to_xhtml {
     return wantarray ? (  $out, $renderer  ) : $out;
 }
 
+sub parse_to_test {
+    shift if ref($_[0]);
+    my ( $text) = @_;
+    my $out    = '';
+    open( my $fd, ">", \$out );
+    my $renderer = new Perl6::Pod::To::Test::
+      writer  => new Perl6::Pod::Writer( out => $fd, escape=>'xml' ),
+      out_put => \$out,
+      doctype => 'xhtml',
+      header => 0;
+    $renderer->parse( \$text, default_pod=>1 );
+    return  $renderer 
+
+}
 sub new {
     my $class = shift;
     $class = ref $class if ref $class;

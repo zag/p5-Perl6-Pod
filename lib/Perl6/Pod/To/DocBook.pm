@@ -63,14 +63,6 @@ sub block_head {
       ->raw('</title>');
 }
 
-sub block_code {
-    my $self = shift;
-    my $el   = shift;
-    $self->w->raw(
-        '<programlisting><![CDATA[');
-    $self->visit_childs($el);
-    $self->w->raw(']]></programlisting>');
-}
 
 sub start_write {
     my $self = shift;

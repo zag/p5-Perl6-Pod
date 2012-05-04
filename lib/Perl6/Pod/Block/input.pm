@@ -50,20 +50,21 @@ use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
 sub to_xhtml {
-    my $self   = shift;
-    my $parser = shift;
-    my $el =
-      $parser->mk_element('kbd')->add_content( $parser->_make_elements(@_) )
-      ->insert_to( $parser->mk_element('pre') );
-    return $el;
+    my ( $self, $to ) = @_;
+    $to->w->raw('<pre><kbd>');
+    $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0] );
+    $to->visit_childs($self);
+    $to->w->raw('</kbd></pre>');
 }
 
 sub to_docbook {
-    my $self   = shift;
-    my $parser = shift;
-    my $el =
-      $parser->mk_element('userinput')->add_content( $parser->_make_elements(@_) );
-    return $el;
+    my ( $self, $to ) = @_;
+    $to->w->raw('<userinput>');
+    $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0] );
+    $to->visit_childs($self);
+    $to->w->raw('</userinput>');
 }
 
 1;

@@ -15,31 +15,6 @@ use Perl6::Pod::To::XHTML;
 use XML::ExtOn('create_pipe');
 use base 'TBase';
 
-sub c01_nested_nested : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml(<<T);
-=begin pod
-=begin nested
-=begin nested
-Test B<er>
-=end nested
-=end nested
-=end pod
-T
-    $t->is_deeply_xml(
-        $x,
-q#<?xml version="1.0"?>
-<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
-  <nested pod:type="block">
-    <nested pod:type="block">
-      <para pod:type="block">Test <B pod:type="code">er</B>
-</para>
-    </nested>
-  </nested>
-</pod>
-#
-    );
-}
 
 sub c02_as_docbook : Test {
     my $t = shift;
@@ -92,38 +67,4 @@ q#<?xml version="1.0"?>
 #
     );
 }
-
-
-sub c03_implicit_code : Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml(<<T);
-=begin pod
-=begin nested
-para1
-
- apara1
- wawe
-
-  para2 asd asd
-asdad
-=end nested
-=end pod
-T
-    $t->is_deeply_xml(
-        $x,
-q#<?xml version="1.0"?>
-<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
-  <nested pod:type="block">
-    <para pod:type="block">para1</para>
-    <code pod:type="block"><![CDATA[ apara1
-  wawe]]></code>
-    <para pod:type="block">  para2 asd asd
- asdad
- </para>
-  </nested>
-</pod>
-#);
-}
-
-
 1;
