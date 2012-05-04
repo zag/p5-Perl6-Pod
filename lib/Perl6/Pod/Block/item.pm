@@ -191,6 +191,9 @@ sub new {
     #and the remaining content is treated as the definition for the term
     if ( $self->item_type eq 'definition') {
        my $first_para = $self->{'content'}->[0];
+       if ($first_para =~ s/^\s*(.*)/) {
+        
+       }
 #       #clear all first blank lines
 #        $first_para =~ s/^\s*//s;
 #        $first_para
