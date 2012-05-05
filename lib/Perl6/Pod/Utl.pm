@@ -121,7 +121,7 @@ sub parse_para {
             })>
     <rule: C_code>(?! \s+)
        <name=([C])><isValideFCode(:name)>
-            <ldelim>     <content=( .* )>   <rdelim(:ldelim)>
+            <ldelim>     <content=( .*? )>   <rdelim(:ldelim)>
     <rule: D_code>(?! \s+)
       <name=([D])><isValideFCode(:name)>
             <ldelim>  <term=([^\|]*?)> (?: \| <[syns=(\S+)]>+ % ;)?  <rdelim(:ldelim)>

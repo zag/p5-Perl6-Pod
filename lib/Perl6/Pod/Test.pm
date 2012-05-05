@@ -11,8 +11,13 @@ sub __default_method {
     use Data::Dumper;
     warn Dumper([caller(0)]);
     }
-#    $self->SUPER::__default_method($n);
-    push @{ $self->{ $n->{name} } }, $n;
+    #src_name may be not eq for name
+    # ie/ item2, head5
+    push @{ $self->{ $n->{name} }}, $n;
+    if ( $n->{name} ne $n->{src_name}) {
+       push @{ $self->{ $n->{src_name} }}, $n;
+        
+    }
 }
 
 package Perl6::Pod::Test;

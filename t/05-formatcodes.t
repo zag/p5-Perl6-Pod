@@ -41,7 +41,7 @@ my $r     = qr{
             })>
     <rule: C_code>(?! \s+)
       <name=([C])><isValideFCode(:name)>
-            <ldelim>     <content=( .* )>   <rdelim(:ldelim)>
+            <ldelim>     <content=( .*? )>   <rdelim(:ldelim)>
     <rule: D_code>(?! \s+)
       <name=([D])><isValideFCode(:name)>
             <ldelim>  <term=([^\|]*?)> (?: \| <[syns=(\S+)]>+ % ;)?  <rdelim(:ldelim)>
@@ -55,6 +55,7 @@ my $STOP_TREE = 2;
 
 @t = ( ' sd C<<<s B<s>>ss» sB<d>' );
 @t=('D<test>, and D<word | synonym1 ;synonym2>');
+@t=('C<as> asds B<asdasI<d>sad >');
 my @grammars;
 
 #@t         = ();

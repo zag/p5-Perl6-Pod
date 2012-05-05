@@ -23,7 +23,8 @@ use v5.10;
 sub make_block {
     my $self = shift;
     my %ref  = @_;
-    my $name = $ref{name};
+    #save original bloack name
+    my $name = $ref{src_name} = $ref{name};
     #for items1,2  and heads
     if ($name =~ /(item|head)(\d+)/ ) {
         $name = $ref{name} = $1;

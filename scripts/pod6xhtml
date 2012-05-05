@@ -6,7 +6,6 @@
 #  DESCRIPTION:  save Perl 6 pod as pod6xhtml
 #       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
 #===============================================================================
-#$Id: pod6docbook 573 2009-07-11 12:54:28Z zag $
 use strict;
 use warnings;
 use Getopt::Long;
@@ -28,7 +27,6 @@ GetOptions(
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
-#my %args = ( header => $add_head, doctype => $doctype, body=>1 );
 my %args = ( header => $add_head, doctype => $doctype, body=> ! $no_body);
 
 if ($css_file) {
@@ -51,16 +49,25 @@ else {
     $in_fd = \*STDIN;
 }
 
-my $p = Perl6::Pod::To::to_abstract( 'Perl6::Pod::To::XHTML', \*STDOUT, %args );
-$p->begin_input;
-#include libs ( see $Perl6::Pod::Lib::PERL6POD )
-if (@libs) {
-    my $use  = join "\n" => map { "=use $_" } @libs;
-    $use .= "\n";
-    $p->_parse_chunk(\$use);
+my $text;
+{
+    local $/;
+    $text = <$in_fd>
 }
-$p->_parse_chunk($in_fd);
-$p->end_input;
+
+my $renderer = new Perl6::Pod::To::XHTML::
+  writer  => new Perl6::Pod::Writer( out => \*STDOUT,  escape=>'html'),
+  doctype => $doctype,
+  header  => $add_head;
+$renderer->parse( \$text, default_pod => 1 );
+
+
+##include libs ( see $Perl6::Pod::Lib::PERL6POD )
+#if (@libs) {
+#    my $use  = join "\n" => map { "=use $_" } @libs;
+#    $use .= "\n";
+#    $p->_parse_chunk(\$use);
+#}
 
 exit;
 
@@ -141,7 +148,7 @@ Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2011 by Zahatski Aliaksandr
+Copyright 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

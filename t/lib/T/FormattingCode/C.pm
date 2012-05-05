@@ -45,7 +45,7 @@ sub t06_allow_for_C : Test {
     my $x = $t->parse_to_xhtml( <<T);
 =config C<> :allow<I E>
 =para
-sdssd C<E<nbsp>>
+sdssd C«E<nbsp>»
 T
     ok $x =~ m{<code>&nbsp;</code>};
 }
@@ -59,6 +59,19 @@ T
     $t->is_deeply_xml( $x,
 q# <xhtml xmlns='http://www.w3.org/1999/xhtml'><p><code>test &gt; &amp;</code>
  </p></xhtml>#
+    );
+}
+
+sub t08_code_to_xhtml : Test {
+     my $t = shift;
+    my $x = $t->parse_to_xhtml( <<T);
+=para
+C<as> asds B<asdasI<d>sad >
+T
+    $t->is_deeply_xml( $x,
+q#<xhtml xmlns="http://www.w3.org/1999/xhtml"><p><code>as</code> asds <strong>asdas<em>d</em>sad </strong>
+ </p></xhtml>
+#
     );
 }
 

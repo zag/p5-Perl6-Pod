@@ -26,7 +26,7 @@ sub get_attr {
     my $attr = $self->SUPER::get_attr;
     #union attr with =config
     if (my $ctx = $self->context) {
-        if ( my $config = $ctx->get_config( $self->name ) ) {
+        if ( my $config = $ctx->get_config( $self->{src_name} ) ) {
          while ( my ($k, $v) = each %$config ) {
             $attr->{$k} = $v
            }
