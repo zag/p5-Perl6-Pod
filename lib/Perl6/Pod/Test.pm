@@ -11,12 +11,28 @@ sub __default_method {
     use Data::Dumper;
     warn Dumper([caller(0)]);
     }
-    #src_name may be not eq for name
+
+    #detect output format
+    # Perl6::Pod::To::DocBook -> to_docbook
+    my $export_method ='to_xhtml';
+    unless ( $export_method && UNIVERSAL::can($n, $export_method) ) {
+    my $method = $self->__get_method_name($n);
+    die ref($self)
+      . ": Method '$method' for class "
+      . ref($n)
+      . " not implemented. But also can't found export method ". ref($n) . "::$export_method";
+    }
+    #call method for export
+    $n->$export_method($self);
+   #src_name may be not eq for name
     # ie/ item2, head5
-    push @{ $self->{ $n->{name} }}, $n;
-    if ( $n->{name} ne $n->{src_name}) {
+    my $name = $n->{name};
+    if (UNIVERSAL::isa($n, 'Perl6::Pod::FormattingCode')) {
+        $name = "$name<>";
+    }
+    push @{ $self->{ $name }}, $n;
+    if ( exists ($n->{src_name}) && ($name ne  $n->{src_name}) ) {
        push @{ $self->{ $n->{src_name} }}, $n;
-        
     }
 }
 
@@ -41,13 +57,9 @@ use warnings;
 use Test::More;
 use Perl6::Pod::Writer;
 
-use Perl6::Pod::To::Mem;
-use Perl6::Pod::To::XML;
 use Perl6::Pod::To::DocBook;
 use Perl6::Pod::To::XHTML;
-use XML::ExtOn::Writer;
 use XML::Flow;
-use XML::ExtOn qw( create_pipe split_pipe);
 
 sub parse_to_docbook {
     shift if ref($_[0]);
@@ -98,54 +110,6 @@ sub new {
     $class = ref $class if ref $class;
     my $self = bless( {@_}, $class );
     return $self;
-}
-
-=head2 parse_to_xml \$pod_str, ['filter1']
-
-return out_put from To::Mem formatter
-
-=cut
-
-sub parse_to_xml {
-    my $test = shift;
-    my ( $text, @filters ) = @_;
-    my $out = '';
-    my $to_mem = new Perl6::Pod::To::XML:: out_put => \$out;
-#    $to_mem->parse(\$text);
-#    return wantarray ? ( $to_mem, $f, $out ) : $out;
-    my ( $p, $f ) = $test->make_parser( @filters, $to_mem );
-    $p->parse( \$text );
-    return wantarray ? ( $p, $f, $out ) : $out;
-}
-
-=head2 pod2xml \$pod_str, ['filter1']
-
-return out_put from To::Mem formatter
-
-=cut
-
-sub pod6xml {
-    my $test = shift;
-    my ( $text, @filters ) = @_;
-    my $out = '';
-    my $to_mem = new Perl6::Pod::To::XML:: out_put => \$out, header=>1;
-    my $p = create_pipe(@filters,$to_mem);
-    $p->parse(\$text);
-    return wantarray ? ( $to_mem, $out ) : $out;
-}
-
-sub make_xhtml_parser {
-    my $t          = shift;
-    my $out        = shift;
-    my $xml_writer = new XML::ExtOn::Writer:: Output => $out;
-    my $out_filters =
-      create_pipe( create_pipe( @_ ? @_ : 'XML::ExtOn', $xml_writer ) );
-    my ( $p, $f ) = Perl6::Pod::To::to_abstract(
-        'Perl6::Pod::To::XHTML', $out,
-        doctype => 'xhtml',
-        headers => 0
-    );
-    return wantarray ? ( $p, $f ) : $p;
 }
 
 

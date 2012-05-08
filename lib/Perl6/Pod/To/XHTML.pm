@@ -4,6 +4,7 @@ use Test::More;
 use XML::ExtOn('create_pipe');
 use base 'XML::ExtOn';
 
+
 sub on_start_element {
     my ( $self, $el ) = @_;
     if ( $el->local_name eq 'pod' ) {
@@ -75,6 +76,15 @@ use Perl6::Pod::Utl;
 use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
 use Data::Dumper;
 
+sub block_NAME {
+    my $self = shift;
+    my $el   = shift;
+    my $w  = $self->w;
+    $w->raw('<title>');
+    $self->visit_childs($el->childs->[0]);
+    $w->raw('</title>');
+}
+
 sub start_write {
     my $self = shift;
     my $w    = $self->writer;
@@ -88,6 +98,21 @@ q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-op
 
 sub end_write {
     my $self = shift;
+    #export N<> notes
+    my $notes = $self->{CODE_N}||[];
+    if (my $count = scalar(@$notes)) {
+        my $w =  $self->w;
+       $w->raw('<div class="footnote">')
+       ->raw('<p>NOTES</p>');
+       my $nid = 1;
+       foreach my $n (@$notes) {
+            $w->raw(qq!<p><a name="ftn.nid${nid}" href="#nid${nid}"><sup>${nid}.</sup></a>!);
+            $self->visit_childs($n);
+            $w->raw('</p>');
+            $nid++;
+       }
+       $self->w->raw('</div>');
+    }
     $self->w->raw_print( '</' . ( $self->{doctype} || 'html' ) . '>' );
 }
 

@@ -15,13 +15,11 @@ use base 'TBase';
 
 sub t01_as_xml : Test {
     my $t = shift;
-    my $x = $t->pod6xml( <<T);
+    my $x = $t->parse_to_test( <<T);
 =para
 Text  this N<Some note>.
 T
-    $t->is_deeply_xml( $x,
-q#<pod6 xmlns:pod='http://perlcabal.org/syn/S26.html'><para pod:type='block'>Text  this <N pod:type='code' pod:n='1'>Some note</N>.</para><_NOTES_ pod:type='block'><_NOTE_ pod:note_id='1' pod:type='block'>Some note</_NOTE_></_NOTES_></pod6>#
-    );
+    is  $x->{CODE_N_COUNT}, 1, 'CODE_N_COUNT';
 }
 
 sub t02_as_xhtml : Test {
@@ -33,9 +31,9 @@ Text  N<Same B<note>>.
 =end pod
 T
 
-    #    diag $x;
     $t->is_deeply_xml( $x,
-q|<xhtml xmlns='http://www.w3.org/1999/xhtml'><p>Text  <sup><a href='#ftn.nid1' name='nid1'>[1]</a></sup>.</p><div class='footnote'><p>NOTES</p><p><a href='#nid1' name='ftn.nid1'><sup>1.</sup></a>Same <strong>note</strong></p></div></xhtml>|
+q|<xhtml xmlns="http://www.w3.org/1999/xhtml"><p>Text  <sup><a name="nid1" href="#ftn.nid1">[1]</a></sup>.
+</p><div class="footnote"><p>NOTES</p><p><a name="ftn.nid1" href="#nid1"><sup>1.</sup></a>Same <strong>note</strong></p></div></xhtml>|
     );
 }
 
@@ -47,7 +45,6 @@ sub t03_as_bocbook : Test {
 Text  N<Same B<note>>.
 =end pod
 T
-
     $t->is_deeply_xml(
         $x,
 q|<chapter><para>Text  <footnote><para>Same <emphasis role='bold'>note</emphasis></para></footnote>.

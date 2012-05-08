@@ -10,21 +10,15 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use Perl6::Pod::To::XHTML;
-use XML::ExtOn('create_pipe');
 use base 'TBase';
 
 sub t01_as_xml : Test {
     my $t = shift;
-    my $x = $t->parse_to_xml( <<T);
+    my $x = $t->parse_to_test( <<T);
 =para
 Bold U<test>
 T
-    $t->is_deeply_xml(
-        $x,
-q#<para pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>Bold <U pod:type='code'>test</U>
-</para>#
-    );
+    is $x->{'U<>'}->[0]->{content}->[0], 'test', 'U<test>';
 }
 
 sub t02_as_xhtml : Test {

@@ -98,7 +98,7 @@ sub parse_para {
         #fill allowed fcodes
         @allow{ @list} =();
     }
-    my $r     = qr{
+    my $r     = $args{reg} || qr{
 
        <extends: Perl6::Pod::Grammar::FormattingCodes>
        <matchline>
@@ -107,6 +107,7 @@ sub parse_para {
     <token: Text> <[content]>+
     <token: text>  .+?
     <token: content> <MATCH=C_code> 
+                    | <MATCH=L_code>
                     | <MATCH=D_code> 
                     | <MATCH=default_formatting_code> 
                     | <.text>
@@ -125,6 +126,26 @@ sub parse_para {
     <rule: D_code>(?! \s+)
       <name=([D])><isValideFCode(:name)>
             <ldelim>  <term=([^\|]*?)> (?: \| <[syns=(\S+)]>+ % ;)?  <rdelim(:ldelim)>
+    <rule: L_x_code>(?! \s+)
+       <name=(L)><isValideFCode(:name)>
+            <ldelim>     <content=( .*? )>   <rdelim(:ldelim)>
+
+    <rule: L_code>(?! \s+)
+      <name=(L)><isValideFCode(:name)>
+            <ldelim>
+            #alternate presentation
+     (?: <alt_text=([^\n\|]*?)> \| )? #(.*) \| not work for 
+    #L< http://cpan.org > B<sd > L< haname | http:perl.html  >
+    # '' => 'L< http://cpan.org > B<sd > L< haname | http:perl.html  >'
+
+    #        (?:<alt_text=(.*?)>)? #hack
+
+                <scheme=([^|\s:]+:)>? #scheme specifier
+
+                (?: <is_external=(//)> )? 
+                  <address=([^\|]*?)>?
+                 (?: \# <section=(.*?)> )? #internal addresses
+            <rdelim(:ldelim)>
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
             <ldelim>  <[content]>*?   <rdelim(:ldelim)>

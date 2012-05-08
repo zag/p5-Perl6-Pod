@@ -30,91 +30,70 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Perl6::Pod::FormattingCode;
-use Perl6::Pod::Parser::Utils qw(parse_URI );
 use base 'Perl6::Pod::FormattingCode';
+use Perl6::Pod::Utl;
+use feature qw(switch);
 
-sub on_para {
-    my ( $self, $parser, $txt ) = @_;
-
-    #extract linkname and content
-    my ( $lname, $lcontent ) = ( '', defined $txt ? $txt : '' );
-    my $attr = $self->attrs_by_name;
-#=pod
-    if ( $lcontent =~ /\|/ ) {
-        my @all;
-        ( $lname, @all ) = split( /\s*\|\s*/, $lcontent );
-        $lcontent = join "", @all;
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    #parse conntent
+    if (0) {
+      my $txt = $self->{'content'};
+      ( $self->{alt_text}, $txt ) =  split( /\s*\|\s*/, $txt ) if $txt =~/\|/; 
+      #cut scheme
+      if ( $txt =~s/^\s*(\w+):// ) {
+        $self->{scheme} = $1;
+      }
+      #is_external
+      if ( $txt =~ s%^//%%) {
+        $self->{is_external}='//'
+      }
+      #cut address
+      if ($txt =~ /([^\#]*)(?:\#(.*))?/) {
+            $self->{address} = $1 ||'';
+            $self->{section} = $2 || '';
+      }
     }
-    #clean whitespaces
-    $lname =~ s/^\s+//;
-    $lname =~ s/\s+$//;
-    $attr->{name} = $lname;
-    my ( $scheme, $address, $section ) =
-      $lcontent =~ /\s*(\w+)\s*\:([^\#]*)(?:\#(.*))?/;
-    $attr->{scheme} = $scheme||'';
-    $address = '' unless defined $address;
-    $attr->{is_external} = $address =~ s/^\/\/// || $scheme && $scheme !~ /^file/;
-
-    #clean whitespaces
-    $address =~ s/^\s+//;
-    $address =~ s/\s+$//;
-    $attr->{address} = $address;
-
-    #fix L<doc:#Special Features>
-    $attr->{section} = defined $section ? $section : '';
-    #fix L<#id>
-    if (!defined($scheme) and $lcontent ) {
-        if ($lcontent =~ /^\s*(?:\#(.*))/) {
-            $attr->{section} = $1
-        }
-    }
-# =cut
-#    %{$attr} = %{parse_URI($txt)};
-    #parse nested formattings, i.e. L<B<name>|http://example.com>
-    $self->SUPER::on_para($parser,$lname)
+    return $self;
 }
 
 sub to_xhtml {
-    my ( $self, $parser, @in ) = @_;
-    my $attr = $self->attrs_by_name();
-    for ( $attr->{scheme} ) {
-        ( /^https?|.*$/ || $attr->{section} ) && do {
-            my $a   = $parser->mk_element('a');
-            my $url = $attr->{address};
-            $url .= "#" . $attr->{section} if $attr->{section};
-            $url = $_ . ":". (/^https?/ ? '//' : '') . $url if $attr->{is_external};
-            my $name = $attr->{name} || $url;
-            $a->attrs_by_name()->{href} = $url;
-             $a->add_content( $parser->_make_events( scalar(@in) ? @in : $name ) );
-            return $a;
-          }
-          || do { 
-            return [ $parser->_make_events(@in) ];
-            }
-    }
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    given ($self->{scheme}|| '') {
+      when ( /^https?|.*$/ || $self->{section} ) {
+                my $url = $self->{address} || ''; 
+                $url .= "#" . $self->{section} if $self->{section};
+                $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
+                $w->raw(qq!<a href="$url">!);
+                unless  ( $self->{alt_text}) {
+                            $w->print($url)
+                } else {
+                    $to->visit(Perl6::Pod::Utl::parse_para($self->{alt_text}))
+                }
+                $w->raw('</a>');
+      }
+    };
 }
 
 sub to_docbook {
-    my ( $self, $parser, @in ) = @_;
-    my $attr = $self->attrs_by_name();
-    for ( $attr->{scheme} ) {
-        /^https?/  && do {
-            my $ulink = $parser->mk_element('ulink');
-            my $url   = $attr->{address};
-            $url .= "#" . $attr->{section} if $attr->{section};
-            $url = $_ . "://" . $url if $attr->{is_external};
-            $ulink->attrs_by_name->{url} = $url;
-            my $name = $attr->{name};
-            $ulink->add_content( $name
-                ? $parser->mk_characters($name)
-                : $parser->_make_events(@in) );
-
-            #        $ulink->add_content( $parser->mk_characters( $name ) );
-            return $ulink;
-          }
-          || do { return $parser->mk_characters( $in[0] ) }
-    }
-
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    given ($self->{scheme}) {
+      when ( /^https?|.*:$/ || $self->{section} ) {
+                my $url = $self->{address} || ''; 
+                $url .= "#" . $self->{section} if $self->{section};
+                $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
+                $w->raw(qq!<ulink url="$url">!);
+                unless  ( $self->{alt_text}) {
+                            $w->print($url)
+                } else {
+                    $to->visit(Perl6::Pod::Utl::parse_para($self->{alt_text}))
+                }
+                $w->raw('</ulink>');
+      }
+    };
 }
 1;
 __END__
@@ -131,7 +110,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

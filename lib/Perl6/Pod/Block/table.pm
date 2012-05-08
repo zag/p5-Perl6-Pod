@@ -1,7 +1,5 @@
 package Perl6::Pod::Block::table;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -61,7 +59,7 @@ or line-by-line with multi-line headers:
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More;
+use Perl6::Pod::Utl;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 use constant {
@@ -71,10 +69,73 @@ use constant {
     COLUMNS_FORMAT_ROW_SEPARATE   => qr/\s*\|\s*|\+|[\ ]{2,}/xms,
 };
 
-sub end {
-    my ( $self, $parser, $attr ) = @_;
-    return;
+my $grammar = do {
+    use Regexp::Grammars;
+    qr{
+        <grammar: Perl6::Pod::table>
+    <token: col_content>( [^\n]*? )
+    <token: row>
+       ^ \s* <[content=col_content]>+ % <col_delims> \s*
+        <require: (?{ 
+                $count_cols == scalar(@{ $MATCH{content} })
+                })>
+   <token: col_delims>( \s+[\|\+]\s+ | \ {2,} | \t+ )
+   <token: row_delims>(
+        \s* \n* <[header_row_delims=([=-_]+)]>+ % (\+|\s+|\|) \s* \n 
+        | <endofline=((\s*\n)+)>
+        )
+
+    <token: Table>
+        <[row]>+ % <[row_delims]>
+    }xms
+};
+
+sub new {
+    my $class = shift;
+    my $self =  $class->SUPER::new(@_);
+    my $content = $self->{content}->[0];
+    my $count = $self->_get_count_cols($content);
+    $self->{tree} = &parse_table($content, $count);
+    $self->{col_count} = $count;
+    $self
+
 }
+
+sub parse_table {
+ my $text = shift;
+ our $count_cols = shift;
+ my $qr = do {
+  use Regexp::Grammars;
+   qr {
+    <extends: Perl6::Pod::table>
+#           <debug:step>
+
+    \A <Table> \Z
+   }xms
+ };
+ if ($text =~ $qr ) {
+    return $/{Table}
+ } else {
+    die "can't parse"
+ }
+}
+
+=head2 is_header_row
+
+Flag id header row exists
+
+=cut
+
+sub is_header_row {
+    my $self = shift;
+    exists $self->{tree}->{row_delims}->[0]->{header_row_delims}
+}
+
+sub get_rows {
+    my $self = shift;
+    my $rows = $self->{tree}->{row};
+}
+
 
 sub _get_count_cols {
     my $self      = shift;
@@ -121,190 +182,71 @@ sub _make_head_row {
     return $res;
 }
 
-sub _make_events {
-    my $self         = shift;
-    my $parser       = shift;
-    my $table_rows   = shift;
-    my @res          = ();
-    my $current_type = "";
-
-    #make head
-    if ( $table_rows->[0]->{type} eq 'head' ) {
-
-        # get head row
-        my $row         = shift @$table_rows;
-        my $type        = $row->{type};
-        my $start_thead = $self->mk_block("table");
-        $start_thead->attrs_by_name->{table_type} = "${type}_start";
-        $parser->start_block( $start_thead, '', 0 );
-
-        my $thead = $self->mk_block("table");
-        $thead->attrs_by_name->{table_type} = $type;
-
-        #make rows
-        $parser->start_block( $thead, '', 0 );
-        foreach my $column ( @{ $row->{data} } ) {
-            my $col = $self->mk_block("table");
-            $col->attrs_by_name->{table_type} = "${type}_column";
-            $parser->start_block( $col, '', 0 );
-            $parser->para($column);
-            $parser->end_block( $col, '', 0 );
-        }
-        $parser->end_block( $thead, '', 0 );
-
-        $parser->end_block( $start_thead, '', 0 );
-    }
-    my $start_body = $self->mk_block("table");
-    $start_body->attrs_by_name->{table_type} = "body_start";
-    $parser->start_block( $start_body, '', 0 );
-
-    foreach my $row (@$table_rows) {
-        my $type  = $row->{type};
-        my $thead = $self->mk_block("table");
-        $thead->attrs_by_name->{table_type} = $type;
-
-        #make rows
-        $parser->start_block( $thead, '', 0 );
-        foreach my $column ( @{ $row->{data} } ) {
-            my $col = $self->mk_block("table");
-            $col->attrs_by_name->{table_type} = "${type}_column";
-            $parser->start_block( $col, '', 0 );
-            $parser->para($column);
-            $parser->end_block( $col, '', 0 );
-        }
-        $parser->end_block( $thead, '', 0 );
-    }
-    $parser->end_block( $start_body, '', 0 );
-    return \@res;
-}
-
-sub on_para {
-    my ( $self, $parser, $txt ) = @_;
-    if ( exists $self->attrs_by_name->{table_type} ) {
-        return $self->SUPER::on_para( $parser, $txt );
-    }
-
-    #$self->{TABLE} .= $txt."\n";
-    my $i++;
-    my @res_rows  = ();
-    my @rows      = ();
-    my $col_count = $self->_get_count_cols($txt);
-    $self->attrs_by_name->{table_row_count} = $col_count;
-    foreach my $line ( split /\n/, $txt ) {
-
-        # clean begin and end of line
-        $line =~ s/^\s*//;
-        $line =~ s/\s*$//;
-
-        #if row separate line ?
-        if ( $line =~ /${\( COLUMNS_FORMAT_ROW )}$|^\s*$/ ) {
-
-            #skip duble row delim
-            next if scalar(@rows) == 0;
-            push @res_rows,
-              $line =~ /${\( COLUMNS_FORMAT_ROW )}$/
-              ? $self->_make_head_row( \@rows )
-              : $self->_make_row( \@rows );
-            @rows = ();
-        }
-        else {
-            my @colums = split( /${\( COLUMNS_SEPARATE )}/, $line );
-            $i++;
-            for ( my $n = 0 ; $n <= $#colums ; $n++ ) {
-                push @{ $rows[$n] }, defined ($colums[$n]) ? $colums[$n] : '';
-            }
-            if ( @colums == $col_count and !$self->{NEED_NEAD} ) {
-                push @res_rows, $self->_make_row( \@rows );
-                @rows = ();
-            }
-        }
-    }
-    return $self->_make_events( $parser, \@res_rows );
-}
-
 sub to_xhtml {
-    my $self    = shift;
-    my $parser  = shift;
-    my $type    = $self->attrs_by_name->{table_type} || '';
-    my @content = $parser->_make_events(@_);
-    my @res;
-    for ($type) {
-        /(row|head)$/ && do {
-            push @res, $parser->mk_element('tr')->add_content(@content);
-          }
-          || /head_column/ && do {
-            push @res, $parser->mk_element('th')->add_content(@content);
-          }
-          || /row_column/ && do {
-            push @res, $parser->mk_element('td')->add_content(@content);
-          }
-          || /head_start|body_start/ && do {    #nothing
-            push @res,
-              $parser->mk_element('table')->add_content(@content)
-              ->delete_element;
-          }
-          || do {
-
-            #make caption table element
-            if ( my $caption = $self->get_attr->{caption} ) {
-                unshift @content,
-                  $parser->mk_element('caption')
-                  ->add_content( $parser->mk_characters($caption) );
-            }
-            push @res, $parser->mk_element('table')->add_content(@content);
-          }
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw('<table>');
+    if ( my $caption = $self->get_attr->{caption}) {
+        $w->raw('<caption>')->print($caption)->raw('</caption>')
     }
-    return \@res;
+    my @rows = @{ $self->get_rows };
+    if ( $self->is_header_row) {
+       my $header = shift @rows; 
+        $w->raw('<tr>');
+        foreach my $h (@{ $header->{content} }) {
+            $w->raw('<th>');
+            $to->visit(Perl6::Pod::Utl::parse_para($h));
+            $w->raw('</th>');
+        }
+        $w->raw('</tr>');
+    }
+    #render content
+    foreach my $r ( @rows ) {
+        $w->raw('<tr>');
+        foreach my $cnt ( @{$r->{content}} ) {
+          $w->raw('<td>');
+          $to->visit(Perl6::Pod::Utl::parse_para($cnt));
+          $w->raw('</td>');
+        }
+        $w->raw('</tr>');
+    }
+    $w->raw('</table>');
 }
 
 sub to_docbook {
-    my $self    = shift;
-    my $parser  = shift;
-    my $type    = $self->attrs_by_name->{table_type} || '';
-    my @content = $parser->_make_events(@_);
-    my @res;
-    for ($type) {
-        /(head)$/ && do {
-            push @res, $parser->mk_element('row')->add_content(@content);
-          }
-          || /head_column/ && do {
-            push @res, $parser->mk_element('entry')->add_content(@content);
-          }
-          || /(row)$/ && do {
-            push @res, $parser->mk_element('row')->add_content(@content);
-          }
-          || /row_column/ && do {
-            push @res, $parser->mk_element('entry')->add_content(@content);
-          }
-          || /body_start/ && do {    #nothing
-            push @res,
-              $parser->mk_element('tbody')->add_content(@content)
-          }
-          || /head_start/ && do {    #nothing
-            push @res,
-              $parser->mk_element('thead')->add_content(@content)
-          }
-          || do {
-
-            
-            my $table = $parser->mk_element('table'); 
-            #make caption table element
-            if ( my $caption = $self->get_attr->{caption} ) {
-            $table->add_content(
-                  $parser->mk_element('title')
-                  ->add_content( $parser->mk_characters($caption) ) );
-            }
-            #add tgroup
-            my $tgroup = $parser->mk_element('tgroup')->add_content(@content);
-            my $count_col = $self->attrs_by_name->{table_row_count};
-
-            $tgroup->attrs_by_name->{cols} = $count_col;
-            $tgroup->attrs_by_name->{align} = 'center';
-
-            push @res, $table->add_content($tgroup);
-          }
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw('<table>');
+    if ( my $caption = $self->get_attr->{caption}) {
+        $w->raw('<title>')->print($caption)->raw('</title>')
     }
-    return \@res;
+    $w->raw(qq!<tgroup align="center" cols="!.$self->{col_count}.'">');
+    my @rows = @{ $self->get_rows };
+    if ( $self->is_header_row) {
+       my $header = shift @rows; 
+        $w->raw('<thead><row>');
+        foreach my $h (@{ $header->{content} }) {
+            $w->raw('<entry>');
+            $to->visit(Perl6::Pod::Utl::parse_para($h));
+            $w->raw('</entry>');
+        }
+        $w->raw('</row></thead>');
+    }
+    #render content
+     $w->raw('<tbody>');
+    foreach my $r ( @rows ) {
+         $w->raw('<row>');
+        foreach my $cnt ( @{$r->{content}} ) {
+         $w->raw('<entry>');
+          $to->visit(Perl6::Pod::Utl::parse_para($cnt));
+         $w->raw('</entry>');
+        }
+          $w->raw('</row>');
+    }
+    $w->raw('</tbody>');
+    $w->raw('</tgroup>');
+    $w->raw('</table>');
+
 }
 
 1;
@@ -322,7 +264,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

@@ -44,25 +44,23 @@ use Perl6::Pod::To;
 use base 'Perl6::Pod::To';
 use Perl6::Pod::Utl;
 
+sub new {
+    my $class =  shift;
+    my $self = $class->SUPER::new(@_);
+    $self->{doctype} ||= 'chapter';
+    return $self;
+}
 sub block_NAME {
     my $self = shift;
     my $el   = shift;
     my $w  = $self->w;
     $w->raw('<title>');
-    $self->visit_childs($el->childs->[0]);
+    $el->{content} = Perl6::Pod::Utl::parse_para($el->childs->[0]->{content}->[0]);
+#    use Data::Dumper;
+#    warn Dumper $el->{content};
+    $self->visit_childs($el);
     $w->raw('</title>');
 }
-
-sub block_head {
-    my $self  =shift;
-    my $el = shift;
-    my $w  = $self->w;
-    my $content = $el->childs->[0];
-    $w->raw('<title>')
-          ->print ($content)
-      ->raw('</title>');
-}
-
 
 sub start_write {
     my $self = shift;
@@ -71,13 +69,29 @@ sub start_write {
         $w->say(
 q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' >@);
     }
-    $self->w->raw_print( '<' . ( $self->{doctype} || 'chapter' ) . '>' );
+    my $doctype = $self->{doctype};
+    $self->w->raw_print( '<' . $doctype . '>' );
 }
 
-
+sub switch_head_level {
+    my $self = shift;
+    my $level = shift;
+    my $w = $self->w;
+    my $prev = $self->SUPER::switch_head_level($level);
+    if ($level && $level == $prev ) {
+        $w->raw('</chapter><chapter>')
+    } elsif ( $prev < $level  ) {
+        $w->raw('<chapter>') for ( 1..$level-$prev);
+    } else #$prev > $level
+     { 
+        $w->raw('</chapter>') for ( 1..$prev-$level);
+     
+     }
+}
 sub end_write {
     my $self = shift;
-    $self->w->raw_print( '</' . ( $self->{doctype} || 'chapter' ) . '>' );
+    $self->switch_head_level(0);
+    $self->w->raw_print( '</' .  $self->{doctype} . '>' );
 }
 
 

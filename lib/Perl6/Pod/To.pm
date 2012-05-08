@@ -19,23 +19,18 @@ Perl6::Pod::To - base class for output formatters
 use Carp;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
+use Perl6::Pod::Block::head;
 =pod
         use     => 'Perl6::Pod::Directive::use',
         comment => 'Perl6::Pod::Block::comment',
-        table   => 'Perl6::Pod::Block::table',
-        '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
-        'L<>'   => 'Perl6::Pod::FormattingCode::L',
         'X<>'   => 'Perl6::Pod::FormattingCode::X',
 
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
-        'U<>' => 'Perl6::Pod::FormattingCode::U',
-        'N<>' => 'Perl6::Pod::FormattingCode::N',
         'R<>' => 'Perl6::Pod::FormattingCode::R',
         'S<>' => 'Perl6::Pod::FormattingCode::S',
         'T<>' => 'Perl6::Pod::FormattingCode::T',
         'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
-        'Z<>' => 'Perl6::Pod::FormattingCode::Z',
 =cut
 
 use constant {
@@ -50,6 +45,8 @@ use constant {
         input   => 'Perl6::Pod::Block::input',
         item    => 'Perl6::Pod::Block::item',
         defn    => 'Perl6::Pod::Block::item',
+        head    => 'Perl6::Pod::Block::head',
+        table   => 'Perl6::Pod::Block::table',
         'A<>' => 'Perl6::Pod::FormattingCode::A',
         'B<>'   => 'Perl6::Pod::FormattingCode::B',
         'C<>'   => 'Perl6::Pod::FormattingCode::C',
@@ -57,6 +54,10 @@ use constant {
         'E<>' => 'Perl6::Pod::FormattingCode::E',
         'I<>'   => 'Perl6::Pod::FormattingCode::I',
         'K<>'   => 'Perl6::Pod::FormattingCode::K',
+        'L<>'   => 'Perl6::Pod::FormattingCode::L',
+        'N<>' => 'Perl6::Pod::FormattingCode::N',
+        'U<>' => 'Perl6::Pod::FormattingCode::U',
+        'Z<>' => 'Perl6::Pod::FormattingCode::Z',
         '*'    => 'Perl6::Pod::Block',
         '*<>'  => 'Perl6::Pod::FormattingCode',
     }
@@ -75,6 +76,8 @@ sub new {
          use Perl6::Pod::Writer;
         $self->{writer} = new Perl6::Pod::Writer( out => \*STDOUT )
     }
+    #init head levels
+    $self->{ HEAD_LEVELS } = 0;
     $self;
 }
 
@@ -160,6 +163,11 @@ sub visit {
         return undef unless ($el);
         $n = $el;
     }
+    #prcess head levels
+    #TODO also semantic BLOCKS
+    if ( $name eq 'head' ) {
+          $self->switch_head_level($n->level)
+    }
     #process nested attr
     my $nested = $n->get_attr->{nested};
     if ($nested) {
@@ -167,6 +175,7 @@ sub visit {
     }
     #make method name
     my $method = $self->__get_method_name($n);
+    #call method
     $self->$method($n);
 
     if ($nested) {
@@ -174,6 +183,21 @@ sub visit {
     }
 }
 
+=head2 switch_head_level
+
+Service method for =head
+
+=cut
+
+sub switch_head_level {
+    my $self = shift;
+    if ( @_ )  {
+         my $prev = $self->{HEAD_LEVELS};
+         $self->{HEAD_LEVELS} = shift;
+         return $prev;
+    }
+    $self->{HEAD_LEVELS}
+}
 sub __get_method_name {
     my $self = shift;
     my $el = shift || croak "empty object !";
@@ -198,6 +222,12 @@ sub block_pod {
     my $self = shift;
     return $self->visit_childs(@_);
 }
+
+#comments
+sub code_Z {}
+sub block_comment {}
+
+
 
 sub write {
     my $self = shift;

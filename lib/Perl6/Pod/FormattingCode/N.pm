@@ -75,29 +75,15 @@ You can change the formatting of the footnote paragraph using CSS. Use the div.f
 #FOR REAL processing SEE Perl6::Pod::To::*
 
 sub to_xhtml {
-    my ( $self, $p, @in ) = @_;
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    my $nid = ++$to->{CODE_N_COUNT};
+
 
     #<sup><a name="id394062" href="#ftn.id394062">[1]</a></sup>
-
-    my $nid   = $self->attrs_by_name->{n};
-    my $aelem = $p->mk_element('a')->add_content( $p->mk_characters("[$nid]") );
-    $aelem->attrs_by_name->{name} = "nid${nid}";
-    $aelem->attrs_by_name->{href} = "#ftn.nid${nid}";
-    $p->mk_element('sup')->add_content($aelem);
-
-}
-
-sub on_para {
-    my ( $self, $p, $t ) = @_;
-    my $nid = ++$p->{CODE_N_COUNT};
-    $self->attrs_by_name->{n} = $nid;
-    $p->{CODE_N_HASH}->{$nid} = {
-        href        => "#nid${nid}",
-        name        => "ftn.nid${nid}",
-        text        => $t,
-        parsed_para => $self->parse_para($t)
-    };
-    $self->SUPER::on_para( $p, $t );
+    $w->raw(qq!<sup><a name="nid${nid}" href="#ftn.nid${nid}">[$nid]</a></sup>!);
+    #save this element
+    push @{ $to->{CODE_N} }, $self;
 }
 
 =head2 to_docbook
@@ -111,12 +97,11 @@ L<http://www.docbook.org/tdg/en/html/footnote.html>
 =cut
 
 sub to_docbook {
-    my ( $self, $parser, @in ) = @_;
-    my @content = $parser->_make_events(@in);
-    my $emp     = $parser->mk_element('footnote')->add_content(
-        $parser->mk_element('para')->add_content(@content)
-        );
-    return $emp;
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw('<footnote><para>');
+    $to->visit_childs($self);
+    $w->raw('</para></footnote>');
 }
 
 1;
@@ -134,7 +119,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

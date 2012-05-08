@@ -1,7 +1,5 @@
 package Perl6::Pod::FormattingCode::U;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -45,11 +43,11 @@ Use css style for underline style:
 =cut
 
 sub to_xhtml {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- my $emp =  $parser->mk_element('em')->add_content(@content);
- $emp->attrs_by_name->{class} = 'unusual';
- return $emp
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw('<em class="unusual">');
+    $to->visit_childs($self);
+    $w->raw('</em>');
 }
 
 =head2 to_docbook
@@ -64,11 +62,12 @@ Render to
 #http://old.nabble.com/docbook-with-style-info-td25857763.html
 
 sub to_docbook {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- my $emp = $parser->mk_element('emphasis')->add_content(@content);
- $emp->attrs_by_name->{role} = 'underline';
- return $emp;
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw('<emphasis role="underline">');
+    $to->visit_childs($self);
+    $w->raw('</emphasis>');
+
 }
 
 1;
@@ -86,7 +85,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

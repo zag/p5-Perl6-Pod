@@ -22,7 +22,6 @@ sub c04_to_docbook : Test {
     test code
 =end pod
 T
-    diag $x; exit;
     $t->is_deeply_xml(
         $x,
         q#<chapter><programlisting><![CDATA[    test code

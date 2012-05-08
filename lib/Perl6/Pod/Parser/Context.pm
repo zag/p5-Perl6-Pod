@@ -6,7 +6,6 @@ use Perl6::Pod::Directive::config;
 use Perl6::Pod::Directive::alias;
 use Perl6::Pod::Block::comment;
 use Perl6::Pod::Block::code;
-use Perl6::Pod::Block::pod;
 use Perl6::Pod::Block::para;
 use Perl6::Pod::Block::table;
 use Perl6::Pod::Block::output;

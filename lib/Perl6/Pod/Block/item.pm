@@ -290,9 +290,12 @@ sub to_xhtml {
     my ( $self, $to ) = @_;
     my $w = $to->w;
 
-    #first nesting
-    $w->start_nesting( $self->item_level )
-      unless exists $self->get_attr->{nested};
+    #nesting first (only 2> )
+    unless (exists $self->get_attr->{nested}) {
+        my $tonest = $self->item_level - 1 ;
+        $w->start_nesting(  $tonest  ) if $tonest;
+    }
+
     my ( $list_name, $items_name ) = @{
         {
             ordered    => [ 'ol', 'li' ],
@@ -315,8 +318,12 @@ sub to_xhtml {
     $to->visit_childs($self);
     $w->raw("</$items_name>");
     $w->raw("</$list_name>");
-    $w->stop_nesting( $self->item_level )
-      unless exists $self->get_attr->{nested};
+
+    unless (exists $self->get_attr->{nested}) {
+        my $tonest = $self->item_level - 1  ;
+        $w->stop_nesting(  $tonest  ) if $tonest;
+    }
+
 }
 
 sub to_docbook {
@@ -332,9 +339,11 @@ sub to_docbook {
     my ( $self, $to ) = @_;
     my $w = $to->w;
 
-    #first nesting
-    $w->start_nesting( $self->item_level )
-      unless exists $self->get_attr->{nested};
+    #nesting first (only 2> )
+    unless (exists $self->get_attr->{nested}) {
+        my $tonest = $self->item_level - 1 ;
+        $w->start_nesting(  $tonest  ) if $tonest;
+    }
     my ( $list_name, $items_name ) = @{
         {
             ordered    => [ 'orderedlist',  'listitem' ],
@@ -370,8 +379,11 @@ sub to_docbook {
     $to->visit_childs($self);
     $w->raw("</$items_name>");
     $w->raw("</$list_name>");
-    $w->stop_nesting( $self->item_level )
-      unless exists $self->get_attr->{nested};
+
+    unless (exists $self->get_attr->{nested}) {
+        my $tonest = $self->item_level - 1  ;
+        $w->stop_nesting(  $tonest  ) if $tonest;
+    }
 
 }
 1;

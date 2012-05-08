@@ -11,7 +11,6 @@ use warnings;
 use base 'TBase';
 use Test::More;
 use Data::Dumper;
-use Perl6::Pod::Parser::ListLevels;
 
 sub t1_test_multi_para : Test(9) {
     my $t = shift;
@@ -59,10 +58,10 @@ i2
 T1
     $t->is_deeply_xml(
         $x,
-q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><blockquote><ol><li>i1
+q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><ol><li>i1
  i2
- </li></ol></blockquote><blockquote><ol><li>i2
- </li></ol></blockquote></xhtml>
+ </li></ol><ol><li>i2
+ </li></ol></xhtml>
 #
     );
 }
@@ -81,16 +80,16 @@ Test
 T1
     $t->is_deeply_xml(
         $x,
-q#<chapter><blockquote><orderedlist><listitem>i1
+q#<chapter><orderedlist><listitem>i1
 i2
-</listitem></orderedlist></blockquote><blockquote><orderedlist><listitem>i2
-</listitem></orderedlist></blockquote><blockquote><variablelist><varlistentry>TERM1</varlistentry><listitem>Test
-</listitem></variablelist></blockquote></chapter>#
+</listitem></orderedlist><orderedlist><listitem>i2
+</listitem></orderedlist><variablelist><varlistentry>TERM1</varlistentry><listitem>Test
+</listitem></variablelist></chapter>#
     );
 }
 
 sub t4_numbering_symbol : Test(1) {
-    my $t = shift;
+   my $t = shift;
     my $x = $t->parse_to_xhtml( <<T1, );
 =begin pod
 =config item2 :numbered
@@ -100,15 +99,12 @@ one
 =item2 two
 =end pod
 T1
-#    diag Dumper $x->{item}->[1]->get_attr; exit;
-    diag  $x; exit;
-    exit;
     $t->is_deeply_xml(
         $x,
-q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><blockquote><ol><li>i1
- i2
- </li></ol></blockquote><blockquote><ol><li>i2
- </li></ol></blockquote></xhtml>
+q#<xhtml xmlns="http://www.w3.org/1999/xhtml"><ul><li>test
+ </li></ul><blockquote><ol><li>one
+ </li></ol></blockquote><blockquote><ol><li>two
+</li></ol></blockquote></xhtml>
 #
     );
 }

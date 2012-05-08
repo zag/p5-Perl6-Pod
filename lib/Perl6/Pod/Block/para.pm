@@ -1,7 +1,5 @@
 package Perl6::Pod::Block::para;
 
-#$Id$
-
 =pod
 
 =head1 NAME

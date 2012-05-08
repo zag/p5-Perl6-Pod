@@ -18,7 +18,7 @@ sub __default_method {
 package main;
 use strict;
 use warnings;
-use Test::More tests => 1;                      # last test to print
+use Test::More tests => 3;                      # last test to print
 use Data::Dumper;
 use Perl6::Pod::Utl;
 

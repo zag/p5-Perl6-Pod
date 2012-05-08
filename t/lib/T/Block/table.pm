@@ -4,18 +4,71 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
+package Perl6::Pod::Block::table;
+
 package T::Block::table;
 use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use Perl6::Pod::To::XHTML;
-use XML::ExtOn('create_pipe');
 use base 'TBase';
 
-sub c01_table_xml:Test {
+sub parse_table {
+ my $text = shift;
+ our $count_cols = shift;
+ my $qr = do {
+  use Regexp::Grammars;
+   qr {
+    <extends: Perl6::Pod::table>
+#           <debug:step>
+
+    \A <Table> \Z
+   }xms
+ };
+ if ($text =~ $qr ) {
+    return $/{Table}
+ } else {
+    die "can't parse"
+ }
+}
+
+sub a00_table_headers:Test(2) {
+    my $t1 = parse_table(<<T,3);
+        The Shoveller e | Eddie Stevens     |  King Arthur's singing shovel  
+        ================+===================+============================
+        The Shovell2er  | Eddie 2Stevens    | King Arthur's singing shovel2
+        The Shoveel2er  | Eddie 2S3tevens   | King Arthur's singing shovel23  
+T
+    ok $t1->{row_delims}->[0]->{header_row_delims}, 'header row delims';
+    is @{$t1->{row}}, 3, 'rows';
+}
+
+sub a03_table_headers:Test() {
+    my $t1 = parse_table(<<T,3);
+        Superhero     | Secret Identity   |  Superpower 
+        ==============|=================+================================
+        The Shoveller | Eddie Stevens   | King Arthur's singing shovel
+
+        Blue Raja     | Geoffrey Smith  | Master of cutlery              
+        Mr Furious    | Roy Orson       | Ticking time bomb of fury      
+        The Bowler    | Carol Pinnsler     Haunted bowling ball           
+T
+    is @{$t1->{row}},5, 'multiline'
+}
+
+sub a02_table_headers:Test() {
+    my $t1 = parse_table(<<T,3);
+        The Shoveller e   Eddie Stevens      King Arthur's singing shovel 
+        The Shovell25er    Eddie 2Stevens    King Arthur's singing shovel2   
+        The Shoveel26er   Eddie 2S3tevens    King Arthur's singing shovel23  
+T
+
+    is @{$t1->{row}},3, 'cols with whitespace delims'
+}
+
+sub c01_table_xml:Test(2) {
     my $t = shift;
-    my $x = $t->parse_to_xml (<<T);
+    my $x = $t->parse_to_test (<<T);
 =begin pod
 =begin table
 = :w<2>
@@ -30,43 +83,9 @@ sub c01_table_xml:Test {
 =end table
 =end pod
 T
-$t->is_deeply_xml( $x,
-q#<?xml version="1.0"?>
-<pod xmlns:pod="http://perlcabal.org/syn/S26.html" pod:type="block">
-  <table w="2" pod:type="block" pod:table_row_count="3">
-    <table pod:type="block" pod:table_type="head_start">
-      <table pod:type="block" pod:table_type="head">
-        <table pod:type="block" pod:table_type="head_column">Superhero </table>
-        <table pod:type="block" pod:table_type="head_column">Secret Identity</table>
-        <table pod:type="block" pod:table_type="head_column">Superpower</table>
-      </table>
-    </table>
-    <table pod:type="block" pod:table_type="body_start">
-      <table pod:type="block" pod:table_type="row">
-        <table pod:type="block" pod:table_type="row_column">The Shoveller</table>
-        <table pod:type="block" pod:table_type="row_column">Eddie Stevens</table>
-        <table pod:type="block" pod:table_type="row_column">King Arthur's singing shovel</table>
-      </table>
-      <table pod:type="block" pod:table_type="row">
-        <table pod:type="block" pod:table_type="row_column">Blue Raja</table>
-        <table pod:type="block" pod:table_type="row_column">Geoffrey Smith</table>
-        <table pod:type="block" pod:table_type="row_column">Master of cutlery</table>
-      </table>
-      <table pod:type="block" pod:table_type="row">
-        <table pod:type="block" pod:table_type="row_column">Mr Furious</table>
-        <table pod:type="block" pod:table_type="row_column">Roy Orson</table>
-        <table pod:type="block" pod:table_type="row_column">Ticking time bomb of fury</table>
-      </table>
-      <table pod:type="block" pod:table_type="row">
-        <table pod:type="block" pod:table_type="row_column">The Bowler</table>
-        <table pod:type="block" pod:table_type="row_column">Carol Pinnsler</table>
-        <table pod:type="block" pod:table_type="row_column">Haunted bowling ball</table>
-      </table>
-    </table>
-  </table>
-</pod>
-#)
-
+ my $t1 = $x->{table}->[0];
+ ok $t1->is_header_row, "check header row";
+ is @{$t1->get_rows}, 5, 'get_rows';
 }
 
 sub c02_table_xhtml:Test {
@@ -81,7 +100,6 @@ sub c02_table_xhtml:Test {
 =end table
 =end pod
 T
-#diag $x; exit;
 
 $t->is_deeply_xml( $x,
 q#<?xml version="1.0"?>
@@ -135,52 +153,5 @@ $t->is_deeply_xml ($x, q#<?xml version="1.0"?>
 </chapter>#)
 }
 
-sub c04_table_wo_ident:Test {
-    my $t = shift;
-    my $x = $t->parse_to_xml (<<T);
-=begin pod
-=begin table :caption("a")
-= :w<2>
-Superhero     | Secret          
---------------|-------------
-The Shoveller | Eddie Stevens   
-=end table
-=end pod
-T
-$t->is_deeply_xml ($x,q#
-<pod pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>
-      <table w='2' pod:type='block' caption='a' pod:table_row_count='2'>
-            <table pod:type='block' pod:table_type='head_start'>
-                  <table pod:type='block' pod:table_type='head'>
-                        <table pod:type='block' pod:table_type='head_column'>Superhero</table>
-                        <table pod:type='block' pod:table_type='head_column'>Secret</table>
-                  </table>
-            </table>
-            <table pod:type='block' pod:table_type='body_start'>
-                  <table pod:type='block' pod:table_type='row'>
-                        <table pod:type='block' pod:table_type='row_column'>The Shoveller</table>
-                        <table pod:type='block' pod:table_type='row_column'>Eddie Stevens</table>
-                  </table>
-            </table>
-      </table>
-</pod>#); 
-}
-
-
-sub c04_table_with_intersections:Test {
-    my $t = shift;
-    my $x = $t->parse_to_docbook (<<T);
-=begin pod
-=for table :caption("a")
-= :w<2>
-Superhero      Secret  Also
---------------+------+-------
-The Shoveller |  +  | Eddie Stevens   
-
-=end pod
-T
-    print $x,"\n";
-#$t->is_deeply_xml ($x,q#
-}
 1;
 
