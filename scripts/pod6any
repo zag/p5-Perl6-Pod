@@ -15,7 +15,7 @@ use Getopt::Long;
 use Pod::Usage;
 use Encode qw(encode decode is_utf8);
 use Perl6::Pod::To;
-use Perl6::Pod::To::XML;
+use IO::File;
 my ( $help, $man );
 my %opt =
   ( help => \$help, man => \$man );

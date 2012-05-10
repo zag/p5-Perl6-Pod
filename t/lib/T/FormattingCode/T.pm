@@ -9,24 +9,7 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use Perl6::Pod::To::XHTML;
 use base 'TBase';
-
-sub t01_as_xml : Test {
-# Looks like you planned 3 tests but ran 1.
-    my $t = shift;
-    my $x = $t->parse_to_xml( <<T);
-=para
-Got C<uname> output : T<FreeBSD>
-T
-    $t->is_deeply_xml(
-        $x,
-q#<para pod:type='block' xmlns:pod='http://perlcabal.org/syn/S26.html'>Got <C pod:type='code'>uname</C> output : <T pod:type='code'>FreeBSD</T>
-</para>
-
-#
-    );
-}
 
 sub t02_as_xhtml : Test {
     my $t = shift;

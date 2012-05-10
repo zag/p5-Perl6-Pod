@@ -10,16 +10,15 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use Perl6::Pod::To;
+use IO::File;
 use Perl6::Pod::To::XHTML;
-my ( $help, $man, $doctype, $add_head, $css_file, $no_body, @libs, $command );
-$no_body = 0;
+my ( $help, $man, $doctype, $no_head, $css_file,  @libs, $command );
+$no_head = 0;
 my %opt = ( help => \$help, man => \$man, );
 GetOptions(
     \%opt, 'help|?', 'man',
     'doctype|t=s' => \$doctype,
-    'add_head|ah' => \$add_head,
-    'no_body|nb' => \$no_body,
+    'nohead|nh' => \$no_head,
     'css=s' => \$css_file,
     'module|M=s' =>\@libs,
     'command|c=s' => \$command
@@ -27,16 +26,8 @@ GetOptions(
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
-my %args = ( header => $add_head, doctype => $doctype, body=> ! $no_body);
+my %args = (  doctype => $doctype );
 
-if ($css_file) {
-    $args{head} = [
-        link => {
-            rel  => "stylesheet",
-            href => "$css_file"
-        }
-    ];
-}
 
 my $infile = shift;
 my $in_fd;
@@ -56,18 +47,41 @@ my $text;
 }
 
 my $renderer = new Perl6::Pod::To::XHTML::
-  writer  => new Perl6::Pod::Writer( out => \*STDOUT,  escape=>'html'),
-  doctype => $doctype,
-  header  => $add_head;
+  writer  => new Perl6::Pod::Writer( out => \*STDOUT,  escape=>'html');
+
+my $w = $renderer->w;
+unless ( $no_head ) {
+    #get title
+    my $title = "TITLE";
+    my $css = '';
+    $w->raw('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
+    $w->raw(<<"HEAD");
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <title>${title}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+HEAD
+    if ($css_file) {
+     $w->raw(qq! <link rel="stylesheet" href="$css_file" type="text/css" />!);
+    }
+$w->raw(q!<meta name="description" content="DESC" />
+    </head>
+    <body>!);
+ }
+
 $renderer->parse( \$text, default_pod => 1 );
 
+unless ($no_head ) {
+    $w->raw('</body></html>')
+}
 
 ##include libs ( see $Perl6::Pod::Lib::PERL6POD )
 #if (@libs) {
 #    my $use  = join "\n" => map { "=use $_" } @libs;
 #    $use .= "\n";
 #    $p->_parse_chunk(\$use);
-#}
+#
+
 
 exit;
 
@@ -85,7 +99,6 @@ exit;
    options:
     -doctype|t - set doc type . Default html;
     -add_head|ah - If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output.
-    -no_body|nb - skip <body> tag
     -css <css_file> - add stylesheet link to head of xhtml file.
     -module|M - add extensions for Pod ( could use multiple )
     -command|c - set one line Pod text for processing (instead from STDIN)
@@ -108,17 +121,13 @@ Prints manual page and exits
 
 Set docbook type . Default html
 
-=item B<-add_head>,B<-ah>
+=item B<-no_head>,B<-nh>
 
-If this option is set , pod6xhtml will emit a DOCTYPE as the first line of output
+If this option is set , pod6xhtml will don't headers
 
 =item B<-css> cssfile 
 
 Add stylesheet link to head of xhtml file
-
-=item B<-no_body>, B<-nb> 
-
-Skip "body" tag
 
 =item B<-M> package name 
 
@@ -129,7 +138,7 @@ Add Perl6::Pod plugins
 Set one line Pod text for processing (instead from STDIN).
 For example:
 
-  pod6xhtml -nb -t div -M Perl6::Pod::Lib -c '=Include test.pod' > out.xhtm
+  pod6xhtml -nh -t div -M Perl6::Pod::Lib -c '=Include test.pod' > out.xhtm
 
 =back
 

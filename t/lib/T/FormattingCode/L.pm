@@ -110,28 +110,22 @@ sub l15_empty_text : Test {
     my $t  = shift;
     my $x = $t->parse_to_xhtml( <<'T');
 =begin pod
-=NAME test0 
-
 L<http://example.com> test
 =end pod
 T
     $t->is_deeply_xml( $x,
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><title>test0
-</title><p><a href='http://example.com'>http://example.com</a> test
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><p><a href='http://example.com'>http://example.com</a> test
 </p></xhtml>#)
 }
 sub l16_mailto_xhtml : Test {
     my $t  = shift;
     my $x = $t->parse_to_xhtml( <<'T');
 =begin pod
-=NAME test0 
-
 L<mailto:example.com> test
 =end pod
 T
 $t->is_deeply_xml( $x,
-q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><title>test0
-</title><p><a href='mailto:example.com'>mailto:example.com</a> test
+q#<xhtml xmlns='http://www.w3.org/1999/xhtml'><p><a href='mailto:example.com'>mailto:example.com</a> test
 </p></xhtml>
 #)
 }

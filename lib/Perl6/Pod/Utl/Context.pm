@@ -7,6 +7,7 @@ use Perl6::Pod::Directive::alias;
 use Perl6::Pod::Block::comment;
 use Perl6::Pod::Block::code;
 use Perl6::Pod::Block::para;
+use Perl6::Pod::Block::head;
 use Perl6::Pod::Block::table;
 use Perl6::Pod::Block::output;
 use Perl6::Pod::Block::input;
@@ -32,42 +33,78 @@ use Perl6::Pod::FormattingCode::Z;
 
 use Tie::UnionHash;
 use Data::Dumper;
-
-use constant {
-    DEFAULT_USE => {
+=pod
         use     => 'Perl6::Pod::Directive::use',
-        config  => 'Perl6::Pod::Directive::config',
         comment => 'Perl6::Pod::Block::comment',
-        alias   => 'Perl6::Pod::Directive::alias',
-        code    => 'Perl6::Pod::Block::code',
-        pod     => 'Perl6::Pod::Block::pod',
-        para    => 'Perl6::Pod::Block::para',
-        table   => 'Perl6::Pod::Block::table',
-        output  => 'Perl6::Pod::Block::output',
-        input   => 'Perl6::Pod::Block::input',
-        nested  => 'Perl6::Pod::Block::nested',
-        item    => 'Perl6::Pod::Block::item',
-        defn    => 'Perl6::Pod::Block::item',
-        '_NOTES_'   => 'Perl6::Pod::Parser::NOTES',
-        'C<>'   => 'Perl6::Pod::FormattingCode::C',
-        'D<>'   => 'Perl6::Pod::FormattingCode::D',
-        'K<>'   => 'Perl6::Pod::FormattingCode::K',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
-        'L<>'   => 'Perl6::Pod::FormattingCode::L',
-        'B<>'   => 'Perl6::Pod::FormattingCode::B',
-        'I<>'   => 'Perl6::Pod::FormattingCode::I',
         'X<>'   => 'Perl6::Pod::FormattingCode::X',
 
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
-        'U<>' => 'Perl6::Pod::FormattingCode::U',
-        'E<>' => 'Perl6::Pod::FormattingCode::E',
-        'N<>' => 'Perl6::Pod::FormattingCode::N',
-        'A<>' => 'Perl6::Pod::FormattingCode::A',
-        'R<>' => 'Perl6::Pod::FormattingCode::R',
         'S<>' => 'Perl6::Pod::FormattingCode::S',
-        'T<>' => 'Perl6::Pod::FormattingCode::T',
         'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
+=cut
+
+use constant {
+    DEFAULT_USE => {
+        'File' => '-',
+        'config'=>'Perl6::Pod::Directive::config',
+        code    => 'Perl6::Pod::Block::code',
+        'para' => 'Perl6::Pod::Block::para',
+        alias   => 'Perl6::Pod::Directive::alias',
+        nested  => 'Perl6::Pod::Block::nested',
+        output  => 'Perl6::Pod::Block::output',
+        input   => 'Perl6::Pod::Block::input',
+        item    => 'Perl6::Pod::Block::item',
+        defn    => 'Perl6::Pod::Block::item',
+        head    => 'Perl6::Pod::Block::head',
+        table   => 'Perl6::Pod::Block::table',
+        'A<>' => 'Perl6::Pod::FormattingCode::A',
+        'B<>'   => 'Perl6::Pod::FormattingCode::B',
+        'C<>'   => 'Perl6::Pod::FormattingCode::C',
+        'D<>'   => 'Perl6::Pod::FormattingCode::D',
+        'E<>' => 'Perl6::Pod::FormattingCode::E',
+        'I<>'   => 'Perl6::Pod::FormattingCode::I',
+        'K<>'   => 'Perl6::Pod::FormattingCode::K',
+        'L<>'   => 'Perl6::Pod::FormattingCode::L',
+        'N<>' => 'Perl6::Pod::FormattingCode::N',
+        'R<>' => 'Perl6::Pod::FormattingCode::R',
+        'T<>' => 'Perl6::Pod::FormattingCode::T',
+        'U<>' => 'Perl6::Pod::FormattingCode::U',
         'Z<>' => 'Perl6::Pod::FormattingCode::Z',
+        '*'    => 'Perl6::Pod::Block',
+        '*<>'  => 'Perl6::Pod::FormattingCode',
+
+#        use     => 'Perl6::Pod::Directive::use',
+#        config  => 'Perl6::Pod::Directive::config',
+#        comment => 'Perl6::Pod::Block::comment',
+#        alias   => 'Perl6::Pod::Directive::alias',
+#        code    => 'Perl6::Pod::Block::code',
+#        para    => 'Perl6::Pod::Block::para',
+#        table   => 'Perl6::Pod::Block::table',
+#        output  => 'Perl6::Pod::Block::output',
+#        input   => 'Perl6::Pod::Block::input',
+#        nested  => 'Perl6::Pod::Block::nested',
+#        item    => 'Perl6::Pod::Block::item',
+#        defn    => 'Perl6::Pod::Block::item',
+#        'C<>'   => 'Perl6::Pod::FormattingCode::C',
+#        'D<>'   => 'Perl6::Pod::FormattingCode::D',
+#        'K<>'   => 'Perl6::Pod::FormattingCode::K',
+#        'M<>'   => 'Perl6::Pod::FormattingCode::M',
+#        'L<>'   => 'Perl6::Pod::FormattingCode::L',
+#        'B<>'   => 'Perl6::Pod::FormattingCode::B',
+#        'I<>'   => 'Perl6::Pod::FormattingCode::I',
+#        'X<>'   => 'Perl6::Pod::FormattingCode::X',
+
+        #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
+#        'U<>' => 'Perl6::Pod::FormattingCode::U',
+#        'E<>' => 'Perl6::Pod::FormattingCode::E',
+#        'N<>' => 'Perl6::Pod::FormattingCode::N',
+#        'A<>' => 'Perl6::Pod::FormattingCode::A',
+#        'R<>' => 'Perl6::Pod::FormattingCode::R',
+#        'S<>' => 'Perl6::Pod::FormattingCode::S',
+#        'T<>' => 'Perl6::Pod::FormattingCode::T',
+#        'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
+#        'Z<>' => 'Perl6::Pod::FormattingCode::Z',
 
     }
 };

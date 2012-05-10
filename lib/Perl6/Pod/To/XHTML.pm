@@ -1,22 +1,4 @@
-package Test::Filter;
-use strict;
-use Test::More;
-use XML::ExtOn('create_pipe');
-use base 'XML::ExtOn';
-
-
-sub on_start_element {
-    my ( $self, $el ) = @_;
-    if ( $el->local_name eq 'pod' ) {
-        $el->delete_element;
-    }
-    return $el;
-}
-1;
-
 package Perl6::Pod::To::XHTML;
-
-#$Id$
 
 =pod
 
@@ -27,18 +9,10 @@ package Perl6::Pod::To::XHTML;
 =head1 SYNOPSIS
 
     my $p = new Perl6::Pod::To::XHTML:: 
-                header => 0, doctype => 'html';
-fill html head
+
+add root <html> tag
     my $p = new Perl6::Pod::To::XHTML:: 
-                header => 1, doctype => 'html',
-                head=>[ 
-                    link=>
-                        {
-                            rel=>"stylesheet",
-                            href=>"/styles/main.1232622176.css"
-                        } 
-                    ],
-               body=>1 #add <body> tag. Default: 0;
+                 doctype => 'html',
     
 
 =head1 DESCRIPTION
@@ -72,27 +46,13 @@ use warnings;
 use Perl6::Pod::To;
 use base 'Perl6::Pod::To';
 use Perl6::Pod::Utl;
-
-use constant POD_URI => 'http://perlcabal.org/syn/S26.html';
 use Data::Dumper;
 
-sub block_NAME {
-    my $self = shift;
-    my $el   = shift;
-    my $w  = $self->w;
-    $w->raw('<title>');
-    $self->visit_childs($el->childs->[0]);
-    $w->raw('</title>');
-}
 
 sub start_write {
     my $self = shift;
     my $w    = $self->writer;
-    if ( $self->{header} ) {
-        $w->say(
-q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' >@);
-    }
-    $self->w->raw_print( '<' . ( $self->{doctype} || 'html' ) . ' xmlns="http://www.w3.org/1999/xhtml">' );
+    $self->w->raw_print( '<' . $self->{doctype} . ' xmlns="http://www.w3.org/1999/xhtml">') if $self->{doctype};
 }
 
 
@@ -113,7 +73,7 @@ sub end_write {
        }
        $self->w->raw('</div>');
     }
-    $self->w->raw_print( '</' . ( $self->{doctype} || 'html' ) . '>' );
+    $self->w->raw_print( '</' .  $self->{doctype} . '>' ) if $self->{doctype};
 }
 
 

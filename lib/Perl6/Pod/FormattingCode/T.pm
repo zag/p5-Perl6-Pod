@@ -29,9 +29,9 @@ C<SE<lt>...E<gt>> around them). The C<TE<lt>E<gt>> code is the inline equivalent
 
 use warnings;
 use strict;
-use Data::Dumper;
 use Perl6::Pod::FormattingCode;
 use base 'Perl6::Pod::FormattingCode';
+use Perl6::Pod::Utl;
 
 =head2 to_xhtml
 
@@ -43,9 +43,10 @@ Render xhtml:
     
 =cut
 sub to_xhtml {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- $parser->mk_element('samp')->add_content(@content);
+ my ( $self, $to ) = @_;
+ $to->w->raw('<samp>');
+ $to->visit( Perl6::Pod::Utl::parse_para($self->{content}->[0]) );
+ $to->w->raw('</samp>');
 }
 
 =head2 to_docbook
@@ -60,9 +61,10 @@ L<http://www.docbook.org/tdg/en/html/computeroutput.html>
 =cut
 
 sub to_docbook {
- my ( $self, $parser, @in ) = @_;
- my @content = $parser->_make_events(@in);
- $parser->mk_element('computeroutput')->add_content(@content);
+ my ( $self, $to ) = @_;
+ $to->w->raw('<computeroutput>');
+ $to->visit( Perl6::Pod::Utl::parse_para($self->{content}->[0]) );
+ $to->w->raw('</computeroutput>');
 }
 
 
@@ -81,7 +83,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

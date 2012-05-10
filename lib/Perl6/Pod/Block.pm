@@ -39,31 +39,10 @@ sub context {
     $_[0]->{context};
 }
 
-=pod
-sub new {
-    my ( $class, %args ) = @_;
-
-    my $doc_context = new XML::ExtOn::Context::;
-    my $self =
-      $class->SUPER::new( context => $doc_context, name => $args{name} );
-
-    #save orig context
-    $self->{__context}    = $args{context} || die 'need context !';
-    $self->{_pod_options} = $args{options} || '';
-
-    #handle class options, if defined when Module load ( =use )
-    $self->{_class_options} = $args{class_options};
-
-    #make local context
-
-    $self->{__context} =
-      new Perl6::Pod::Parser::Context:: %{ $self->{__context} }
-      unless exists $args{parent_context};
-    $self->context->custom->{_check_allow_parent_on_} = 1
-      if exists VERBATIMS->{ $args{name} };
-    $self;
+sub to_xhtml {
+    my ( $self, $to ) = @_;
+    warn "export to xhtml not implemented for ".$self->name . " near: " . $self->{''};
 }
-=cut
 1;
 __END__
 

@@ -19,50 +19,7 @@ Perl6::Pod::To - base class for output formatters
 use Carp;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
-use Perl6::Pod::Block::head;
-=pod
-        use     => 'Perl6::Pod::Directive::use',
-        comment => 'Perl6::Pod::Block::comment',
-        'M<>'   => 'Perl6::Pod::FormattingCode::M',
-        'X<>'   => 'Perl6::Pod::FormattingCode::X',
-
-        #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
-        'R<>' => 'Perl6::Pod::FormattingCode::R',
-        'S<>' => 'Perl6::Pod::FormattingCode::S',
-        'T<>' => 'Perl6::Pod::FormattingCode::T',
-        'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
-=cut
-
-use constant {
-    DEFAULT_USE => {
-        'File' => '-',
-        'config'=>'Perl6::Pod::Directive::config',
-        code    => 'Perl6::Pod::Block::code',
-        'para' => 'Perl6::Pod::Block::para',
-        alias   => 'Perl6::Pod::Directive::alias',
-        nested  => 'Perl6::Pod::Block::nested',
-        output  => 'Perl6::Pod::Block::output',
-        input   => 'Perl6::Pod::Block::input',
-        item    => 'Perl6::Pod::Block::item',
-        defn    => 'Perl6::Pod::Block::item',
-        head    => 'Perl6::Pod::Block::head',
-        table   => 'Perl6::Pod::Block::table',
-        'A<>' => 'Perl6::Pod::FormattingCode::A',
-        'B<>'   => 'Perl6::Pod::FormattingCode::B',
-        'C<>'   => 'Perl6::Pod::FormattingCode::C',
-        'D<>'   => 'Perl6::Pod::FormattingCode::D',
-        'E<>' => 'Perl6::Pod::FormattingCode::E',
-        'I<>'   => 'Perl6::Pod::FormattingCode::I',
-        'K<>'   => 'Perl6::Pod::FormattingCode::K',
-        'L<>'   => 'Perl6::Pod::FormattingCode::L',
-        'N<>' => 'Perl6::Pod::FormattingCode::N',
-        'U<>' => 'Perl6::Pod::FormattingCode::U',
-        'Z<>' => 'Perl6::Pod::FormattingCode::Z',
-        '*'    => 'Perl6::Pod::Block',
-        '*<>'  => 'Perl6::Pod::FormattingCode',
-    }
-};
-
+use Perl6::Pod::Block::SEMANTIC;
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
@@ -104,6 +61,10 @@ sub visit_childs {
         die "Unknow type $n (not isa Perl6::Pod::Block)"
           unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
               || UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
+        unless (defined $n->childs) {
+            #die " undefined childs for". Dumper ($n)
+            next;
+        }
         foreach my $ch ( @{ $n->childs } ) {
             $self->visit($ch);
         }
@@ -130,7 +91,7 @@ sub visit {
     # here convert lexer base block to
     # instance of DOM class
     my $name = $n->name;
-    my $map  = DEFAULT_USE;
+    my $map  = $self->context->use;
     my $class;
     #convert lexer blocks
     unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
@@ -150,7 +111,10 @@ sub visit {
                 $additional_attr{name} = $name;
             }
 
-            $class = $map->{$name} || $map->{'*'};
+             $class = $map->{$name} 
+               ||  ( $name eq uc($name) 
+                  ? 'Perl6::Pod::Block::SEMANTIC' 
+                  : $map->{'*'} ); 
         }
 
         #create instance
@@ -203,6 +167,9 @@ sub __get_method_name {
     my $el = shift || croak "empty object !";
     my $method;
     use Data::Dumper;
+    unless (UNIVERSAL::isa( $el, 'Perl6::Pod::Block') ) {
+        warn "unknown block". Dumper($el);
+    }
     my $name = $el->name || die "Can't get element name for " . Dumper($el);
     if ( UNIVERSAL::isa( $el, 'Perl6::Pod::FormattingCode' ) ) {
         $method = "code_$name";
