@@ -11,8 +11,6 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use Perl6::Pod::To::XHTML;
-use XML::ExtOn('create_pipe');
 use base 'TBase';
 
 sub x0000_process_index_string : Test(4) {

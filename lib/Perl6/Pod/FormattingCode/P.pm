@@ -26,8 +26,6 @@ use strict;
 use Data::Dumper;
 use Perl6::Pod::FormattingCode;
 use base 'Perl6::Pod::FormattingCode';
-use Perl6::Pod::Parser::FilterPattern;
-use XML::ExtOn ('create_pipe');
 
 sub start {
     my $self = shift;

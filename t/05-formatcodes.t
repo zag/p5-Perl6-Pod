@@ -52,7 +52,7 @@ my $r     = qr{
             <ldelim>     <content=(.*?)>   <rdelim(:ldelim)>
     <rule: L_code>(?! \s+)
 #          <ws: ( [^\n] | \s++  )* >
-          <ws: (  [ \t]  )* >
+          <ws: ([ \t])*>
 #          <ws: (?: [^\n]|\s+)* >
       <name=(L)><isValideFCode(:name)>
             <ldelim>
@@ -109,11 +109,14 @@ is $t1->{scheme},'issn:','L: issn';
 $t1 = parse_para('L<OK |file://sdsd/config#test>')->[0];
 is $t1->{scheme},'file:','L: file';
 
-$t1 = parse_para('L< file:./cpan.org > 
+$t1 = parse_para('L<file:./cpan.org >
 B<sd > L<< haname | http:perl.html  >>')->[0];
 is $t1->{scheme},'file:','L: L<> L<|>';
 $t1 = parse_para('L<B<test1>|http://example.com> test')->[0];
 is $t1->{alt_text}, 'B<test1>','nested formatting codes';
+#$t1 = parse_para('L<I<abbreviated style
+#>|#Abbreviated blocks>');
+
 #diag Dumper parse_para('L<http://example.com/test#test>');
 #diag Dumper parse_para('L<http:../examples/index.html>');
 exit;

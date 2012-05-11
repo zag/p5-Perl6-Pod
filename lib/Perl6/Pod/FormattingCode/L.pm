@@ -66,7 +66,7 @@ sub to_xhtml {
                 my $url = $self->{address} || ''; 
                 $url .= "#" . $self->{section} if $self->{section};
                 $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
-                $w->raw(qq!<a href="$url">!);
+                $w->raw('<a href="')->print($url)->raw('">');
                 unless  ( $self->{alt_text}) {
                             $w->print($url)
                 } else {
@@ -85,7 +85,7 @@ sub to_docbook {
                 my $url = $self->{address} || ''; 
                 $url .= "#" . $self->{section} if $self->{section};
                 $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
-                $w->raw(qq!<ulink url="$url">!);
+                $w->raw('<ulink url="')->print($url)->raw('">');
                 unless  ( $self->{alt_text}) {
                             $w->print($url)
                 } else {

@@ -11,7 +11,6 @@ use warnings;
 use base "TBase";
 use Test::More;
 use Data::Dumper;
-use XML::ExtOn qw(create_pipe);
 
 
 sub f03_nested_attr_xhtml : Test {

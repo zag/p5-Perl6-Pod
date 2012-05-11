@@ -19,7 +19,6 @@ This module requires these other modules and libraries:
 
  XML::Parser;
  XML::Writer;
- XML::ExtOn;
  XML::Flow;
 
 COPYRIGHT AND LICENCE

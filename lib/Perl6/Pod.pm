@@ -1,12 +1,10 @@
 package Perl6::Pod;
 
-#$Id$
-
 =pod
 
 =head1 NAME
 
-Perl6::Pod - use Perl6's pod in perl5 programms
+Perl6::Pod - Pod6 implementation
 
 =head1 SYNOPSIS
 
@@ -203,17 +201,7 @@ This option expects a list of formatting codes that are to be recognized within 
 
 =head2 Formatting codes
 
-
-=head2 Diffs to SYNOPSIS 26 by 25 Apr 2007 edition
-
-
-=over
-
-=item delete "Code" type from perl6-ish option pairs due security  and portability(compatibilitty) issues
-
-=item use :allow attribute for any block or formatting codes
-
-=back
+=head2 API
 
 Perl6::Pod - in general, a set of classes, scripts and modules for maintance Perl6's pod documentation using perl5.
 
@@ -221,7 +209,7 @@ The suite contain the following classes:
 
 =over
 
-=item * L<Perl6::Pod::Parser> - base class for perl6's pod parsers
+=item * L<Perl6::Pod::Grammars> - Pod6 Grammars
 
 =item * L<Perl6::Pod::Block> - base class for Perldoc blocks
 
@@ -231,11 +219,9 @@ The suite contain the following classes:
 
 =back
 
-DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !DOCUMENTING !
-
 =cut
 
-$Perl6::Pod::VERSION = '0.35';
+$Perl6::Pod::VERSION = '0.50';
 
 use warnings;
 use strict;
@@ -375,7 +361,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2012 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

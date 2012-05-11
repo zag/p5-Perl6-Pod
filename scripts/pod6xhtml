@@ -49,10 +49,25 @@ my $text;
 my $renderer = new Perl6::Pod::To::XHTML::
   writer  => new Perl6::Pod::Writer( out => \*STDOUT,  escape=>'html');
 
+#parse tree
+    use Perl6::Pod::Utl;
+    my $tree = Perl6::Pod::Utl::parse_pod(ref($text) ? $$text : $text, default_pod=>1) || die "can't parse Pod";
+
 my $w = $renderer->w;
 unless ( $no_head ) {
     #get title
-    my $title = "TITLE";
+    my $title = "DEFAULT TITLE (need =TITLE or =NAME block)";
+    my @blocks = @{$tree};
+    while (my $node = shift @blocks ) {
+     if ( $node->name eq 'pod' ) {
+         push @blocks, @{ $node->childs } if $node->childs;
+         next;
+     }
+     if ($node->name =~ /^(TITLE|NAME)$/) {
+        $title = $node->childs->[0]->{content}->[0];
+        last;
+     }
+    }
     my $css = '';
     $w->raw('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
     $w->raw(<<"HEAD");
@@ -69,11 +84,14 @@ $w->raw(q!<meta name="description" content="DESC" />
     <body>!);
  }
 
-$renderer->parse( \$text, default_pod => 1 );
+ $renderer->start_write;
+ $renderer->write($tree);
+ $renderer->end_write;
 
 unless ($no_head ) {
     $w->raw('</body></html>')
 }
+
 
 ##include libs ( see $Perl6::Pod::Lib::PERL6POD )
 #if (@libs) {

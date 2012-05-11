@@ -70,6 +70,7 @@ use constant {
         'R<>' => 'Perl6::Pod::FormattingCode::R',
         'T<>' => 'Perl6::Pod::FormattingCode::T',
         'U<>' => 'Perl6::Pod::FormattingCode::U',
+        'V<>'   => 'Perl6::Pod::FormattingCode::C',
         'Z<>' => 'Perl6::Pod::FormattingCode::Z',
         '*'    => 'Perl6::Pod::Block',
         '*<>'  => 'Perl6::Pod::FormattingCode',

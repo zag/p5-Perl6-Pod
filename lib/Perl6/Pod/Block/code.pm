@@ -58,7 +58,7 @@ sub to_xhtml {
           Perl6::Pod::Utl::parse_para( $self->childs->[0], allow => $allow );
     }
     $to->visit_childs($self);
-    $to->w->raw('</code></pre>');
+    $to->w->raw('</pre></code>');
 }
 
 =head2 to_docbook
