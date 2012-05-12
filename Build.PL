@@ -13,7 +13,7 @@ Module::Build->new
 	'Regexp::Grammars'=>'1.015'
 	     },
     script_files=>[qw!
-	scripts/pod6xml
+	scripts/pod6any
 	scripts/pod6docbook
 	scripts/pod6xml
     !],

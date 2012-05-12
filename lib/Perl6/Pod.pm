@@ -221,7 +221,7 @@ The suite contain the following classes:
 
 =cut
 
-$Perl6::Pod::VERSION = '0.50';
+$Perl6::Pod::VERSION = '0.51';
 
 use warnings;
 use strict;

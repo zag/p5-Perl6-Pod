@@ -4,6 +4,8 @@ TODO:
     - Formatting code: P<>, S<>, M<>, X<>
     - Config: :margin, :formatted
 
+0.51 12 May 2012
+    - fix scripts
 0.50 11 May 2012
     - reimplement Perl6::Pod
 0.35 24 Oct 2011
