@@ -102,7 +102,6 @@ sub parse_para {
 
        <extends: Perl6::Pod::Grammar::FormattingCodes>
        <matchline>
-#      <debug:step>
        \A  <Text>  \Z
     <token: Text> <[content]>+
     <token: text>  .+?

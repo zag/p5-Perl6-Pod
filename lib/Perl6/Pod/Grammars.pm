@@ -5,6 +5,33 @@
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
 package Perl6::Pod::Grammars;
+=pod
+
+=head1 NAME
+
+Perl6::Pod::Grammars - set of grammars for Pod6
+
+=head1 SYNOPSIS
+
+    my $r =  qr{
+       <extends: Perl6::Pod::Grammar::Blocks>
+       <matchline>
+        \A <File> \Z
+    }xms;
+    my $tree ;
+    if ( $src =~ $r  ) {
+     $tree = Perl6::Pod::Lex->new(%args)->make_tree( $/{File} );
+    }
+    else {
+        return undef;
+    }
+
+
+=head1 DESCRIPTION
+
+Perl6::Pod::Grammars - set of grammars for Pod6
+
+=cut
 use strict;
 use warnings;
 use v5.10;
@@ -147,4 +174,26 @@ qr{
 };
 1;
 
+__END__
+
+
+=head1 SEE ALSO
+
+L<http://zag.ru/perl6-pod/S26.html>,
+Perldoc Pod to HTML converter: L<http://zag.ru/perl6-pod/>,
+Perl6::Pod::Lib
+
+=head1 AUTHOR
+
+Zahatski Aliaksandr, <zag@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2012 by Zahatski Aliaksandr
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
 
