@@ -71,8 +71,8 @@ sub l12_link_with_name_docbook : Test {
 =head1  test L<name|http://test> test
 =end pod
 T
-    $t->is_deeply_xml( $x, q# <chapter><chapter><title>test <ulink url='http://test'>name</ulink> test
-</title></chapter></chapter>#);
+    $t->is_deeply_xml( $x, q# <chapter><section><title>test <ulink url='http://test'>name</ulink> test
+</title></section></chapter>#);
 }
 
 sub l13_link_only_addr_docbook : Test {
@@ -82,8 +82,8 @@ sub l13_link_only_addr_docbook : Test {
 =head1  test L<http://example.com> test
 =end pod
 T
-    $t->is_deeply_xml( $x, q#<chapter><chapter><title>test <ulink url='http://example.com'>http://example.com</ulink> test
-</title></chapter></chapter>#)
+    $t->is_deeply_xml( $x, q#<chapter><section><title>test <ulink url='http://example.com'>http://example.com</ulink> test
+</title></section></chapter>#)
 }
 
 

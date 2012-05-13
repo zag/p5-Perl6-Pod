@@ -79,12 +79,12 @@ sub switch_head_level {
     my $w = $self->w;
     my $prev = $self->SUPER::switch_head_level($level);
     if ($level && $level == $prev ) {
-        $w->raw('</chapter><chapter>')
+        $w->raw('</section><section>')
     } elsif ( $prev < $level  ) {
-        $w->raw('<chapter>') for ( 1..$level-$prev);
+        $w->raw('<section>') for ( 1..$level-$prev);
     } else #$prev > $level
      { 
-        $w->raw('</chapter>') for ( 1..$prev-$level);
+        $w->raw('</section>') for ( 1..$prev-$level);
      
      }
 }
