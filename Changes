@@ -1,11 +1,12 @@
 Revision history for Perl extension Perl6::Pod.
 TODO:
     - Declarator blocks
-    - Formatting code: P<>, S<>, M<>, X<>
+    - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
 0.52 13 May 2012
     - fix docbook head levels
+    - X<> 
 0.51 12 May 2012
     - fix scripts
 0.50 11 May 2012
