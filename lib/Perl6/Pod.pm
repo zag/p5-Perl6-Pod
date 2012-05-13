@@ -262,6 +262,7 @@ my $DATA_PAT = qr{
 
 
 # Recursive matcher for all other Perldoc sections...
+no strict 'vars';
 
 my $POD_PAT; $POD_PAT = qr{
     ^ =
@@ -291,6 +292,7 @@ my $POD_PAT; $POD_PAT = qr{
         $BLANK_LINE
     )
 }xms;
+
 
 FILTER {
     my @DATA;
