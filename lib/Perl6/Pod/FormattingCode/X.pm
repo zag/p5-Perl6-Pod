@@ -1,7 +1,5 @@
 package Perl6::Pod::FormattingCode::X;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -120,6 +118,10 @@ sub to_xhtml {
 }
 
 sub to_docbook {
+    my ($self, $to )= @_;
+    $to->write($self->{text});
+}
+sub to_docbook_ {
     my $self   = shift;
     my $parser = shift;
     my $attr   = $self->attrs_by_name;

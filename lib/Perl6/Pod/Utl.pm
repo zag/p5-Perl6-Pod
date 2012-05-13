@@ -18,25 +18,26 @@ return ref to tree
 =cut
 
 sub parse_pod {
+    my ( $src, %args ) = @_;
+    my $r = do {
     use Regexp::Grammars;
     use Perl6::Pod::Grammars;
-    use Perl6::Pod::Lex;
-    use v5.10;
-    my ( $src, %args ) = @_;
-    my $r =  qr{
+
+    qr{
        <extends: Perl6::Pod::Grammar::Blocks>
        <matchline>
         \A <File> \Z
     }xms;
-
-    my $tree ;
-    if ( $src =~ $r  ) {
-     $tree = Perl6::Pod::Lex->new(%args)->make_tree( $/{File} );
+    };
+    my $tree;
+    if ( $src =~ $r ) {
+        use Perl6::Pod::Lex;
+        $tree = Perl6::Pod::Lex->new(%args)->make_tree( $/{File} );
     }
     else {
         return undef;
     }
-    $tree
+    $tree;
 }
 
 =head2 strip_vmargin $vmargin, $txt
@@ -49,25 +50,26 @@ sub parse_pod {
 =cut
 
 sub strip_vmargin {
-        my ($vmargin, $content )= @_;
-        #get min margin of text
-        my $min = $vmargin;
-        foreach ( split( /[\n\r]/, $content ) ) {
-            if (m/(\s+)/) {
-                my $length = length($1);
-                $min = $length if $length < $min;
-            }
-        }
+    my ( $vmargin, $content ) = @_;
 
-        #remove only if $min > 0
-        if ( $min > 0 ) {
-            my $new_content = '';
-            foreach ( split( /[\n\r]/, $content ) ) {
-                $new_content .= substr( $_, $min ) . "\n";
-            }
-            $content = $new_content;
+    #get min margin of text
+    my $min = $vmargin;
+    foreach ( split( /[\n\r]/, $content ) ) {
+        if (m/(\s+)/) {
+            my $length = length($1);
+            $min = $length if $length < $min;
         }
-        return $content
+    }
+
+    #remove only if $min > 0
+    if ( $min > 0 ) {
+        my $new_content = '';
+        foreach ( split( /[\n\r]/, $content ) ) {
+            $new_content .= substr( $_, $min ) . "\n";
+        }
+        $content = $new_content;
+    }
+    return $content;
 }
 
 =head2  parse_para $text
@@ -82,23 +84,23 @@ Optrions:
 =cut
 
 sub parse_para {
-    use Regexp::Grammars;
-    use Perl6::Pod::Grammars;
-    use Perl6::Pod::Lex;
     use Perl6::Pod::Codeactions;
-    use v5.10;
     my $text = shift || return [];
     our %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
-    our %allow = ('*' => 1 );
+    our %allow = ( '*' => 1 );
 
-    my %args =  @_ ;
+    my %args = @_;
     if ( my $allow = $args{allow} ) {
         my @list = ref($allow) ? @$allow : ($allow);
         %allow = ();
+
         #fill allowed fcodes
-        @allow{ @list} =();
+        @allow{@list} = ();
     }
-    my $r     = $args{reg} || qr{
+    my $r = $args{reg} || do {
+         use Regexp::Grammars;
+        use Perl6::Pod::Grammars;
+    qr{
 
        <extends: Perl6::Pod::Grammar::FormattingCodes>
        <matchline>
@@ -108,6 +110,7 @@ sub parse_para {
     <token: content> <MATCH=C_code> 
                     | <MATCH=L_code>
                     | <MATCH=D_code> 
+                    | <MATCH=X_code>
                     | <MATCH=default_formatting_code> 
                     | <.text>
     <token: ldelim> <%delim>
@@ -145,19 +148,30 @@ sub parse_para {
                   <address=([^\|]*?)>?
                  (?: \# <section=(.*?)> )? #internal addresses
             <rdelim(:ldelim)>
+    <rule: X_code_entry> <[entry=([^,\;]+?)]>* % (\s*,\s*)
+    <rule: X_code>(?! \s+)
+     <name=(X)><isValideFCode(:name)>
+            <ldelim>
+          # X<text>
+          ( <text=([^\n\|]*?)>(?{$MATCH{entry}=$MATCH{text}; $MATCH{form} = 1  })
+          |
+            <text=([^\n\|]*?)>? \| <[entries=X_code_entry]>* % (\s*\;\s*) 
+            (?{$MATCH{form} = 2})
+             )
+            <rdelim(:ldelim)>
+
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
             <ldelim>  <[content]>*?   <rdelim(:ldelim)>
 }xms;
+      };
 
-    my $tree ;
     if ( $text =~ $r->with_actions( Perl6::Pod::Codeactions->new ) ) {
-     $tree =  $/{Text} ;
+       return $/{Text};
     }
     else {
         return undef;
     }
-    $tree
 
 }
 1;

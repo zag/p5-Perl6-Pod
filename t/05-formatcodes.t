@@ -14,7 +14,7 @@ use v5.10;
 use Regexp::Grammars;
 use  Perl6::Pod::Codeactions;
 use Perl6::Pod::Grammars;
-use Test::More tests => 10;    # last test to print
+use Test::More tests => 15;    # last test to print
 my %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
 my %allow = ( '*' => 1 );
 my $r     = qr{
@@ -29,6 +29,7 @@ my $r     = qr{
     <token: content> <MATCH=C_code> 
                     | <MATCH=D_code> 
                     | <MATCH=L_code> 
+                    | <MATCH=X_code> 
                     | <MATCH=default_formatting_code> 
                     | <.text>
     <token: ldelim> <%delim>
@@ -66,6 +67,17 @@ my $r     = qr{
                 (?: <is_external=(//)> )? 
                   <address=([^\|]*?)>? #for hack1
                  (?: \# <section=(.*?)> )? #internal addresses
+            <rdelim(:ldelim)>
+    <rule: X_code_entry> <[entry=([^,\;]+?)]>* % (\s*,\s*)
+    <rule: X_code>(?! \s+)
+     <name=(X)><isValideFCode(:name)>
+            <ldelim>
+          # X<text>
+          ( <text=([^\n\|]*?)>(?{$MATCH{entry}=$MATCH{text}; $MATCH{form} = 1  })
+          |
+            <text=([^\n\|]*?)>? \| <[entries=X_code_entry]>* % (\s*\;\s*) 
+            (?{$MATCH{form} = 2})
+             )
             <rdelim(:ldelim)>
 
     <token: default_formatting_code> 
@@ -114,9 +126,16 @@ B<sd > L<< haname | http:perl.html  >>')->[0];
 is $t1->{scheme},'file:','L: L<> L<|>';
 $t1 = parse_para('L<B<test1>|http://example.com> test')->[0];
 is $t1->{alt_text}, 'B<test1>','nested formatting codes';
-#$t1 = parse_para('L<I<abbreviated style
-#>|#Abbreviated blocks>');
 
+$t1 = parse_para('X< array >')->[0];
+is $t1->{text}, $t1->{entry}, 'X<array>';
+is $t1->{text}, 'array', 'check text X<array>';
+$t1 = parse_para('X< arrays | array1, array2; use array >')->[0];
+is @{$t1->{entries}}, 2, "more than one entries";
+is $t1->{text}, 'arrays', 'check text: X< arrays | array1, array2; use array >';
+$t1 = parse_para('X<| array1, array2; use array >')->[0];
+is $t1->{text},'', 'empty text';
+#diag Dumper $t1;
 #diag Dumper parse_para('L<http://example.com/test#test>');
 #diag Dumper parse_para('L<http:../examples/index.html>');
 exit;

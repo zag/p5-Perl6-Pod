@@ -31,7 +31,7 @@ sub new {
     }
     unless ( $self->writer ) {
          use Perl6::Pod::Writer;
-        $self->{writer} = new Perl6::Pod::Writer( out => \*STDOUT )
+        $self->{writer} = new Perl6::Pod::Writer( out => ( $self->{out} || \*STDOUT ), escape=>'xml'  )
     }
     #init head levels
     $self->{ HEAD_LEVELS } = 0;

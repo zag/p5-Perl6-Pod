@@ -47,7 +47,7 @@ use Perl6::Pod::Utl;
 sub new {
     my $class =  shift;
     my $self = $class->SUPER::new(@_);
-    $self->{doctype} ||= 'chapter';
+#    $self->{doctype} ||= 'chapter';
     return $self;
 }
 sub block_NAME {
@@ -69,8 +69,7 @@ sub start_write {
         $w->say(
 q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd' >@);
     }
-    my $doctype = $self->{doctype};
-    $self->w->raw_print( '<' . $doctype . '>' );
+    $self->w->raw_print( '<' . $self->{doctype} . '>' ) if $self->{doctype};
 }
 
 sub switch_head_level {
@@ -91,7 +90,7 @@ sub switch_head_level {
 sub end_write {
     my $self = shift;
     $self->switch_head_level(0);
-    $self->w->raw_print( '</' .  $self->{doctype} . '>' );
+    $self->w->raw_print( '</' .  $self->{doctype} . '>' ) if $self->{doctype};
 }
 
 

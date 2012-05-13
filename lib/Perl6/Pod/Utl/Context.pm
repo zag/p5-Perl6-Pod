@@ -37,7 +37,6 @@ use Data::Dumper;
         use     => 'Perl6::Pod::Directive::use',
         comment => 'Perl6::Pod::Block::comment',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
-        'X<>'   => 'Perl6::Pod::FormattingCode::X',
 
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
         'S<>' => 'Perl6::Pod::FormattingCode::S',
@@ -71,6 +70,7 @@ use constant {
         'T<>' => 'Perl6::Pod::FormattingCode::T',
         'U<>' => 'Perl6::Pod::FormattingCode::U',
         'V<>'   => 'Perl6::Pod::FormattingCode::C',
+        'X<>'   => 'Perl6::Pod::FormattingCode::X',
         'Z<>' => 'Perl6::Pod::FormattingCode::Z',
         '*'    => 'Perl6::Pod::Block',
         '*<>'  => 'Perl6::Pod::FormattingCode',

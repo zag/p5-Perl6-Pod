@@ -155,10 +155,6 @@ This option specifies that the block is to be numbered. The most common use of t
 
 It is up to individual renderers to decide how to display any numbering associated with other types of blocks.
 
-=head4 :term
-
-This option specifies that a list item is the definition of a term. See Definition lists. 
-
 =head4 :formatted
 
 This option specifies that the contents of the block should be treated as if they had one or more formatting codes placed around them.

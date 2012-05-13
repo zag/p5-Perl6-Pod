@@ -4,10 +4,7 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-
 package Perl6::Pod::Block::output;
-
-#$Id$
 
 =pod
 
@@ -46,6 +43,7 @@ Export:
 
 use warnings;
 use strict;
+use Perl6::Pod::Utl;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 
@@ -53,7 +51,7 @@ sub to_xhtml {
     my ( $self, $to ) = @_;
     $to->w->raw('<pre><samp>');
     $self->{content} =
-          Perl6::Pod::Utl::parse_para( $self->childs->[0] );
+          &Perl6::Pod::Utl::parse_para( $self->childs->[0] );
     $to->visit_childs($self);
     $to->w->raw('</samp></pre>');
 }

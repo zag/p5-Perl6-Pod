@@ -53,6 +53,12 @@ sub C_code {
     return Perl6::Pod::Lex::FormattingCode->new($rec);
 }
 
+sub X_code {
+    my $self = shift;
+    my $rec  = shift;
+    return Perl6::Pod::Lex::FormattingCode->new($rec);
+}
+
 sub L_code {
     my $self = shift;
     my $rec  = shift;
