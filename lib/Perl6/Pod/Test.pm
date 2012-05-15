@@ -93,7 +93,7 @@ sub parse_to_xhtml {
 
 sub parse_to_test {
     shift if ref($_[0]);
-    my ( $text) = @_;
+    my ( $text, %args) = @_;
     my $out    = '';
     open( my $fd, ">", \$out );
     my $renderer = new Perl6::Pod::To::Test::
@@ -101,8 +101,8 @@ sub parse_to_test {
       out_put => \$out,
       doctype => 'xhtml',
       header => 0;
-    $renderer->parse( \$text, default_pod=>1 );
-    return  $renderer 
+    $renderer->parse( \$text, default_pod=>1 ) unless exists $args{no_parse};
+    return wantarray ? (  $out, $renderer  ) : $renderer;
 
 }
 sub new {
