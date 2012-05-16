@@ -287,7 +287,7 @@ L<http://www.tizag.com/htmlT/lists.php>
 =cut
 
 sub to_xhtml {
-    my ( $self, $to ) = @_;
+    my ( $self, $to, $prev, $next ) = @_;
     my $w = $to->w;
 
     #nesting first (only 2> )
@@ -303,7 +303,9 @@ sub to_xhtml {
             definition => [ 'dl', 'dd' ]
         }->{ $self->item_type }
       };
-    $w->raw("<$list_name>");
+    if (!$prev || $prev->name ne 'item' ) {
+        $w->raw("<$list_name>");
+    }
     if ( $self->item_type eq 'definition' ) {
         $w->raw('<dt><strong>');
         $to->visit( Perl6::Pod::Utl::parse_para( $self->{term} ) );
@@ -317,7 +319,9 @@ sub to_xhtml {
     $w->raw("<$items_name>");
     $to->visit_childs($self);
     $w->raw("</$items_name>");
-    $w->raw("</$list_name>");
+    if (!$next || $next->name ne 'item' ) {
+        $w->raw("</$list_name>");
+    }
 
     unless (exists $self->get_attr->{nested}) {
         my $tonest = $self->item_level - 1  ;

@@ -1,6 +1,7 @@
 package Perl6::Pod::To;
 use strict;
 use warnings;
+
 =pod
 
 =head1 NAME
@@ -20,9 +21,11 @@ use Carp;
 use Perl6::Pod::Utl::AbstractVisiter;
 use base 'Perl6::Pod::Utl::AbstractVisiter';
 use Perl6::Pod::Block::SEMANTIC;
+
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+
     # check if exists context
     # create them instead
     unless ( $self->context ) {
@@ -30,11 +33,15 @@ sub new {
         $self->context( new Perl6::Pod::Utl::Context:: );
     }
     unless ( $self->writer ) {
-         use Perl6::Pod::Writer;
-        $self->{writer} = new Perl6::Pod::Writer( out => ( $self->{out} || \*STDOUT ), escape=>'xml'  )
+        use Perl6::Pod::Writer;
+        $self->{writer} = new Perl6::Pod::Writer(
+            out => ( $self->{out} || \*STDOUT ),
+            escape => 'xml'
+        );
     }
+
     #init head levels
-    $self->{ HEAD_LEVELS } = 0;
+    $self->{HEAD_LEVELS} = 0;
     $self;
 }
 
@@ -51,7 +58,7 @@ sub context {
     if (@_) {
         $self->{context} = shift;
     }
-    return $self->{context}
+    return $self->{context};
 }
 
 #TODO then visit to child -> create new context !
@@ -61,38 +68,30 @@ sub visit_childs {
         die "Unknow type $n (not isa Perl6::Pod::Block)"
           unless UNIVERSAL::isa( $n, 'Perl6::Pod::Block' )
               || UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
-        unless (defined $n->childs) {
+        unless ( defined $n->childs ) {
+
             #die " undefined childs for". Dumper ($n)
             next;
         }
-        foreach my $ch ( @{ $n->childs } ) {
-            $self->visit($ch);
-        }
+        $self->visit( $n->childs );
     }
 }
 
-sub visit {
+sub _make_dom_node {
     my $self = shift;
-    my $n    = shift;
+    my $n = shift || return;
 
-    if ( ref($n) eq 'ARRAY' ) {
-        $self->visit($_) for @$n;
-        return;
-    }
-
-    # if string -> paragraph
+    # if string -> nothing to do
     unless ( ref($n) ) {
-            return $self->w->print($n)
+        return $n;
     }
-
-    die "Unknown node type $n (not isa Perl6::Pod::Lex::Block)"
-      unless UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
 
     # here convert lexer base block to
     # instance of DOM class
     my $name = $n->name;
     my $map  = $self->context->use;
     my $class;
+
     #convert lexer blocks
     unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
 
@@ -111,10 +110,12 @@ sub visit {
                 $additional_attr{name} = $name;
             }
 
-             $class = $map->{$name} 
-               ||  ( $name eq uc($name) 
-                  ? 'Perl6::Pod::Block::SEMANTIC' 
-                  : $map->{'*'} ); 
+            $class = $map->{$name}
+              || (
+                $name eq uc($name)
+                ? 'Perl6::Pod::Block::SEMANTIC'
+                : $map->{'*'}
+              );
         }
 
         #create instance
@@ -127,23 +128,67 @@ sub visit {
         return undef unless ($el);
         $n = $el;
     }
+    return $n;
+}
+
+sub visit {
+    my $self = shift;
+    my $n    = shift;
+
+    # if string -> paragraph
+    unless ( ref($n) ) {
+        return $self->w->print($n);
+    }
+
+    if ( ref($n) eq 'ARRAY' ) {
+
+        #       $self->visit($_) for @$n;
+        my @nodes = grep { defined $_ }       #skip empty nodes
+          map { $self->_make_dom_node($_) }
+          map { ref($_) eq 'ARRAY' ? @$_ : $_ } @$n;
+        my ( $prev, $next ) = ();
+        for ( my $i = 0 ; $i <= $#nodes ; ++$i ) {
+            if ( $i == $#nodes ) {
+                $next = undef;
+            }
+            else {
+                $next = $nodes[ $i + 1 ];
+            }
+            $self->visit( $nodes[$i], $prev, $next );
+            $prev = $nodes[$i];
+        }
+        return;
+    }
+
+    die "Unknown node type $n (not isa Perl6::Pod::Lex::Block)"
+      unless UNIVERSAL::isa( $n, 'Perl6::Pod::Lex::Block' );
+
+    #unless already converted to DOM element
+    unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
+        $n = $self->_make_dom_node($n) || return;
+    }
+    my $name = $n->name;
+
     #prcess head levels
     #TODO also semantic BLOCKS
     if ( $name eq 'head' ) {
-          $self->switch_head_level($n->level)
+        $self->switch_head_level( $n->level );
     }
+
     #process nested attr
     my $nested = $n->get_attr->{nested};
     if ($nested) {
-        $self->w->start_nesting($nested)
+        $self->w->start_nesting($nested);
     }
+
     #make method name
     my $method = $self->__get_method_name($n);
+
     #call method
-    $self->$method($n);
+    $self->$method( $n, @_ );    # $prev, $to in @_
 
     if ($nested) {
-        $self->w->stop_nesting($nested)
+        $self->w->stop_nesting($nested);
     }
 }
 
@@ -155,20 +200,21 @@ Service method for =head
 
 sub switch_head_level {
     my $self = shift;
-    if ( @_ )  {
-         my $prev = $self->{HEAD_LEVELS};
-         $self->{HEAD_LEVELS} = shift;
-         return $prev;
+    if (@_) {
+        my $prev = $self->{HEAD_LEVELS};
+        $self->{HEAD_LEVELS} = shift;
+        return $prev;
     }
-    $self->{HEAD_LEVELS}
+    $self->{HEAD_LEVELS};
 }
+
 sub __get_method_name {
     my $self = shift;
     my $el = shift || croak "empty object !";
     my $method;
     use Data::Dumper;
-    unless (UNIVERSAL::isa( $el, 'Perl6::Pod::Block') ) {
-        warn "unknown block". Dumper($el);
+    unless ( UNIVERSAL::isa( $el, 'Perl6::Pod::Block' ) ) {
+        warn "unknown block" . Dumper($el);
     }
     my $name = $el->name || die "Can't get element name for " . Dumper($el);
     if ( UNIVERSAL::isa( $el, 'Perl6::Pod::FormattingCode' ) ) {
@@ -182,25 +228,24 @@ sub __get_method_name {
 
 sub block_File {
     my $self = shift;
-    return $self->visit_childs(@_);
+    return $self->visit_childs(shift);
 }
 
 sub block_pod {
     my $self = shift;
-    return $self->visit_childs(@_);
+    return $self->visit_childs(shift);
 }
 
 #comments
-sub code_Z {}
-sub block_comment {}
-
-
+sub code_Z        { }
+sub block_comment { }
 
 sub write {
     my $self = shift;
     my $tree = shift;
     $self->visit($tree);
 }
+
 =head2 parse \$TEXT
 
 parse text
@@ -209,9 +254,10 @@ parse text
 
 sub parse {
     my $self = shift;
-    my $text = shift ;
+    my $text = shift;
     use Perl6::Pod::Utl;
-    my $tree = Perl6::Pod::Utl::parse_pod(ref($text) ? $$text : $text, @_) || return "Error";
+    my $tree = Perl6::Pod::Utl::parse_pod( ref($text) ? $$text : $text, @_ )
+      || return "Error";
     $self->start_write;
     $self->write($tree);
     $self->end_write;
@@ -221,32 +267,33 @@ sub parse {
 # unless have export method
 # try element methods for export
 sub __default_method {
-    my $self   = shift;
-    my $n      = shift;
+    my $self = shift;
+    my $n    = shift;
+
     #detect output format
     # Perl6::Pod::To::DocBook -> to_docbook
     ( my $export_method = ref($self) ) =~ s/^.*To::([^:]+)/lc "to_$1"/es;
-    unless ( $export_method && UNIVERSAL::can($n, $export_method) ) {
-    my $method = $self->__get_method_name($n);
-    die ref($self)
-      . ": Method '$method' for class "
-      . ref($n)
-      . " not implemented. But also can't found export method ". ref($n) . "::$export_method";
+    unless ( $export_method && UNIVERSAL::can( $n, $export_method ) ) {
+        my $method = $self->__get_method_name($n);
+        die ref($self)
+          . ": Method '$method' for class "
+          . ref($n)
+          . " not implemented. But also can't found export method "
+          . ref($n)
+          . "::$export_method";
     }
+
     #call method for export
-    $n->$export_method($self)
+    $n->$export_method( $self, @_ )    # $prev, $to
 }
 
 sub start_write {
     my $self = shift;
 }
 
-
 sub end_write {
     my $self = shift;
 }
-
-
 
 1;
 __END__
