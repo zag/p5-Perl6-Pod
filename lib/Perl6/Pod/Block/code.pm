@@ -77,7 +77,9 @@ sub to_docbook {
     my ( $self, $to ) = @_;
     $to->w->raw(
         '<programlisting><![CDATA[');
-    $to->visit_childs($self);
+#    $to->visit_childs($self);
+        $to->w->raw($_) for @{$self->childs};
+
     $to->w->raw(']]></programlisting>');
 
 }

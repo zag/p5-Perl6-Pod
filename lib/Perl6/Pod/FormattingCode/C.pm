@@ -77,6 +77,7 @@ sub to_docbook {
     my $w  = $to->w;
     $w->raw(" <code>");
     $to->visit_childs($self);
+#    $to->w->raw($_) for @{$self->childs};
     $w->raw('</code>');
 }
 
