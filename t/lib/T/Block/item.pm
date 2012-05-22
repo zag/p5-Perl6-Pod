@@ -60,7 +60,7 @@ T1
         $x,
 q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><ol><li>i1
  i2
- </li></ol><ol><li>i2
+ </li><li>i2
  </li></ol></xhtml>
 #
     );
@@ -81,10 +81,11 @@ T1
     $t->is_deeply_xml(
         $x,
 q#<chapter><orderedlist><listitem>i1
-i2
-</listitem></orderedlist><orderedlist><listitem>i2
-</listitem></orderedlist><variablelist><varlistentry>TERM1</varlistentry><listitem>Test
-</listitem></variablelist></chapter>#
+ i2
+</listitem><listitem>i2
+ </listitem></orderedlist><variablelist><varlistentry>TERM1</varlistentry><listitem>Test
+ </listitem></variablelist></chapter>
+#
     );
 }
 
@@ -101,10 +102,10 @@ one
 T1
     $t->is_deeply_xml(
         $x,
-q#<xhtml xmlns="http://www.w3.org/1999/xhtml"><ul><li>test
+q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><ul><li>test
  </li></ul><blockquote><ol><li>one
- </li></ol></blockquote><blockquote><ol><li>two
-</li></ol></blockquote></xhtml>
+ </li><li>two
+ </li></ol></blockquote></xhtml>
 #
     );
 }

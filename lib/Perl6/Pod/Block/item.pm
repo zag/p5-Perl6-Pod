@@ -286,15 +286,19 @@ L<http://www.tizag.com/htmlT/lists.php>
    
 =cut
 
+sub get_item_sign {
+    my $self = shift;
+    my $el = shift;
+    my $name = $el->name;
+    return $name unless $name eq 'item';
+    my $sign = join '_'=> $name, $el->item_level, $self->item_type;
+    return $sign
+}
+
 sub to_xhtml {
     my ( $self, $to, $prev, $next ) = @_;
     my $w = $to->w;
 
-    #nesting first (only 2> )
-    unless (exists $self->get_attr->{nested}) {
-        my $tonest = $self->item_level - 1 ;
-        $w->start_nesting(  $tonest  ) if $tonest;
-    }
 
     my ( $list_name, $items_name ) = @{
         {
@@ -303,7 +307,13 @@ sub to_xhtml {
             definition => [ 'dl', 'dd' ]
         }->{ $self->item_type }
       };
-    if (!$prev || $prev->name ne 'item' ) {
+    if (!$prev || $self->get_item_sign($prev) ne $self->get_item_sign($self) ) {
+        #nesting first (only 2> )
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1 ;
+            $w->start_nesting(  $tonest  ) if $tonest;
+        }
+
         $w->raw("<$list_name>");
     }
     if ( $self->item_type eq 'definition' ) {
@@ -319,14 +329,15 @@ sub to_xhtml {
     $w->raw("<$items_name>");
     $to->visit_childs($self);
     $w->raw("</$items_name>");
-    if (!$next || $next->name ne 'item' ) {
+    if (!$next || $self->get_item_sign($next) ne $self->get_item_sign($self) ) {
         $w->raw("</$list_name>");
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1  ;
+            $w->stop_nesting(  $tonest  ) if $tonest;
+        }
+
     }
 
-    unless (exists $self->get_attr->{nested}) {
-        my $tonest = $self->item_level - 1  ;
-        $w->stop_nesting(  $tonest  ) if $tonest;
-    }
 
 }
 
@@ -340,14 +351,9 @@ sub to_docbook {
     #                $rattr->{number_start} = $attr->{number_value};
     #            }
     #        }
-    my ( $self, $to ) = @_;
+    my ( $self, $to, $prev, $next ) = @_;
     my $w = $to->w;
 
-    #nesting first (only 2> )
-    unless (exists $self->get_attr->{nested}) {
-        my $tonest = $self->item_level - 1 ;
-        $w->start_nesting(  $tonest  ) if $tonest;
-    }
     my ( $list_name, $items_name ) = @{
         {
             ordered    => [ 'orderedlist',  'listitem' ],
@@ -355,7 +361,16 @@ sub to_docbook {
             definition => [ 'variablelist', 'listitem' ]
         }->{ $self->item_type }
       };
-    $w->raw("<$list_name>");
+    if (!$prev || $self->get_item_sign($prev) ne $self->get_item_sign($self) ) {
+        #nesting first (only 2> )
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1 ;
+            $w->start_nesting(  $tonest  ) if $tonest;
+        }
+
+        $w->raw("<$list_name>");
+    }
+
             
 
     if ( $self->item_type eq 'definition' ) {
@@ -382,11 +397,14 @@ sub to_docbook {
     }
     $to->visit_childs($self);
     $w->raw("</$items_name>");
-    $w->raw("</$list_name>");
 
-    unless (exists $self->get_attr->{nested}) {
-        my $tonest = $self->item_level - 1  ;
-        $w->stop_nesting(  $tonest  ) if $tonest;
+    if (!$next || $self->get_item_sign($next) ne $self->get_item_sign($self) ) {
+        $w->raw("</$list_name>");
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1  ;
+            $w->stop_nesting(  $tonest  ) if $tonest;
+        }
+
     }
 
 }
