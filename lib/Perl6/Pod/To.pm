@@ -272,7 +272,7 @@ sub __default_method {
 
     #detect output format
     # Perl6::Pod::To::DocBook -> to_docbook
-    ( my $export_method = ref($self) ) =~ s/^.*To::([^:]+)/lc "to_$1"/es;
+    ( my $export_method = "To::".$self->{format} || ref($self) ) =~ s/^.*To::([^:]+)/lc "to_$1"/es;
     unless ( $export_method && UNIVERSAL::can( $n, $export_method ) ) {
         my $method = $self->__get_method_name($n);
         die ref($self)
