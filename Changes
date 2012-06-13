@@ -4,6 +4,7 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+    - fix code block 
 0.54 22 May 2012
     - fix scripts;
     - fix =item and tests;
