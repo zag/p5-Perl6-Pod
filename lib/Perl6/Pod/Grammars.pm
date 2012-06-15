@@ -70,7 +70,11 @@ qr{
         | <MATCH=alias_directive>
         | <MATCH=abbr_block>
         | <MATCH=text_content> 
+#        | <MATCH=ambient_content>
 
+    <token: ambient_content>             <matchpos><matchline>
+                                          (?{ $MATCH{type} = "ambient"})
+                                         \s+
     <rule: config_directive>             <matchpos><matchline>
                                         (?{ $MATCH{type} = "directive"})
        ^ <spaces=hs>? =<name=(config)>  <block_name=(\S+)>
@@ -129,7 +133,7 @@ qr{
 
             <[content=raw_content]>?
 
-     ^ <spacesend=hs>?  =end <.hsp> <\name> <.hs> <.newline>
+     ^ <spacesend=hs>?  =end <.hsp> <\name> <.hs> <.newline>?
 
     <token: delimblock>                 <matchpos><matchline>
                                         (?{ $MATCH{type} = "block"})
@@ -137,7 +141,7 @@ qr{
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
                    <[content=block_content]>*
                    <.emptyline>*
-     ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>
+     ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>?
 
     <token: paragraph_block>             <matchpos><matchline>
                                     (?{ $MATCH{type} = "block"})
