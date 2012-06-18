@@ -11,6 +11,8 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use IO::File;
+use open ':utf8';
+
 use Perl6::Pod::To::XHTML;
 my ( $help, $man, $doctype, $no_head, $css_file,  @libs, $command );
 $no_head = 0;
@@ -45,6 +47,8 @@ my $text;
     local $/;
     $text = <$in_fd>
 }
+
+utf8::decode( $text ) unless utf8::is_utf8( $text );
 
 my $renderer = new Perl6::Pod::To::XHTML::
   writer  => new Perl6::Pod::Writer( out => \*STDOUT,  escape=>'html');

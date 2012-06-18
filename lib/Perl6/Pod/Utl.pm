@@ -7,6 +7,7 @@
 package Perl6::Pod::Utl;
 use strict;
 use warnings;
+use utf8;
 
 =head2  parse_pod [default_pod => 0 ]
 
@@ -98,7 +99,7 @@ sub parse_para {
         @allow{@list} = ();
     }
     my $r = $args{reg} || do {
-         use Regexp::Grammars;
+        use Regexp::Grammars;
         use Perl6::Pod::Grammars;
     qr{
 
