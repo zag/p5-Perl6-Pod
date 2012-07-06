@@ -66,7 +66,7 @@ sub end_write {
        ->raw('<p>NOTES</p>');
        my $nid = 1;
        foreach my $n (@$notes) {
-            $w->raw(qq!<p><a name="ftn.nid${nid}" href="#nid${nid}"><sup>${nid}.</sup></a>!);
+            $w->raw(qq!<p><a name="ftn.nid${nid}" href="#nid${nid}"><sup>${nid}.</sup></a> !);
             $self->visit_childs($n);
             $w->raw('</p>');
             $nid++;

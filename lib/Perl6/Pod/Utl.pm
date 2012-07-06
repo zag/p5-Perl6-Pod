@@ -108,6 +108,7 @@ sub parse_para {
        \A  <Text>  \Z
     <token: Text> <[content]>+
     <token: text>  .+?
+    <token: hs>[ \t]*
     <token: content> <MATCH=C_code> 
                     | <MATCH=L_code>
                     | <MATCH=D_code> 
@@ -163,7 +164,7 @@ sub parse_para {
 
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
-            <ldelim>  <[content]>*?   <rdelim(:ldelim)>
+            <ldelim> <.hs> <[content]>*? <.hs> <rdelim(:ldelim)>
 }xms;
       };
 

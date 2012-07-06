@@ -82,7 +82,7 @@ my $r     = qr{
 
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
-            <ldelim> <[content]>*? <rdelim(:ldelim)>
+            <ldelim> <.hs> <[content]>*? <.hs> <rdelim(:ldelim)>
 }xms;
 
 sub parse_para {
@@ -137,7 +137,7 @@ $t1 = parse_para('X<| array1, array2; use array >')->[0];
 is $t1->{text},'', 'empty text';
 #diag Dumper $t1;
 #diag Dumper parse_para('L<http://example.com/test#test>');
-#diag Dumper parse_para('L<http:../examples/index.html>');
+#diag Dumper parse_para('C«E<nbsp>»');
 exit;
 
 #@t         = ();

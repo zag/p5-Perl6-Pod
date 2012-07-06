@@ -11,7 +11,7 @@ use warnings;
 use Test::More;
 use Data::Dumper;
 use base 'TBase';
-
+use utf8;
 
 
 sub t04_as_docbook : Test {
