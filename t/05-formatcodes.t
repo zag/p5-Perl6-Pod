@@ -14,7 +14,7 @@ use v5.10;
 use Regexp::Grammars;
 use  Perl6::Pod::Codeactions;
 use Perl6::Pod::Grammars;
-use Test::More tests => 15;    # last test to print
+use Test::More tests => 16;    # last test to print
 my %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
 my %allow = ( '*' => 1 );
 my $r     = qr{
@@ -30,6 +30,7 @@ my $r     = qr{
                     | <MATCH=D_code> 
                     | <MATCH=L_code> 
                     | <MATCH=X_code> 
+                    | <MATCH=P_code> 
                     | <MATCH=default_formatting_code> 
                     | <.text>
     <token: ldelim> <%delim>
@@ -80,6 +81,13 @@ my $r     = qr{
              )
             <rdelim(:ldelim)>
 
+    <rule: P_code>
+     <name=(P)><isValideFCode(:name)>
+             <ldelim> <.hs> 
+                <scheme=([^|\s:]+:)>? #scheme specifier
+                (?: <is_external=(//)> )? 
+                  <address=([^\|]*?)> 
+            <.hs> <rdelim(:ldelim)>
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
             <ldelim> <.hs> <[content]>*? <.hs> <rdelim(:ldelim)>
@@ -135,9 +143,15 @@ is @{$t1->{entries}}, 2, "more than one entries";
 is $t1->{text}, 'arrays', 'check text: X< arrays | array1, array2; use array >';
 $t1 = parse_para('X<| array1, array2; use array >')->[0];
 is $t1->{text},'', 'empty text';
+$t1 = parse_para('P<http://example.com>')->[0];
+is $t1->{'scheme'},'http:', 'P: scheme';
+
+#diag Dumper $t1;
+
 #diag Dumper $t1;
 #diag Dumper parse_para('L<http://example.com/test#test>');
 #diag Dumper parse_para('C«E<nbsp>»');
+
 exit;
 
 #@t         = ();

@@ -4,6 +4,7 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+0.55 19 Jul 2012
     - trailing spaces in default FormattingCodes
     - fix code block 
 0.54 22 May 2012
