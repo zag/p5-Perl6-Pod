@@ -46,6 +46,16 @@ sub _html_escape {
     $txt
 }
 
+#http://www.cespedes.org/blog/85/how-to-escape-latex-special-characters
+sub _latex_escape {
+    my ( $txt ) =@_;
+    $txt   =~ s/\\/\textbackslash{}/g;
+    $txt   =~ s/^/\textbackslash{}/g;
+    $txt   =~ s/~/\textasciitilde{}/g;
+    $txt   =~ s/([#$%&_{}])/\\$1/g;
+    $txt
+}
+
 sub raw_print {
     my $self = shift;
     my $fh = $self->o;

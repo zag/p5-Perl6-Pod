@@ -77,6 +77,19 @@ sub parse_to_docbook {
 }
 
 
+sub parse_to_latex {
+    shift if ref($_[0]);
+    my ( $text) = @_;
+    my $out    = '';
+    open( my $fd, ">", \$out );
+    my $renderer = new Perl6::Pod::To::Latex::
+      writer  => new Perl6::Pod::Writer( out => $fd, escape=>'latex' ),
+      out_put => \$out,
+      header => 0;
+    $renderer->parse( \$text, default_pod=>1 );
+    return wantarray ? (  $out, $renderer  ) : $out;
+}
+
 sub parse_to_xhtml {
     shift if ref($_[0]);
     my ( $text) = @_;
