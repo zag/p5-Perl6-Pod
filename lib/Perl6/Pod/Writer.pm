@@ -58,6 +58,7 @@ sub print {
     my $fh = $self->o;
     if (my $type = $self->{escape}) {
         my $str = join ""=>@_;
+        utf8::encode( $str) if utf8::is_utf8($str);
         print $fh ($type eq 'xml') ? _xml_escape($str) : _html_escape($str);
         return $self
     }
