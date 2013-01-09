@@ -110,4 +110,19 @@ q# <xhtml xmlns="http://www.w3.org/1999/xhtml"><ul><li>test
     );
 }
 
+sub t5_latex : Test(2) {
+   my $t = shift;
+    my $x = $t->parse_to_latex( <<T1, );
+=begin pod
+=config item2 :numbered
+=item1 test
+=for item2 :a
+one
+=item2 two
+=end pod
+T1
+    ok $x =~ m%\\begin{itemize}%, 'itemized list';
+    ok $x =~ m%\\begin{enumerate}%, 'numbered list';
+}
+
 1;

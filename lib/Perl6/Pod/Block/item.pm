@@ -408,6 +408,56 @@ sub to_docbook {
     }
 
 }
+
+sub to_latex {
+    my ( $self, $to, $prev, $next ) = @_;
+    my $w = $to->w;
+
+    my ( $list_name, $items_name ) = @{
+        {
+            ordered    => [ 'enumerate',  'item' ],
+            unordered  => [ 'itemize', 'item' ],
+            definition => [ 'description', 'item' ]
+        }->{ $self->item_type }
+      };
+    if (!$prev || $self->get_item_sign($prev) ne $self->get_item_sign($self) ) {
+        #nesting first (only 2> )
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1 ;
+            $w->start_nesting(  $tonest  ) if $tonest;
+        }
+
+    $w->say('\begin{' . $list_name . '}');
+    }
+
+    $w->raw('\item');
+
+    if ( $self->item_type eq 'definition' ) {
+        $w->raw('[');
+        $self->visit( Perl6::Pod::Utl::parse_para( $self->{term} ) );
+        $w->raw(']')
+
+    }
+    $w->raw(' ');#space
+
+    #parse first para
+    $self->{content}->[0] =
+      Perl6::Pod::Utl::parse_para( $self->{content}->[0] );
+    $to->visit_childs($self);
+    if ( $self->get_attr->{pause} ) {
+        $w->say('\pause');
+    }
+
+    if (!$next || $self->get_item_sign($next) ne $self->get_item_sign($self) ) {
+        $w->say('\end{' . $list_name . '}');
+        unless (exists $self->get_attr->{nested}) {
+            my $tonest = $self->item_level - 1  ;
+            $w->stop_nesting(  $tonest  ) if $tonest;
+        }
+
+   }
+}
+
 1;
 __END__
 

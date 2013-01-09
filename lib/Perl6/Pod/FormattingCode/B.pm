@@ -60,6 +60,24 @@ sub to_docbook {
     $w->raw('</emphasis>');
 }
 
+=head2 to_latex
+
+    B<test>
+
+Render to
+
+   \\textbf{test} 
+
+=cut
+
+sub to_latex{
+    my ( $self, $to ) = @_;
+    my $w  = $to->w;
+    $w->raw("\\textbf{");
+    $to->visit_childs($self);
+    $w->raw("}");
+}
+
 1;
 __END__
 

@@ -33,7 +33,7 @@ sub _latex_escape {
     my ( $txt ) =@_;
     #die "$txt";
     #$txt = "#";
-    warn ">$txt";
+    #warn ">$txt";
     $txt  =~ s/(\\|\^|\~|[\#\$\%\&\_\{\}])/&repl($1)/eg;
 #    $txt   =~ s/\\/\textbackslash{}/g;
 #    $txt   =~ s/^/\textbackslash{}/g;
@@ -51,6 +51,16 @@ sub print {
     print $fh _latex_escape($str);
     $self
 }
+
+sub start_nesting {
+    my $self = shift;
+    my $level = shift || 1 ;
+}
+sub stop_nesting {
+    my $self = shift;
+    my $level = shift || 1 ;
+}
+
 1;
 
 

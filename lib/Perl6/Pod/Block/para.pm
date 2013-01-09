@@ -59,9 +59,22 @@ sub to_docbook {
         }
         $w->raw( '<para>');
         my $fc = Perl6::Pod::Utl::parse_para($para);
-#        die Dumper ($fc);
         $to->visit($fc);
         $w->raw('</para>' );
+    }
+}
+
+sub to_latex {
+    my $self = shift;
+    my $to   = shift;
+    my $w  = $to->w;
+    foreach my $para (@{ $self->childs }) {
+        if(ref($para)) {
+            $to->visit(Perl6::Pod::Utl::parse_para($para) );next;
+        }
+        my $fc = Perl6::Pod::Utl::parse_para($para);
+        $to->visit($fc);
+        $w->say('');
     }
 }
 

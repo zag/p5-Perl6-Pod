@@ -90,6 +90,12 @@ sub to_docbook {
     $to->visit_childs($self);
 }
 
+sub to_latex {
+    my $self = shift;
+    my $to   = shift;
+    $to->visit_childs($self);
+}
+
 1;
 __END__
 

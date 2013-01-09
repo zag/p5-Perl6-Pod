@@ -77,8 +77,17 @@ sub to_docbook {
     my $w  = $to->w;
     $w->raw(" <code>");
     $to->visit_childs($self);
-#    $to->w->raw($_) for @{$self->childs};
     $w->raw('</code>');
+}
+
+sub to_latex {
+    my $self   = shift;
+    my $to = shift;
+    my $w  = $to->w;
+    $w->raw('\verb=');
+    $to->visit_childs($self);
+    $w->raw('=');
+
 }
 
 1;

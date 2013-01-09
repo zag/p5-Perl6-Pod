@@ -41,5 +41,14 @@ T
     );
 }
 
+sub t03_as_latex : Test {
+    my $t = shift;
+    my $x = $t->parse_to_latex( <<T);
+=para
+Italic I<test>
+T
+ok $x =~ m%\\emph{test}%;
+}
+
 1;
 

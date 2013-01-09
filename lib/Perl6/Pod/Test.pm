@@ -59,6 +59,7 @@ use Perl6::Pod::Writer;
 
 use Perl6::Pod::To::DocBook;
 use Perl6::Pod::To::XHTML;
+use Perl6::Pod::To::Latex;
 use XML::Flow;
 
 sub parse_to_docbook {
@@ -83,7 +84,7 @@ sub parse_to_latex {
     my $out    = '';
     open( my $fd, ">", \$out );
     my $renderer = new Perl6::Pod::To::Latex::
-      writer  => new Perl6::Pod::Writer( out => $fd, escape=>'latex' ),
+      writer  => new Perl6::Pod::Writer::Latex( out => $fd, escape=>'latex' ),
       out_put => \$out,
       header => 0;
     $renderer->parse( \$text, default_pod=>1 );

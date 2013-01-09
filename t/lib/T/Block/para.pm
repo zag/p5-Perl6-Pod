@@ -53,6 +53,21 @@ $t->is_deeply_xml ( $x, q#<?xml version="1.0"?>
 
 }
 
+sub p03_multi_para_latex :Test {
+    my $t = shift;
+    my $x = $t->parse_to_latex(<<T);
+=begin pod
+=begin para
+B<test> and I<test>
+
+Simple para I<test>
+=end para
+=end pod
+T
+
+  ok $x =~ m%\\textbf{test} and \\emph{test}%, 'latex'
+}
+
 
 1;
 

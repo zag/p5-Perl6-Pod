@@ -73,6 +73,15 @@ q#<xhtml xmlns="http://www.w3.org/1999/xhtml"><p><code>as</code> asds <strong>as
     );
 }
 
+sub t08_code_to_latex : Test {
+     my $t = shift;
+    my $x = $t->parse_to_latex( <<T);
+=para
+C<as> asds B<asdasI<d>sad >
+T
+    ok $x =~ m%\\verb=as=%;
+}
+
 
 1;
 

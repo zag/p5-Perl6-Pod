@@ -42,5 +42,17 @@ T
 
 }
 
+sub c06_allow_in_latex_code : Test(2) {
+    my $t = shift;
+    my $x = $t->parse_to_latex(<<T);
+=begin pod 
+=for code :allow<B>
+test B<para.test> para.test.I<pas>
+=end pod
+T
+    ok $x =~ m%\\begin{verbatim}%, '=code in latex';
+    ok $x =~ m%\\textbf{para.%,':allow<B>';;
+}
+ 
 1;
 

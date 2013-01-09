@@ -80,8 +80,19 @@ sub to_docbook {
         $to->w->raw($_) for @{$self->childs};
 
     $to->w->raw(']]></programlisting>');
-
 }
+
+sub to_latex {
+    my ( $self, $to ) = @_;
+    if ( my $allow = $self->get_attr->{allow} ) {
+        $self->{content} =
+          Perl6::Pod::Utl::parse_para( $self->childs->[0], allow => $allow );
+    }
+    $to->w->say('\begin{verbatim}');
+    $to->visit_childs($self);
+    $to->w->raw('\end{verbatim}');
+}
+
 1;
 __END__
 

@@ -39,5 +39,14 @@ q#<chapter><para>Bold <emphasis role='bold'>test</emphasis>
 </para></chapter>#)
 }
 
+sub t03_as_latex : Test {
+    my $t = shift;
+    my $x = $t->parse_to_latex( <<T);
+=para
+Bold B<test>
+T
+ok $x =~ m%\\textbf{test}%
+}
+
 1;
 
