@@ -1,10 +1,9 @@
 #===============================================================================
 #
-#  DESCRIPTION:  
+#  DESCRIPTION:  Export to latex
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-#$Id$
 package Perl6::Pod::To::Latex;
 use strict;
 use warnings;
@@ -26,6 +25,14 @@ sub new {
     my $self = $class->SUPER::new(%args);
     return $self;
 }
+
+sub switch_head_level {
+    my $self = shift;
+    my $level = shift;
+    my $w = $self->w;
+    my $prev = $self->Perl6::Pod::To::switch_head_level($level);
+}
+
 1;
 
 

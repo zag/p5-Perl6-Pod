@@ -60,6 +60,30 @@ sub to_docbook {
     $w->raw("</title>" );
 }
 
+
+sub to_latex {
+    my ( $self, $to )= @_;
+    my $w  = $to->w;
+    my $level = $self->level;
+    #http://en.wikibooks.org/wiki/LaTeX/Document_Structure
+    my %level2latex = 
+    ( 1 => 'section',
+      2  => 'subsection',
+      3 => 'subsubsection',
+      4 => 'paragraph',
+      5 => 'subparagraph'
+    );
+    unless (exists $level2latex{$level}) {
+        warn "Level $level not supported by pod6latex. Set to: 5";
+        $level = 5;
+    };
+
+    $w->raw('\\'.$level2latex{$level}.'{');
+    $self->{content}->[0] = Perl6::Pod::Utl::parse_para($self->{content}->[0]);
+    $to->visit_childs($self);
+    $w->raw("}" );
+}
+
 1;
 
 __END__

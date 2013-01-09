@@ -37,6 +37,7 @@ my $text;
     local $/;
     $text = <$in_fd>
 }
+
 my $renderer = new Perl6::Pod::To::Latex::
   writer  => new Perl6::Pod::Writer::Latex( out => \*STDOUT ),
   doctype => $doctype,
