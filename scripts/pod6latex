@@ -42,7 +42,16 @@ my $renderer = new Perl6::Pod::To::Latex::
   writer  => new Perl6::Pod::Writer::Latex( out => \*STDOUT ),
   doctype => $doctype,
   header  => $add_head;
-$renderer->parse( \$text, default_pod => 1 );
+    use Perl6::Pod::Utl;
+    my $tree = Perl6::Pod::Utl::parse_pod( $text, default_pod => 1 )
+      || return "Error";
+    $renderer->w->raw(<<TXT);
+\\documentclass{article}
+\\begin{document}
+TXT
+    $renderer->write($tree);
+    $renderer->w->raw('\end{document}');
+
 
 exit;
 
