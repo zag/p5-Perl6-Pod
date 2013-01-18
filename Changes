@@ -4,6 +4,8 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+0.58 18 Jan 2013
+    - update deps up to Regexp::Grammars 1.021
 0.57 15 Jan 2013
     - pod6latex
 0.56 20 Jul 2012

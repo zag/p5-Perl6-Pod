@@ -133,7 +133,7 @@ qr{
 
             <[content=raw_content]>?
 
-     ^ <spacesend=hs>?  =end <.hsp> <\name> <.hs> <.newline>?
+     ^ <spacesend=hs>?  =end <.hsp> <\_name> <.hs> <.newline>?
 
     <token: delimblock>                 <matchpos><matchline>
                                         (?{ $MATCH{type} = "block"})
@@ -141,7 +141,7 @@ qr{
      ( ( <.newline>  = )? <.hs>  <[attr=pair]>+ % <.hs> )* <.newline>
                    <[content=block_content]>*
                    <.emptyline>*
-     ^ <spacesend=hs>?  =end <.hs> <\name> <.hs> <.newline>?
+     ^ <spacesend=hs>?  =end <.hs> <\_name> <.hs> <.newline>?
 
     <token: paragraph_block>             <matchpos><matchline>
                                     (?{ $MATCH{type} = "block"})
