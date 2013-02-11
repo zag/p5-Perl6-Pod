@@ -4,6 +4,8 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+0.59 11 Feb 2013
+    - fix =headX in docbook
 0.58 18 Jan 2013
     - update deps up to Regexp::Grammars 1.021
 0.57 15 Jan 2013

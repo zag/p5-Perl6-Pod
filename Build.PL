@@ -17,6 +17,7 @@ Module::Build->new
 	scripts/pod6any
 	scripts/pod6docbook
 	scripts/pod6xhtml
+	scripts/pod6latex
     !],
    dist_version_from=>'lib/Perl6/Pod.pm',
     meta_merge=>{
