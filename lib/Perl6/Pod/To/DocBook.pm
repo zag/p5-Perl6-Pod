@@ -84,7 +84,7 @@ sub switch_head_level {
      { 
         my $count_to_close = $level * 1 + $prev-$level;
         $w->raw('</section>') for ( 1..$count_to_close);
-        $w->raw('<section>') unless $no_start_next_flag;
+        $w->raw('<section>') unless $no_start_next_flag or !$level;
      
      }
 }
