@@ -56,8 +56,6 @@ sub block_NAME {
     my $w  = $self->w;
     $w->raw('<title>');
     $el->{content} = Perl6::Pod::Utl::parse_para($el->childs->[0]->{content}->[0]);
-#    use Data::Dumper;
-#    warn Dumper $el->{content};
     $self->visit_childs($el);
     $w->raw('</title>');
 }
@@ -75,6 +73,7 @@ q@<!DOCTYPE chapter PUBLIC '-//OASIS//DTD DocBook V4.2//EN' 'http://www.oasis-op
 sub switch_head_level {
     my $self = shift;
     my $level = shift;
+    my $no_start_next_flag = shift;
     my $w = $self->w;
     my $prev = $self->SUPER::switch_head_level($level);
     if ($level && $level == $prev ) {
@@ -83,13 +82,16 @@ sub switch_head_level {
         $w->raw('<section>') for ( 1..$level-$prev);
     } else #$prev > $level
      { 
-        $w->raw('</section>') for ( 1..$prev-$level);
+        my $count_to_close = $level * 1 + $prev-$level;
+        $w->raw('</section>') for ( 1..$count_to_close);
+        $w->raw('<section>') unless $no_start_next_flag;
      
      }
 }
+
 sub end_write {
     my $self = shift;
-    $self->switch_head_level(0);
+    $self->switch_head_level(0,'no_start_next');
     $self->w->raw_print( '</' .  $self->{doctype} . '>' ) if $self->{doctype};
 }
 
