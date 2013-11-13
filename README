@@ -19,8 +19,15 @@ This module requires these other modules and libraries:
 
  Regexp::Grammars
 
-COPYRIGHT AND LICENCE
+AUTHOR 
 
+Zahatski Aliaksandr, <zag@cpan.org>
+
+CREDITS
+
+Ivan Baidakou, <dmol@cpan.org>
+
+COPYRIGHT AND LICENCE
 
 Copyright (C) 2009-2013 by Zahatski Aliaksandr
 

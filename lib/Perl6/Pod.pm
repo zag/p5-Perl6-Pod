@@ -217,7 +217,7 @@ The suite contain the following classes:
 
 =cut
 
-$Perl6::Pod::VERSION = '0.59';
+$Perl6::Pod::VERSION = '0.60';
 
 use warnings;
 use strict;
@@ -356,6 +356,9 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 (Perl6::Pod derived from Perl6::Perldoc by Damian Conway  C<< <DCONWAY@CPAN.org> >>)
 
+=head1 CREDITS
+
+Ivan Baidakou, <dmol@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
