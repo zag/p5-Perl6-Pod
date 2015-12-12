@@ -38,7 +38,7 @@ sub __default_method {
 }
 
 package Perl6::Pod::Test;
-#$Id$
+our $VERSION = '0.01';
 
 =pod
 
