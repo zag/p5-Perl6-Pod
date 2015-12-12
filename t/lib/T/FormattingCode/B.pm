@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  test B<> implementation
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 #$Id$
 
@@ -45,7 +45,7 @@ sub t03_as_latex : Test {
 =para
 Bold B<test>
 T
-ok $x =~ m%\\textbf{test}%
+ok $x =~ m%\\textbf\{test\}%
 }
 
 1;

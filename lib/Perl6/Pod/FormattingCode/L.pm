@@ -1,7 +1,5 @@
 package Perl6::Pod::FormattingCode::L;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -32,7 +30,7 @@ use Data::Dumper;
 use Perl6::Pod::FormattingCode;
 use base 'Perl6::Pod::FormattingCode';
 use Perl6::Pod::Utl;
-use feature qw(switch);
+our $VERSION = '0.01';
 
 sub new {
     my $class = shift;
@@ -61,11 +59,11 @@ sub new {
 sub to_xhtml {
     my ( $self, $to ) = @_;
     my $w  = $to->w;
-    given ($self->{scheme}|| '') {
-      when ( /^https?|.*$/ || $self->{section} ) {
+    my $scheme = $self->{scheme}|| '';
+    if (  ( $scheme =~ /^https?|.*$/ ) or $self->{section} ) {
                 my $url = $self->{address} || ''; 
                 $url .= "#" . $self->{section} if $self->{section};
-                $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
+                $url = $self->{scheme} .  ($scheme =~ /^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
                 $w->raw('<a href="')->print($url)->raw('">');
                 unless  ( $self->{alt_text}) {
                             $w->print($url)
@@ -74,17 +72,16 @@ sub to_xhtml {
                 }
                 $w->raw('</a>');
       }
-    };
 }
 
 sub to_docbook {
     my ( $self, $to ) = @_;
     my $w  = $to->w;
-    given ($self->{scheme}) {
-      when ( /^https?|.*:$/ || $self->{section} ) {
+    my $scheme = $self->{scheme}|| '';
+    if (  ( $scheme =~ /^https?|.*$/ ) or $self->{section} ) {
                 my $url = $self->{address} || ''; 
                 $url .= "#" . $self->{section} if $self->{section};
-                $url = $self->{scheme} .  (/^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
+                $url = $self->{scheme} .  ($scheme =~ /^https?/ ? '//' : '') . $url if $self->{is_external} || ($self->{scheme} && $self->{scheme} eq 'mailto:');
                 $w->raw('<ulink url="')->print($url)->raw('">');
                 unless  ( $self->{alt_text}) {
                             $w->print($url)
@@ -93,7 +90,6 @@ sub to_docbook {
                 }
                 $w->raw('</ulink>');
       }
-    };
 }
 1;
 __END__
@@ -110,7 +106,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

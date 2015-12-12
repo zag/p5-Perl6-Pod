@@ -1,7 +1,5 @@
 package Perl6::Pod::Parser::Utils;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -21,6 +19,7 @@ Set of useful functions
 =back
 
 =cut
+our $VERSION = '0.01';
 require Exporter;
 *import                = \&Exporter::import;
 @Perl6::Pod::Parser::Utils::EXPORT_OK = qw( parse_URI);

@@ -1,7 +1,5 @@
 package Perl6::Pod::Parser::AddIds;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -61,6 +59,7 @@ use warnings;
 use base 'Perl6::Pod::Parser';
 use Test::More;
 use Data::Dumper;
+our $VERSION = '0.01';
 
 sub on_para {
     my ( $self, $el, $txt ) = @_;

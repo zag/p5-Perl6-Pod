@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  Export to latex
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::To::Latex;
 use strict;
@@ -12,6 +12,7 @@ use warnings;
 use Perl6::Pod::To::DocBook;
 use base 'Perl6::Pod::To::DocBook';
 use Perl6::Pod::Utl;
+our $VERSION = '0.01';
 
 sub new {
     my $class =  shift;

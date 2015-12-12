@@ -1,7 +1,5 @@
 package Perl6::Pod::Directive::alias;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -44,14 +42,12 @@ use warnings;
 use strict;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+our $VERSION = '0.01';
 
 sub new {
     my ( $class, %args ) = @_;
     my $self = $class->SUPER::new( %args );
     $self->context->{_alias}->{$self->{alias_name} } = $self->{text}->[0];
-#
-#    use Data::Dumper; die Dumper($self);
-#    return $self;
     return undef;
 }
 
@@ -109,7 +105,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2011 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

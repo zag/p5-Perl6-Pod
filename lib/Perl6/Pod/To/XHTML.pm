@@ -47,6 +47,7 @@ use Perl6::Pod::To;
 use base 'Perl6::Pod::To';
 use Perl6::Pod::Utl;
 use Data::Dumper;
+our $VERSION = '0.01';
 
 
 sub start_write {

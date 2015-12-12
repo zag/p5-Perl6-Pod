@@ -4,6 +4,9 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+0.70 2015-12-12
+    * restore functionality after 5.18
+
 0.60 2013-11-13
     * improve perl6 pod parser
     (thanks Ivan Baidakou! )

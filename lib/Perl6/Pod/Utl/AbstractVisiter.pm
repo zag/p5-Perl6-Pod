@@ -2,13 +2,14 @@
 #
 #  DESCRIPTION:  Abstract Class for Nodes Visiter
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Utl::AbstractVisiter;
 use strict;
 use warnings;
 use vars qw($AUTOLOAD);
 use Carp;
+our $VERSION = '0.01';
 
 sub new {
     my $class = shift;

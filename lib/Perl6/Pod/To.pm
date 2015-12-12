@@ -1,4 +1,5 @@
 package Perl6::Pod::To;
+our $VERSION = '0.01';
 use strict;
 use warnings;
 
@@ -91,7 +92,6 @@ sub _make_dom_node {
     my $name = $n->name;
     my $map  = $self->context->use;
     my $class;
-
     #convert lexer blocks
     unless ( UNIVERSAL::isa( $n, 'Perl6::Pod::Block' ) ) {
 
@@ -107,6 +107,7 @@ sub _make_dom_node {
 
                 # add { name=>$name }
                 # for text and code blocks
+
                 $additional_attr{name} = $name;
             }
 
@@ -316,7 +317,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

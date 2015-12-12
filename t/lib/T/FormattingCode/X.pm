@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  Test I<> implementation
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 #$Id$
 package T::FormattingCode::X;

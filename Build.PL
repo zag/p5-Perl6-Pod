@@ -1,5 +1,5 @@
 use Module::Build;
-use 5.10.0;
+use 5.20.0;
 Module::Build->new
     ( module_name => 'Perl6::Pod',
     license => 'perl',
@@ -10,9 +10,12 @@ Module::Build->new
 	'Getopt::Long'=>0,
 	'Test::Class'=>0,
 	'Filter::Simple'=>0,
-	'Regexp::Grammars'=>'1.021',
+	'Regexp::Grammars'=>'1.042',
 	'Tie::UnionHash'=>'0.02'
 	     },
+    requires => {
+            'perl' => '5.18.4',
+    },
     script_files=>[qw!
 	scripts/pod6any
 	scripts/pod6docbook

@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  Test Attributes
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Test::To;
 use strict;
@@ -22,6 +22,7 @@ use Test::More tests => 3;                      # last test to print
 use Data::Dumper;
 use Perl6::Pod::Utl;
 
+
 my $t1 = Perl6::Pod::Utl::parse_pod(<<TXT, default_pod=>1);
 =for para :t1 :e<1 223 > :h{ er=>1, e2=>1}
 TXT
@@ -36,7 +37,6 @@ is_deeply $t1->[0]->get_attr,{
                  },
           't1' => 1
         }, "get_attr";
-
 $t1 = Perl6::Pod::Utl::parse_pod(<<TXT, default_pod=>1);
 =config para :formatted<I>
 =for para :t1 :e<1 223 > :h{ er=>1, e2=>1}

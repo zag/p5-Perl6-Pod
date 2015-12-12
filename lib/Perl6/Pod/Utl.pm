@@ -2,12 +2,14 @@
 #
 #  DESCRIPTION:  Utils for Perl6 Pod
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Utl;
 use strict;
 use warnings;
 use utf8;
+our $VERSION = '0.01';
+
 
 =head2  parse_pod [default_pod => 0 ]
 
@@ -87,8 +89,8 @@ Optrions:
 sub parse_para {
     use Perl6::Pod::Codeactions;
     my $text = shift || return [];
-    our %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
-    our %allow = ( '*' => 1 );
+    my %delim = ( '<' => '>', '«' => '»', '<<' => '>>' );
+    my %allow = ( '*' => 1 );
 
     my %args = @_;
     if ( my $allow = $args{allow} ) {
@@ -98,21 +100,25 @@ sub parse_para {
         #fill allowed fcodes
         @allow{@list} = ();
     }
+    my $DEFER_REGEX_COMPILATION = "";
     my $r = $args{reg} || do {
         use Regexp::Grammars;
         use Perl6::Pod::Grammars;
     qr{
 
        <extends: Perl6::Pod::Grammar::FormattingCodes>
+       <debug:off>
        <matchline>
        \A  <Text>  \Z
     <token: Text> <[content]>+
     <token: text>  .+?
     <token: hs>[ \t]*
+    <token: hash> \#
     <token: content> <MATCH=C_code> 
                     | <MATCH=L_code>
                     | <MATCH=D_code> 
                     | <MATCH=X_code>
+                    | <MATCH=P_code>
                     | <MATCH=default_formatting_code> 
                     | <.text>
     <token: ldelim> <%delim>
@@ -148,7 +154,7 @@ sub parse_para {
 
                 (?: <is_external=(//)> )? 
                   <address=([^\|]*?)>?
-                 (?: \# <section=(.*?)> )? #internal addresses
+                 (?:<hash><section=(.*?)> )? #internal addresses
             <rdelim(:ldelim)>
     <rule: X_code_entry> <[entry=([^,\;]+?)]>* % (\s*,\s*)
     <rule: X_code>(?! \s+)
@@ -162,9 +168,18 @@ sub parse_para {
              )
             <rdelim(:ldelim)>
 
+    <rule: P_code>
+     <name=(P)><isValideFCode(:name)>
+             <ldelim> <.hs> 
+                <scheme=([^|\s:]+:)>? #scheme specifier
+                (?: <is_external=(//)> )? 
+                  <address=([^\|]*?)> 
+            <.hs> <rdelim(:ldelim)>
+
     <token: default_formatting_code> 
       <name=(\w)><isValideFCode(:name)>
             <ldelim> <.hs> <[content]>*? <.hs> <rdelim(:ldelim)>
+    $DEFER_REGEX_COMPILATION
 }xms;
       };
 
@@ -176,5 +191,6 @@ sub parse_para {
     }
 
 }
+
 1;
 

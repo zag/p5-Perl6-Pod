@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  test =para block
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package T::Block::para;
 use strict;
@@ -65,7 +65,7 @@ Simple para I<test>
 =end pod
 T
 
-  ok $x =~ m%\\textbf{test} and \\emph{test}%, 'latex'
+  ok $x =~ m%\\textbf\{test\} and \\emph\{test\}%, 'latex'
 }
 
 

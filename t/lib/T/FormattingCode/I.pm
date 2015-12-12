@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  test B<> implementation
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 #$Id$
 
@@ -47,7 +47,7 @@ sub t03_as_latex : Test {
 =para
 Italic I<test>
 T
-ok $x =~ m%\\emph{test}%;
+ok $x =~ m%\\emph\{test\}%;
 }
 
 1;

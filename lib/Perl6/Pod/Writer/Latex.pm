@@ -2,14 +2,14 @@
 #
 #  DESCRIPTION:  Latex writer
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
-#$Id$
 package Perl6::Pod::Writer::Latex;
 use strict;
 use warnings;
 use Perl6::Pod::Writer;
 use base 'Perl6::Pod::Writer';
+our $VERSION = '0.01';
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );

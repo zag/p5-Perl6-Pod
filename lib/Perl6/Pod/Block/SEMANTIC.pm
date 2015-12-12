@@ -2,13 +2,14 @@
 #
 #  DESCRIPTION:  Class for semantic blocks
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Block::SEMANTIC;
 use strict;
 use warnings;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+our $VERSION = '0.01';
 
 sub to_xhtml {
  my ( $self, $to )  = @_;

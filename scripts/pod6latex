@@ -4,7 +4,7 @@
 #         FILE: pod6latex
 #
 #  DESCRIPTION:  save pod6 as latex
-#       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski ,  <zag@cpan.org>
 #===============================================================================
 use strict;
 use warnings;
@@ -122,11 +122,11 @@ Set module for handle Block_name Equivalent for B<=use> direcive :
 
 =head1 AUTHOR
 
-Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
+Zahatski Aliaksandr, E<lt>zag@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2013 by Zahatski Aliaksandr
+Copyright 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

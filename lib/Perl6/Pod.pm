@@ -217,7 +217,7 @@ The suite contain the following classes:
 
 =cut
 
-$Perl6::Pod::VERSION = '0.60';
+$Perl6::Pod::VERSION = '0.70';
 
 use warnings;
 use strict;
@@ -362,7 +362,7 @@ Ivan Baidakou, <dmol@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

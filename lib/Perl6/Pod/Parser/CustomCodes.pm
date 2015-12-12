@@ -1,7 +1,5 @@
 package Perl6::Pod::Parser::CustomCodes;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -22,6 +20,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use base 'Perl6::Pod::Parser';
+our $VERSION = '0.01';
 
 sub on_start_element {
     my ( $self, $el ) = @_;

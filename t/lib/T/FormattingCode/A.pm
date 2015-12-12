@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  Test A
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package T::FormattingCode::A;
 use strict;
@@ -46,7 +46,7 @@ sub t04_as_latex : Test {
 =para
 Bold A<TEST>
 T
-    ok $x =~ m%\\textbf{Test1}%, 'latex: A'
+    ok $x =~ m%\\textbf\{Test1\}%, 'latex: A'
 }
 
 1;

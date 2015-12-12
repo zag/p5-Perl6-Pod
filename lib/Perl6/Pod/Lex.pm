@@ -2,15 +2,18 @@
 #
 #  DESCRIPTION:  Make objectx from syntax tree
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Lex::RawText;
 use base 'Perl6::Pod::Lex::Block';
+our $VERSION = '0.01';
 
 package Perl6::Pod::Lex::Text;
 use base 'Perl6::Pod::Lex::RawText';
+our $VERSION = '0.01';
 
 package Perl6::Pod::Lex;
+our $VERSION = '0.01';
 use strict;
 use warnings;
 sub new {
@@ -19,6 +22,7 @@ sub new {
     $self;
 }
 use v5.10;
+use Perl6::Pod::Utl;
 
 sub make_block {
     my $self = shift;
@@ -60,9 +64,8 @@ sub make_block {
         next
           unless UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::Text' )
               || UNIVERSAL::isa( $node, 'Perl6::Pod::Lex::RawText' );
-        use Perl6::Pod::Utl;
         my $content = delete $node->{''};
-
+        
         #remove virual margin
         $content = Perl6::Pod::Utl::strip_vmargin( $vmargin, $content );
 

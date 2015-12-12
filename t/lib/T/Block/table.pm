@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  test for =table 
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Block::table;
 
@@ -13,24 +13,12 @@ use Test::More;
 use Data::Dumper;
 use base 'TBase';
 
-sub parse_table {
- my $text = shift;
- our $count_cols = shift;
- my $qr = do {
-  use Regexp::Grammars;
-   qr {
-    <extends: Perl6::Pod::table>
-#           <debug:step>
 
-    \A <Table> \Z
-   }xms
- };
- if ($text =~ $qr ) {
-    return $/{Table}
- } else {
-    die "can't parse"
- }
+use Perl6::Pod::Block::table;
+sub parse_table {
+ return Perl6::Pod::Block::table::parse_table(@_)
 }
+
 
 sub a00_table_headers:Test(2) {
     my $t1 = parse_table(<<T,3);

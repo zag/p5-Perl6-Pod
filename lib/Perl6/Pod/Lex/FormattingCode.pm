@@ -2,14 +2,14 @@
 #
 #  DESCRIPTION:  Base block
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
-#$Id$
 package Perl6::Pod::Lex::FormattingCode;
 use strict;
 use warnings;
 use Perl6::Pod::Lex::Block;
 use base 'Perl6::Pod::Lex::Block';
+our $VERSION = '0.01';
 
 sub new {
     my $class = shift;

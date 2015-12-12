@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION: test block =code
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 #$Id$
 
@@ -50,8 +50,8 @@ sub c06_allow_in_latex_code : Test(2) {
 test B<para.test> para.test.I<pas>
 =end pod
 T
-    ok $x =~ m%\\begin{verbatim}%, '=code in latex';
-    ok $x =~ m%\\textbf{para.%,':allow<B>';;
+    ok $x =~ m%\\begin\{verbatim\}%, '=code in latex';
+    ok $x =~ m%\\textbf\{para.%,':allow<B>';;
 }
  
 1;

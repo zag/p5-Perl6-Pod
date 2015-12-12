@@ -62,32 +62,13 @@ use Data::Dumper;
 use Perl6::Pod::Utl;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+our $VERSION = '0.01';
+
 use constant {
     NEW_LINE           => qr/^ \s* $/xms,
     COLUMNS_SEPARATE   => qr/\s*\|\s*|[\ ]{2,}/xms,
     COLUMNS_FORMAT_ROW => qr/(\s+)?[\=\-]+[\=\-\+\n]+(\s+)?/xms,
     COLUMNS_FORMAT_ROW_SEPARATE   => qr/\s*\|\s*|\+|[\ ]{2,}/xms,
-};
-
-my $grammar = do {
-    use Regexp::Grammars;
-    qr{
-        <grammar: Perl6::Pod::table>
-    <token: col_content>( [^\n]*? )
-    <token: row>
-       ^ \s* <[content=col_content]>+ % <col_delims> \s*
-        <require: (?{ 
-                $count_cols == scalar(@{ $MATCH{content} })
-                })>
-   <token: col_delims>( \s+[\|\+]\s+ | \ {2,} | \t+ )
-   <token: row_delims>(
-        \s* \n* <[header_row_delims=([=-_]+)]>+ % (\+|\s+|\|) \s* \n 
-        | <endofline=((\s*\n)+)>
-        )
-
-    <token: Table>
-        <[row]>+ % <[row_delims]>
-    }xms
 };
 
 sub new {
@@ -103,14 +84,27 @@ sub new {
 
 sub parse_table {
  my $text = shift;
- our $count_cols = shift;
+ my $count_cols = shift;
+ my $DEFER_REGEX_COMPILATION = "";
  my $qr = do {
   use Regexp::Grammars;
-   qr {
-    <extends: Perl6::Pod::table>
-#           <debug:step>
+   qr{
+       \A <Table> \Z
 
-    \A <Table> \Z
+    <token: col_content>( [^\n]*? )
+    <token: row>
+       ^ \s* <[content=col_content]>+ % <col_delims> \s*
+        <require: (?{ 
+                $count_cols == scalar(@{ $MATCH{content} })
+                })>
+   <token: col_delims>( \s+[\|\+]\s+ | \ {2,} | \t+ )
+   <token: row_delims>(
+        \s* \n* <[header_row_delims=([=-_]+)]>+ % (\+|\s+|\|) \s* \n 
+        | <endofline=((\s*\n)+)>
+        )
+    <token: Table>
+        <[row]>+ % <[row_delims]>
+    $DEFER_REGEX_COMPILATION
    }xms
  };
  if ($text =~ $qr ) {
@@ -264,7 +258,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

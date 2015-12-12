@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Carp;
+our $VERSION = '0.01';
 
 sub new {
     my $class = shift;

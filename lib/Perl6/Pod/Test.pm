@@ -1,4 +1,5 @@
 package Perl6::Pod::To::Test;
+our $VERSION = '0.01';
 use strict;
 use warnings;
 use Perl6::Pod::To;

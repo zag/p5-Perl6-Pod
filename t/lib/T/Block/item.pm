@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  test lists
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 #$Id$
 package T::Block::item;
@@ -121,8 +121,8 @@ one
 =item2 two
 =end pod
 T1
-    ok $x =~ m%\\begin{itemize}%, 'itemized list';
-    ok $x =~ m%\\begin{enumerate}%, 'numbered list';
+    ok $x =~ m%\\begin\{itemize\}%, 'itemized list';
+    ok $x =~ m%\\begin\{enumerate\}%, 'numbered list';
 }
 
 1;

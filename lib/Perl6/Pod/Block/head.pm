@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  =head
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Block::head;
 
@@ -35,6 +35,7 @@ use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
 use Perl6::Pod::Utl;
 use Data::Dumper;
+our $VERSION = '0.01';
 
 sub level {
     my $self = shift;

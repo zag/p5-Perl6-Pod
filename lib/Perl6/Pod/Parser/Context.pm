@@ -1,4 +1,5 @@
 package Perl6::Pod::Parser::Context;
+our $VERSION = '0.01';
 use warnings;
 use strict;
 use Perl6::Pod::Directive::use;
@@ -431,7 +432,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2010 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

@@ -1,6 +1,6 @@
 #===============================================================================
 #  DESCRIPTION: Test for make ids
-#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zag@cpan.org>
 #===============================================================================
 package T::Parser::AddIds;
 use Perl6::Pod::Parser::AddIds;

@@ -1,7 +1,5 @@
 package Perl6::Pod::Block;
 
-#$Id$
-
 =pod
 
 =head1 NAME
@@ -20,6 +18,7 @@ Perl6::Pod::Block - base class for Perldoc blocks
 use strict;
 use warnings;
 use base 'Perl6::Pod::Lex::Block';
+our $VERSION = '0.01';
 
 sub get_attr {
     my $self = shift;
@@ -58,7 +57,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

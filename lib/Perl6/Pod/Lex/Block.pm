@@ -2,11 +2,12 @@
 #
 #  DESCRIPTION:  Base block
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Lex::Block;
 use strict;
 use warnings;
+our $VERSION = '0.01';
 
 sub get_attr {
     my $self = shift;

@@ -1,6 +1,6 @@
 #===============================================================================
 #  DESCRIPTION:  
-#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski (Mn), <zag@cpan.org>
 #===============================================================================
 
 use strict;

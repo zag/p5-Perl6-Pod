@@ -4,7 +4,7 @@
 #         FILE: pod6xhtml
 #
 #  DESCRIPTION:  save Perl 6 pod as pod6xhtml
-#       AUTHOR:  Aliaksandr P. Zahatski ,  <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski ,  <zag@cpan.org>
 #===============================================================================
 use strict;
 use warnings;
@@ -175,11 +175,11 @@ For example:
 
 =head1 AUTHOR
 
-Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
+Zahatski Aliaksandr, E<lt>zag@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2009-2012 by Zahatski Aliaksandr
+Copyright 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

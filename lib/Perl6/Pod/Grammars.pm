@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  Pod6 Grammars
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package Perl6::Pod::Grammars;
 =pod
@@ -32,6 +32,8 @@ Perl6::Pod::Grammars - set of grammars for Pod6
 Perl6::Pod::Grammars - set of grammars for Pod6
 
 =cut
+our $VERSION = '0.01';
+
 use strict;
 use warnings;
 use v5.10;
@@ -58,9 +60,9 @@ qr{
                                                  &&
                                         ( $MATCH ne lc($MATCH) )  })>
     <rule: raw_content> 
-                .*?
-#                        (?:(?!^<spaces=hs>?=\w+).)*   # match everythig, except
-#                                                      # it looks like directive
+#                .*?
+                        (?:(?!^<spaces=hs>?=\w+).)*   # match everythig, except
+                                                      # it looks like directive
                     (?{ $MATCH{type} = "raw"})
 
     <rule: block_content> 
@@ -195,7 +197,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Zahatski Aliaksandr
+Copyright (C) 2009-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
