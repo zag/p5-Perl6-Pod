@@ -10,7 +10,7 @@ Module::Build->new
 	'Getopt::Long'=>0,
 	'Test::Class'=>0,
 	'Filter::Simple'=>0,
-	'Regexp::Grammars'=>'1.042',
+	'Regexp::Grammars'=>'1.044',
 	'Tie::UnionHash'=>'0.02'
 	     },
     requires => {

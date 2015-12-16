@@ -4,6 +4,9 @@ TODO:
     - Formatting code: P<>, S<>, M<>, 
     - Config: :margin, :formatted
 
+0.72 2015-12-16
+    * fix deps
+
 0.71 2015-12-12
     * restore functionality after 5.18
 
