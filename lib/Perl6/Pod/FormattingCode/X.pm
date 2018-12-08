@@ -55,7 +55,7 @@ The indexed text can be empty, creating a "zero-width" index entry:
 
 Exported :
 
-=over 
+=over 4
 
 =item *  docbook 
 
@@ -66,6 +66,8 @@ Exported :
 
 L<http://www.docbook.org/tdg/en/html/index.html>
 L<http://www.docbook.org/tdg/en/html/indexterm.html>
+
+=back
 
 =cut
 

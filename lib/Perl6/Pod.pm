@@ -191,7 +191,7 @@ This option specifies that a block or config has the same formatting properties 
 
 =head4 :allow
 
-This option expects a list of formatting codes that are to be recognized within any V<> codes that appear in (or are implicitly applied to) the current block. The option is most often used on =code blocks to allow mark-up within those otherwise verbatim blocks, though it can be used in any block that contains verbatim text. See Formatting within code blocks. 
+This option expects a list of formatting codes that are to be recognized within any C<VE<lt>E<gt>> codes that appear in (or are implicitly applied to) the current block. The option is most often used on =code blocks to allow mark-up within those otherwise verbatim blocks, though it can be used in any block that contains verbatim text. See Formatting within code blocks. 
 
 =head2 Blocks 
 

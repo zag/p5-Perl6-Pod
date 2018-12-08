@@ -16,9 +16,8 @@ Set of useful functions
 
 =head1 METHODS
 
-=back
-
 =cut
+
 our $VERSION = '0.01';
 require Exporter;
 *import                = \&Exporter::import;

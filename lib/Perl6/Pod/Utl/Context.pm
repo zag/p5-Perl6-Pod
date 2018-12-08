@@ -34,7 +34,11 @@ use Perl6::Pod::FormattingCode::Z;
 
 use Tie::UnionHash;
 use Data::Dumper;
+
+=encoding utf8
+
 =pod
+
         use     => 'Perl6::Pod::Directive::use',
         comment => 'Perl6::Pod::Block::comment',
         'M<>'   => 'Perl6::Pod::FormattingCode::M',
@@ -42,6 +46,7 @@ use Data::Dumper;
         #        'P<>'   => 'Perl6::Pod::FormattingCode::P',
         'S<>' => 'Perl6::Pod::FormattingCode::S',
         'V<>' => 'Perl6::Pod::FormattingCode::C', #V like C
+
 =cut
 
 use constant {
