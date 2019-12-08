@@ -21,7 +21,7 @@ Perl6::Pod::FormattingCode::T - Terminal output
 
 The C<TE<lt>E<gt>> formatting code specifies that the contained text is
 B<terminal output>; that is: something that a program might print out.
-Such content would typically be rendered in a T<fixed-width font> or with
+Such content would typically be rendered in a C<TE<lt>fixed-width fontE<gt>>or with
 C< E<lt>sampE<gt>...E<lt>/sampE<gt> > tags. The contents of a C<TE<lt>E<gt>> code are always space-preserved (as if they had an implicit
 C<SE<lt>...E<gt>> around them). The C<TE<lt>E<gt>> code is the inline equivalent of the C<=output> block.
 

@@ -13,10 +13,14 @@ our $VERSION = '0.01';
 
 =head2  parse_pod [default_pod => 0 ]
 
+=over 4
+
 =item * default_pod => 0/1 ,
 
 switch on/off ambient mode for para out of =pod blocks. Default 0 (ambient mode)
 return ref to tree
+
+=back
 
 =cut
 
@@ -81,8 +85,11 @@ parse formatting codes
 
 Optrions:
 
+=over 4
+
 =item * allow=>[ 'A', 'B']
 
+=back
 
 =cut
 

@@ -16,7 +16,7 @@ Perl6::Pod::FormattingCode::M - class of M code
 
 =head1 DESCRIPTION
 
-Perldoc modules can define their own formatting codes, using the M<> code. An M<> code must start with a colon-terminated scheme specifier. The rest of the enclosed text is treated as the (verbatim) contents of the formatting code. For example: 
+Perldoc modules can define their own formatting codes, using the C<ME<lt>E<gt>> code. An C<ME<lt>E<gt>> code must start with a colon-terminated scheme specifier. The rest of the enclosed text is treated as the (verbatim) contents of the formatting code. For example: 
 
     =use Perldoc::TT TT<>
     
@@ -25,7 +25,7 @@ Perldoc modules can define their own formatting codes, using the M<> code. An M<
     
     M<TT: get_description($CLASSNAME) >
 
-The M<> formatting code is the inline equivalent of a named block. 
+The C<ME<lt>E<gt>> formatting code is the inline equivalent of a named block. 
 
 =cut
 

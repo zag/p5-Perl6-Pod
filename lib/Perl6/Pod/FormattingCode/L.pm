@@ -16,7 +16,7 @@ A standard web URL. For example:
 
 =head1 DESCRIPTION
 
-The L<> code is used to specify all kinds of links, filenames, citations, and cross-references (both internal and external).
+The L<Perl6::Pod::FormattingCode::L> code is used to specify all kinds of links, filenames, citations, and cross-references (both internal and external).
 
 A link specification consists of a scheme specifier terminated by a colon, followed by an external address (in the scheme's preferred syntax), followed by an internal address (again, in the scheme's syntax). All three components are optional, though at least one must be present in any link specification.
 
