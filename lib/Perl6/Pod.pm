@@ -191,7 +191,7 @@ This option specifies that a block or config has the same formatting properties 
 
 =head4 :allow
 
-This option expects a list of formatting codes that are to be recognized within any C<V<>> codes that appear in (or are implicitly applied to) the current block. The option is most often used on =code blocks to allow mark-up within those otherwise verbatim blocks, though it can be used in any block that contains verbatim text. See Formatting within code blocks. 
+This option expects a list of formatting codes that are to be recognized within any C<V <>> codes that appear in (or are implicitly applied to) the current block. The option is most often used on =code blocks to allow mark-up within those otherwise verbatim blocks, though it can be used in any block that contains verbatim text. See Formatting within code blocks. 
 
 =head2 Blocks 
 
@@ -346,9 +346,13 @@ __END__
 
 =head1 SEE ALSO
 
+=over 
+
 =item * L<S26-documentation.pod6|https://github.com/zag/js-pod6/blob/master/doc/S26-documentation.pod6>
 
 =item * Pod6 to HTML converter: L<http://pod6.in/>
+
+=back 
 
 =head2 JavaScript implementation of pod6
 
