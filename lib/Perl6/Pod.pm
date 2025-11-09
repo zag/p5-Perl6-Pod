@@ -356,9 +356,12 @@ __END__
 
 =head2 🌟 Podlite is a lightweight block-based markup language designed for flexibility and ease of use 🌟
 
+Podlite represents the evolution of Synopsis26 ideas.
 Follow Podlite news and developments:
 
 =over
+
+=item <Podlite Perl module|https://metacpan.org/release/Podlite> - Podlite support for Perl
 
 =item L<Podlite Specification|https://podlite.org/specification> - Official specification in HTML
 

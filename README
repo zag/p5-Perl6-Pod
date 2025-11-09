@@ -26,6 +26,9 @@ Podlite is a lightweight block-based markup language designed for flexibility an
 Podlite represents the evolution of Synopsis26 ideas.
 Follow Podlite news and developments:
 
+  * Podlite Perl module (https://metacpan.org/release/Podlite)
+    Podlite support for Perl on CPAN
+
   * Podlite Specification (https://podlite.org/specification)
     Official specification in HTML
 
